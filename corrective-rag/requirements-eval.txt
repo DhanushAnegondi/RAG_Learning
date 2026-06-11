@@ -1,0 +1,3 @@
+# M5 eval only. Heavy tree (datasets, etc.) — install separately when you reach the eval milestone:
+#   pip install -r requirements-eval.txt
+ragas>=0.2

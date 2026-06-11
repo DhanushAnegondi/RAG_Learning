@@ -1,0 +1,15 @@
+{"question": "What is the minimum FICO credit score for an unsecured personal loan?", "ground_truth": "660.", "in_corpus": true}
+{"question": "What is the maximum debt-to-income ratio allowed at origination?", "ground_truth": "43%.", "in_corpus": true}
+{"question": "How old must an applicant be to be eligible?", "ground_truth": "At least 18 years old and a legal resident.", "in_corpus": true}
+{"question": "Is stated income without documentation accepted?", "ground_truth": "No, stated income without documentation is never accepted.", "in_corpus": true}
+{"question": "Within how many days must an adverse action notice be sent?", "ground_truth": "Within 30 days.", "in_corpus": true}
+{"question": "What is the APR range for a personal loan?", "ground_truth": "8.99% to 23.99% depending on credit tier.", "in_corpus": true}
+{"question": "What is the maximum loan-to-value for an auto loan?", "ground_truth": "125% including tax, title, and fees.", "in_corpus": true}
+{"question": "How long is the HELOC draw period?", "ground_truth": "10 years, followed by a 20-year repayment period.", "in_corpus": true}
+{"question": "What is the grace period before a late fee is assessed?", "ground_truth": "15 days.", "in_corpus": true}
+{"question": "What happens when a loan is 90 days past due?", "ground_truth": "It is classified as seriously delinquent, reported to credit bureaus, and loss-mitigation options are offered.", "in_corpus": true}
+{"question": "How many payment deferrals can a borrower request per 12-month period?", "ground_truth": "A one-time deferral of up to two payments per 12-month period.", "in_corpus": true}
+{"question": "What is the current US federal funds rate target range?", "ground_truth": "Not covered by the corpus; requires a live web lookup.", "in_corpus": false}
+{"question": "Who is the current Chair of the US Federal Reserve?", "ground_truth": "Not covered by the corpus; requires a live web lookup.", "in_corpus": false}
+{"question": "What is the average 30-year fixed mortgage rate in the US this week?", "ground_truth": "Not covered by the corpus; requires a live web lookup.", "in_corpus": false}
+{"question": "What is the maximum contribution limit for a Roth IRA this year?", "ground_truth": "Not covered by the corpus; requires a live web lookup.", "in_corpus": false}
