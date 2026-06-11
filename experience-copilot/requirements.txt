@@ -1,0 +1,16 @@
+# Experience Copilot. Install: pip install -r requirements.txt
+# Then reuse the grounding engine: pip install -e ../corrective-rag
+
+# UI
+streamlit>=1.36
+
+# Config + validation
+python-dotenv>=1.0
+pydantic>=2.0
+
+# Tests
+pytest>=8.0
+
+# NOTE: LLM/embeddings/vector-store/web come transitively from the `crag` package
+# (langchain-nvidia-ai-endpoints, langchain-chroma, ddgs, ...). Install it with:
+#   pip install -e ../corrective-rag

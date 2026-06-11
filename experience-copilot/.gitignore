@@ -1,0 +1,20 @@
+# Secrets + personal content
+.env
+profile/persona.md
+profile/style_examples.md
+data/corpus/*
+!data/corpus/README.md
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+
+# Vector index
+chroma_store/
+
+# Session process memory (not part of the project deliverable)
+ledger/
