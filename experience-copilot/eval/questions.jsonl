@@ -1,0 +1,48 @@
+{"id": "northstar_streaming-1", "question": "At Northstar Labs, how did you handle duplicate Kafka events?", "expected_sources": ["Northstar Labs/northstar_streaming.md"], "answerable": true, "split": "dev"}
+{"id": "northstar_streaming-2", "question": "Describe your Northstar Labs telemetry replay work.", "expected_sources": ["Northstar Labs/northstar_streaming.md"], "answerable": true, "split": "dev"}
+{"id": "northstar_streaming-3", "question": "How did you deal with repeated messages in the telemetry pipeline?", "expected_sources": ["Northstar Labs/northstar_streaming.md"], "answerable": true, "split": "dev"}
+{"id": "northstar_streaming-4", "question": "What did you personally own in the Kafka project at Northstar Labs?", "expected_sources": ["Northstar Labs/northstar_streaming.md"], "answerable": true, "split": "holdout"}
+{"id": "northstar_streaming-5", "question": "What duplicate-rate change did you observe in the staging replay?", "expected_sources": ["Northstar Labs/northstar_streaming.md"], "answerable": true, "split": "holdout"}
+{"id": "cedar_reconciliation-1", "question": "How did you reconcile loan data at Cedar Bank?", "expected_sources": ["Cedar Bank/cedar_reconciliation.md"], "answerable": true, "split": "dev"}
+{"id": "cedar_reconciliation-2", "question": "What keys did you use for the Cedar Bank reconciliation?", "expected_sources": ["Cedar Bank/cedar_reconciliation.md"], "answerable": true, "split": "dev"}
+{"id": "cedar_reconciliation-3", "question": "Describe your Snowflake SQL data-quality work.", "expected_sources": ["Cedar Bank/cedar_reconciliation.md"], "answerable": true, "split": "dev"}
+{"id": "cedar_reconciliation-4", "question": "How did you handle null loan keys at Cedar Bank?", "expected_sources": ["Cedar Bank/cedar_reconciliation.md"], "answerable": true, "split": "holdout"}
+{"id": "cedar_reconciliation-5", "question": "What mismatch counts were observed in the loan reconciliation UAT?", "expected_sources": ["Cedar Bank/cedar_reconciliation.md"], "answerable": true, "split": "holdout"}
+{"id": "harbor_recovery-1", "question": "Explain your Airflow retry design at Harbor Retail.", "expected_sources": ["Harbor Retail/harbor_recovery.md"], "answerable": true, "split": "dev"}
+{"id": "harbor_recovery-2", "question": "How did you prevent duplicate rows during sales backfills?", "expected_sources": ["Harbor Retail/harbor_recovery.md"], "answerable": true, "split": "dev"}
+{"id": "harbor_recovery-3", "question": "Describe a source-outage recovery at Harbor Retail.", "expected_sources": ["Harbor Retail/harbor_recovery.md"], "answerable": true, "split": "dev"}
+{"id": "harbor_recovery-4", "question": "Which partition key did the daily sales pipeline use?", "expected_sources": ["Harbor Retail/harbor_recovery.md"], "answerable": true, "split": "holdout"}
+{"id": "harbor_recovery-5", "question": "How many missing days did you backfill for Harbor Retail?", "expected_sources": ["Harbor Retail/harbor_recovery.md"], "answerable": true, "split": "holdout"}
+{"id": "atlas_schema-1", "question": "How did you validate biomedical specimen data?", "expected_sources": ["Atlas Research/atlas_schema.md"], "answerable": true, "split": "dev"}
+{"id": "atlas_schema-2", "question": "What caused files to be quarantined at Atlas Research?", "expected_sources": ["Atlas Research/atlas_schema.md"], "answerable": true, "split": "dev"}
+{"id": "atlas_schema-3", "question": "What did you contribute to the specimen validation project?", "expected_sources": ["Atlas Research/atlas_schema.md"], "answerable": true, "split": "dev"}
+{"id": "atlas_schema-4", "question": "Which identifier did the biomedical files use?", "expected_sources": ["Atlas Research/atlas_schema.md"], "answerable": true, "split": "holdout"}
+{"id": "atlas_schema-5", "question": "How many malformed files were found in the acceptance sample?", "expected_sources": ["Atlas Research/atlas_schema.md"], "answerable": true, "split": "holdout"}
+{"id": "cedar_contracts-1", "question": "Tell me about a schema change you caught at Cedar Bank.", "expected_sources": ["Cedar Bank/cedar_contracts.md"], "answerable": true, "split": "dev"}
+{"id": "cedar_contracts-2", "question": "What happened when principal_amount changed type?", "expected_sources": ["Cedar Bank/cedar_contracts.md"], "answerable": true, "split": "dev"}
+{"id": "cedar_contracts-3", "question": "How did you recover from the loan source contract change?", "expected_sources": ["Cedar Bank/cedar_contracts.md"], "answerable": true, "split": "dev"}
+{"id": "cedar_contracts-4", "question": "How did you collaborate with a source team on schema contracts?", "expected_sources": ["Cedar Bank/cedar_contracts.md"], "answerable": true, "split": "holdout"}
+{"id": "cedar_contracts-5", "question": "What prevented invalid principal amounts from reaching reporting?", "expected_sources": ["Cedar Bank/cedar_contracts.md"], "answerable": true, "split": "holdout"}
+{"id": "harbor_late_data-1", "question": "How did you handle late sales records at Harbor Retail?", "expected_sources": ["Harbor Retail/harbor_late_data.md"], "answerable": true, "split": "dev"}
+{"id": "harbor_late_data-2", "question": "Which key identified a sales correction?", "expected_sources": ["Harbor Retail/harbor_late_data.md"], "answerable": true, "split": "dev"}
+{"id": "harbor_late_data-3", "question": "How did you keep the newest version when corrections arrived out of order?", "expected_sources": ["Harbor Retail/harbor_late_data.md"], "answerable": true, "split": "dev"}
+{"id": "harbor_late_data-4", "question": "Who chose the reporting cutoff for the late-sales project?", "expected_sources": ["Harbor Retail/harbor_late_data.md"], "answerable": true, "split": "holdout"}
+{"id": "harbor_late_data-5", "question": "What late-arrival cases did you test for Harbor Retail?", "expected_sources": ["Harbor Retail/harbor_late_data.md"], "answerable": true, "split": "holdout"}
+{"id": "unsupported-01", "question": "What production Kafka throughput did you achieve at Northstar Labs?", "expected_sources": [], "answerable": false, "split": "dev"}
+{"id": "unsupported-02", "question": "How much annual cost did the Harbor Retail backfill save?", "expected_sources": [], "answerable": false, "split": "holdout"}
+{"id": "unsupported-03", "question": "Describe the fraud prediction model you trained at Northstar Labs.", "expected_sources": [], "answerable": false, "split": "dev"}
+{"id": "unsupported-04", "question": "How did you save one million dollars at Cedar Bank?", "expected_sources": [], "answerable": false, "split": "holdout"}
+{"id": "unsupported-05", "question": "How did you manage 30 engineers at Harbor Retail?", "expected_sources": [], "answerable": false, "split": "dev"}
+{"id": "unsupported-06", "question": "Describe your Kubernetes cluster ownership at Cedar Bank.", "expected_sources": [], "answerable": false, "split": "holdout"}
+{"id": "unsupported-07", "question": "What model did you deploy to predict patient diagnoses at Atlas Research?", "expected_sources": [], "answerable": false, "split": "dev"}
+{"id": "unsupported-08", "question": "What percentage runtime improvement did the Airflow backfill achieve?", "expected_sources": [], "answerable": false, "split": "holdout"}
+{"id": "unsupported-09", "question": "What revenue did the Cedar Bank schema contract project generate?", "expected_sources": [], "answerable": false, "split": "dev"}
+{"id": "unsupported-10", "question": "What Kafka streaming architecture did you build for Harbor Retail?", "expected_sources": [], "answerable": false, "split": "holdout"}
+{"id": "unsupported-11", "question": "Which Terraform modules did you publish?", "expected_sources": [], "answerable": false, "split": "dev"}
+{"id": "unsupported-12", "question": "What AWS certification do you hold?", "expected_sources": [], "answerable": false, "split": "holdout"}
+{"id": "unsupported-13", "question": "At Cedar Bank, describe your telemetry Kafka deduplication work.", "expected_sources": [], "answerable": false, "split": "dev"}
+{"id": "unsupported-14", "question": "At Atlas Research, describe the loan reconciliation SQL you built.", "expected_sources": [], "answerable": false, "split": "holdout"}
+{"id": "unsupported-15", "question": "At Northstar Labs, how did you quarantine biomedical files?", "expected_sources": [], "answerable": false, "split": "dev"}
+{"id": "unsupported-16", "question": "Who was your manager at Harbor Retail?", "expected_sources": [], "answerable": false, "split": "holdout"}
+{"id": "unsupported-17", "question": "What exact production SLA did the Cedar Bank warehouse meet?", "expected_sources": [], "answerable": false, "split": "dev"}
+{"id": "unsupported-18", "question": "What were the benchmark results for the Spark optimization project?", "expected_sources": [], "answerable": false, "split": "holdout"}

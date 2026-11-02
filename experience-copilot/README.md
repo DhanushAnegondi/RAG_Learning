@@ -1,5 +1,12 @@
 # Experience Copilot
 
+**V2 development:** switch between the original V1 and the improved V2 in the UI or with
+`--version v1|v2`. V2 adds reviewed-source metadata, BM25 + vector retrieval, evidence reranking,
+coverage gating, citations and a model-based claim check. Each version has a separate index.
+Start with [the development plan](docs/PLAN.md) and [run/test instructions](docs/TESTING.md).
+The untouched V1 is preserved on `baseline/experience-copilot-v1`; development happens on
+`codex/experience-copilot-v2`. Quality improvements must be demonstrated by evaluation.
+
 Ask a question about *your* experience ("What data pipeline have you built that you're proud of?",
 "Why this company?") and get a natural, human-sounding answer **grounded in your own documents** —
 with controls for answer **length** (short / medium / long) and **tone** (formal / professional /

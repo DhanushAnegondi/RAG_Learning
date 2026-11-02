@@ -28,18 +28,24 @@ if not settings.nvidia_api_key:
 
 with st.sidebar:
     st.header("Controls")
+    version = st.selectbox("RAG version", ("v1", "v2"), index=1,
+                           help="V1: original baseline. V2: reviewed evidence, hybrid retrieval and checked citations.")
+    employer = st.text_input("Employer filter (V2, optional)")
     model_label = st.selectbox("Answer model", list(MODELS), index=0)
     model_id = MODELS[model_label]
-    length = st.selectbox("Length", LENGTHS, index=0, help="'auto' lets the model choose.")
+    length = st.selectbox("Length", LENGTHS, index=0,
+                         help="V1 auto: model chooses. V2 auto: medium length and humanized tone.")
     tone = st.selectbox("Tone", TONES, index=0)
     fast = st.checkbox(
         "Fast mode (skip relevance grading)",
         value=True,
+        disabled=version == "v2",
         help="Faster: retrieves your docs and answers directly, without an LLM call per chunk.",
     )
     allow_web = st.checkbox(
         "Allow web research when my docs don't cover it",
         value=False,
+        disabled=version == "v2",
         help="Useful for company/factual questions. Off for personal-experience answers.",
     )
     st.divider()
@@ -58,6 +64,29 @@ notes = st.text_area(
 )
 
 if st.button("Draft my answer", type="primary") and question.strip():
+    if version == "v2":
+        from copilot.pipeline import draft
+        if notes.strip():
+            st.info("V2 uses reviewed corpus evidence. Add these notes to a source document and review its manifest entry first.")
+        try:
+            with st.spinner("Finding evidence and checking the draft…"):
+                result = draft(question, employer=employer.strip() or None, model=model_id,
+                               length="medium" if length == "auto" else length,
+                               tone="humanized" if tone == "auto" else tone)
+        except FileNotFoundError:
+            st.error("Build the V2 index first: copilot ingest --version v2. See docs/TESTING.md.")
+            st.stop()
+        if result.get("verified"):
+            st.markdown(result["answer"])
+        else:
+            st.warning(result["answer"])
+        with st.expander("Supporting evidence"):
+            for source in result["sources"]:
+                st.write(f"[{source['id']}] {source['employer']} — {source['project']}")
+                st.caption(f"{source['source']} · version {source['version']} · ownership: {source['ownership']}")
+            st.text(result["context"])
+        st.caption("V2 · reviewed sources · hybrid retrieval · model-checked draft (review it yourself before use).")
+        st.stop()
     chosen_len, chosen_tone = length, tone
     if length == "auto" or tone == "auto":
         with st.spinner("Picking length and tone…"):

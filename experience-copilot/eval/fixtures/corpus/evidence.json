@@ -1,0 +1,64 @@
+{
+  "documents": {
+    "Northstar Labs/northstar_streaming.md": {
+      "status": "confirmed",
+      "employer": "Northstar Labs",
+      "project": "telemetry ingestion",
+      "ownership": "implemented deduplication and replay; platform team operated Kafka",
+      "version": "fixture-1",
+      "story_id": "northstar_streaming"
+    },
+    "Cedar Bank/cedar_reconciliation.md": {
+      "status": "confirmed",
+      "employer": "Cedar Bank",
+      "project": "loan reconciliation",
+      "ownership": "implemented SQL reconciliation; did not own the whole warehouse",
+      "version": "fixture-1",
+      "story_id": "cedar_reconciliation"
+    },
+    "Harbor Retail/harbor_recovery.md": {
+      "status": "confirmed",
+      "employer": "Harbor Retail",
+      "project": "daily sales backfill",
+      "ownership": "implemented idempotent Airflow task logic; team managed deployment",
+      "version": "fixture-1",
+      "story_id": "harbor_recovery"
+    },
+    "Atlas Research/atlas_schema.md": {
+      "status": "confirmed",
+      "employer": "Atlas Research",
+      "project": "biomedical schema validation",
+      "ownership": "contributed validation rules; research team defined scientific interpretation",
+      "version": "fixture-1",
+      "story_id": "atlas_schema"
+    },
+    "Cedar Bank/cedar_contracts.md": {
+      "status": "confirmed",
+      "employer": "Cedar Bank",
+      "project": "source contract changes",
+      "ownership": "implemented contract checks with source-team review",
+      "version": "fixture-1",
+      "story_id": "cedar_contracts"
+    },
+    "Harbor Retail/harbor_late_data.md": {
+      "status": "confirmed",
+      "employer": "Harbor Retail",
+      "project": "late sales corrections",
+      "ownership": "implemented correction merges; analytics team chose reporting cutoff",
+      "version": "fixture-1",
+      "story_id": "harbor_late_data"
+    },
+    "Northstar Labs/synthetic.md": {
+      "status": "synthetic",
+      "employer": "Northstar Labs"
+    },
+    "Cedar Bank/draft.md": {
+      "status": "draft",
+      "employer": "Cedar Bank"
+    },
+    "Harbor Retail/unverified.md": {
+      "status": "unverified",
+      "employer": "Harbor Retail"
+    }
+  }
+}

@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import argparse
+from pathlib import Path
 import sys
 
 from .answer import generate_answer
@@ -46,7 +47,9 @@ def _answer(question, length, tone, notes, model, fast) -> int:
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="copilot", description="Experience Copilot")
     sub = p.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("ingest", help="Embed your experience docs into the index")
+    ing = sub.add_parser("ingest", help="Embed your experience docs into the index")
+    ing.add_argument("--version", choices=("v1", "v2"), default="v1")
+    ing.add_argument("--manifest", help="V2 evidence manifest (default: corpus/evidence.json)")
     a = sub.add_parser("answer", help="Answer a question in your voice")
     a.add_argument("question")
     a.add_argument("--length", default="auto", choices=LENGTHS)
@@ -54,14 +57,42 @@ def main(argv: list[str] | None = None) -> int:
     a.add_argument("--notes", default="", help="Extra detail to ground on when your docs are thin")
     a.add_argument("--model", default=None, help="Model id (default: quality). See copilot.llm.MODELS")
     a.add_argument("--fast", action="store_true", help="Skip per-chunk grading for a faster answer")
+    a.add_argument("--version", choices=("v1", "v2"), default="v1")
+    a.add_argument("--employer", help="V2: restrict evidence to this employer")
+
+    ev = sub.add_parser("evaluate", help="Validate a question set or compare V1/V2 live")
+    ev.add_argument("--dataset", default=str(Path(__file__).resolve().parents[2] / "eval/questions.jsonl"))
+    ev.add_argument("--live", action="store_true", help="Use NVIDIA embeddings/LLM against isolated synthetic indexes")
+    ev.add_argument("--answers", action="store_true", help="Also generate answers (extra API calls)")
+    ev.add_argument("--limit", type=int, default=None)
+    ev.add_argument("--model", default=None)
+    ev.add_argument("--output", default="eval/results/comparison.json")
 
     args = p.parse_args(argv)
+    if args.cmd == "evaluate":
+        from .evaluation import run
+        return run(args)
     if not get_settings().nvidia_api_key:
         print("NVIDIA_API_KEY not set. Copy .env.example to .env and paste your key.", file=sys.stderr)
         return 2
     if args.cmd == "ingest":
+        if args.version == "v2":
+            from .retrieval_v2 import build_index
+            print(build_index(manifest=args.manifest))
+            return 0
         return _ingest()
     if args.cmd == "answer":
+        if args.version == "v2":
+            if args.fast or args.notes:
+                p.error("V2 requires evidence checking; add reviewed notes to the corpus instead of --fast/--notes")
+            from .pipeline import draft
+            result = draft(args.question, employer=args.employer, model=args.model,
+                           length="medium" if args.length == "auto" else args.length,
+                           tone="humanized" if args.tone == "auto" else args.tone)
+            print(result["answer"])
+            for source in result["sources"]:
+                print(f"[{source['id']}] {source['source']} ({source['employer']}, {source['version']})")
+            return 0 if result.get("verified") else 3
         return _answer(args.question, args.length, args.tone, args.notes, args.model, args.fast)
     return 1
 
