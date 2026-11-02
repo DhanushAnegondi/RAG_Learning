@@ -1,5 +1,7 @@
 # Experience Copilot
 
+Learn the architecture and how to change it: [interactive learning guide](docs/LEARNING-GUIDE.md) — diagrams, code map, parameters, answer recipes and document-format adapters.
+
 **V2 development:** switch between the original V1 and the improved V2 in the UI or with
 `--version v1|v2`. V2 adds reviewed-source metadata, BM25 + vector retrieval, evidence reranking,
 coverage gating, citations and a model-based claim check. Each version has a separate index.
