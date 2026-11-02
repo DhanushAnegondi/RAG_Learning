@@ -113,6 +113,35 @@ def test_topic_match_is_not_sufficient(monkeypatch, doc):
     assert "throughput" in result["missing"]
 
 
+@pytest.mark.parametrize("quote,expected", [("implemented Kafka deduplication", True),
+                                          ("invented throughput", False), ("", False)])
+def test_recheck_requires_an_exact_evidence_quote(monkeypatch, doc, quote, expected):
+    monkeypatch.setattr(v2, "retrieve_candidates", lambda *args: [passage(doc)])
+    class Checker:
+        def with_structured_output(self, schema):
+            return model(v2.EvidenceDecision(ranked_ids=["chunk1"], sufficient=False, missing="more")
+                         if schema is v2.EvidenceDecision else v2.EvidenceRecheck(sufficient=True, quote=quote))
+    monkeypatch.setattr(v2, "chat", lambda *args: Checker())
+    assert v2.ground("What was implemented?")["covered"] is expected
+
+
+def test_recheck_sees_employer_and_reports_failure(monkeypatch, doc):
+    monkeypatch.setattr(v2, "retrieve_candidates", lambda *args: [passage(doc)])
+    class Checker:
+        def with_structured_output(self, schema):
+            if schema is v2.EvidenceDecision:
+                return model(v2.EvidenceDecision(ranked_ids=["chunk1"], sufficient=False, missing="missing"))
+            return self
+        def invoke(self, messages):
+            payload = json.loads(messages[1][1])
+            assert payload["passages"][0]["employer"] == "Northstar"
+            assert payload["passages"][0]["ownership"] == "implemented deduplication"
+            raise RuntimeError("unavailable")
+    monkeypatch.setattr(v2, "chat", lambda *args: Checker())
+    result = v2.ground("What did Cedar build?")
+    assert not result["covered"] and result["recheck_error"] == "RuntimeError"
+
+
 def test_supported_context_has_sources_and_parent_dedup(monkeypatch, doc):
     a, b = passage(doc), passage(doc, key="chunk2")
     b.metadata["parent_id"] = a.metadata["parent_id"]

@@ -71,13 +71,15 @@ def score(row: dict, result: dict, corpus: Path) -> dict:
             "reciprocal_rank": 1 / min(ranks) if ranks else (0 if expected else None),
             "expected_answerable": row["answerable"], "covered": result.get("covered", False),
             "coverage_correct": not error and result.get("covered", False) == row["answerable"],
-            "error": error, "answer": result.get("answer"), "model_verified": result.get("verified")}
+            "error": error, "recheck_error": result.get("recheck_error"),
+            "answer": result.get("answer"), "model_verified": result.get("verified")}
 
 
 def summarize(rows: list[dict]) -> dict:
     positives = [r for r in rows if r["expected_answerable"]]
     negatives = [r for r in rows if not r["expected_answerable"]]
     return {"questions": len(rows), "errors": sum(bool(r["error"]) for r in rows),
+            "recheck_errors": sum(bool(r.get("recheck_error")) for r in rows),
             "source_recall": mean(r["source_recall"] for r in positives) if positives else None,
             "source_mrr": mean(r["reciprocal_rank"] for r in positives) if positives else None,
             "coverage_accuracy": mean(r["coverage_correct"] for r in rows) if rows else None,
