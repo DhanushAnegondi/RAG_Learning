@@ -46,6 +46,16 @@ def test_unlisted_sources_remain_unverified(tmp_path):
     assert chunks and not v2.eligible(chunks)
 
 
+def test_keyword_index_supports_broad_introduction_without_embeddings(monkeypatch, tmp_path):
+    root = corpus(tmp_path)
+    write_manifest(root)
+    monkeypatch.setenv('EXP_V2_PERSIST_DIR', str(tmp_path / 'index'))
+    monkeypatch.setattr(v2, 'get_embeddings', lambda: pytest.fail('keyword mode must not call embeddings'))
+    v2.build_index(str(root), keyword_only=True)
+    docs = v2.retrieve_candidates('Tell me about yourself')
+    assert docs and docs[0].metadata['employer'] == 'Northstar'
+
+
 def test_manifest_metadata_and_stable_ids(tmp_path):
     root = corpus(tmp_path)
     write_manifest(root)

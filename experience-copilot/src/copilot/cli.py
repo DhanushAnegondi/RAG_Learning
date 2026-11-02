@@ -50,6 +50,7 @@ def main(argv: list[str] | None = None) -> int:
     ing = sub.add_parser("ingest", help="Embed your experience docs into the index")
     ing.add_argument("--version", choices=("v1", "v2"), default="v1")
     ing.add_argument("--manifest", help="V2 evidence manifest (default: corpus/evidence.json)")
+    ing.add_argument("--keyword-only", action="store_true", help="V2: build local keyword index without embedding calls")
     a = sub.add_parser("answer", help="Answer a question in your voice")
     a.add_argument("question")
     a.add_argument("--length", default="auto", choices=LENGTHS)
@@ -78,7 +79,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "ingest":
         if args.version == "v2":
             from .retrieval_v2 import build_index
-            print(build_index(manifest=args.manifest))
+            print(build_index(manifest=args.manifest, keyword_only=args.keyword_only))
             return 0
         return _ingest()
     if args.cmd == "answer":

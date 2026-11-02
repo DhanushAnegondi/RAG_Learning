@@ -1,5 +1,13 @@
 # Run and compare the two versions
 
+V2 chooses an answer shape from the question: technology lists for stack questions, a sourced
+professional summary for introductions, and supported actions/results for experience questions.
+Mixed questions about an incident and its tools retain the story. A request for team management
+still requires a documented leadership episode; the app must not invent one from technical tasks.
+
+If embeddings are unavailable, explicitly build a keyword index with
+`python -m copilot.cli ingest --version v2 --keyword-only`. The UI shows the actual search mode.
+
 All examples below run from the repository root in PowerShell. Never commit your key or corpus.
 
 ## 1. Install once

@@ -6,6 +6,8 @@ from __future__ import annotations
 
 import os
 import sys
+import json
+from pathlib import Path
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
@@ -20,6 +22,15 @@ from copilot.suggest import suggest_style
 st.set_page_config(page_title="Experience Copilot", page_icon="🗣️")
 st.title("🗣️ Experience Copilot")
 st.caption("Answers about your experience, grounded in your own documents, written in your voice.")
+from copilot.retrieval_v2 import index_dir
+index_path = index_dir() / 'index.json'
+if index_path.exists():
+    snapshot = json.loads(index_path.read_text(encoding='utf-8'))
+    source_count = len({r['metadata']['source'] for r in snapshot['chunks']})
+    st.info(f"Experience library: {source_count} selected source documents. Answers cite their supporting passages.")
+    st.caption('Search mode: ' + ('keyword fallback' if snapshot.get('retrieval_mode') == 'keyword' else 'hybrid retrieval'))
+else:
+    st.warning("Your personal search index is being prepared. The question screen is available; answers will work after indexing completes.")
 
 settings = get_settings()
 if not settings.nvidia_api_key:
