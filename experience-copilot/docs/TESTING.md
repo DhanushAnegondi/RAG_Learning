@@ -17,8 +17,12 @@ if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 The key is needed only for ingestion/live model calls, not offline tests or question-set validation.
 The existing model list was recorded in June 2026; provider availability can change. Choose an
 available model with structured-output support. A refusal or unsupported schema blocks V2 drafts.
-The old default chat model returned HTTP 410 during the November 2026 check; an available chat
-model is still needed for end-to-end answers. The default V2 embedding endpoint was verified live.
+The old default chat model returned HTTP 410 during the November 2026 check. V2 now defaults to
+`nvidia/nemotron-3.5-bolt-e4b`; this model and the V2 embedding endpoint were verified live.
+The SDK warns that structured output support is not in its model registry, so continue to monitor
+schema errors. The V1 CLI still has its original default: pass `--model nvidia/nemotron-3.5-bolt-e4b`
+to use the available model. If rebuilding a V1 index for the new embedding model, use a fresh
+`EXP_PERSIST_DIR` and set `CRAG_EMBED_MODEL` to `nvidia/nemotron-3.5-embed-1b`.
 
 ## 2. Run offline checks
 

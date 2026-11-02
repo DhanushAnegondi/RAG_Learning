@@ -6,7 +6,7 @@ import re
 from pydantic import BaseModel
 
 from .answer import generate_answer
-from .llm import chat
+from .llm import V2_MODEL, chat
 from .retrieval_v2 import ground
 
 
@@ -17,6 +17,7 @@ class ClaimCheck(BaseModel):
 
 def draft(question: str, *, employer: str | None = None, length: str = "medium",
           tone: str = "humanized", model: str | None = None) -> dict:
+    model = model or V2_MODEL
     result = ground(question, employer=employer, grade_model=model)
     if not result["covered"]:
         result["answer"] = result["missing"]

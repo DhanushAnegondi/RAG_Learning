@@ -1,6 +1,7 @@
 # Fictional regression benchmark
 
 48 questions: 30 supported and 18 unsupported. `split` marks dev and holdout paraphrases/negatives.
+See [COVERAGE-RESULTS.md](COVERAGE-RESULTS.md) for the live coverage comparison.
 All employers, stories, claims and metrics in `fixtures/` are fictional. They must never be used
 as candidate resume or interview evidence. A fixture's `confirmed` label means it is authoritative
 inside this fictional test universe only.

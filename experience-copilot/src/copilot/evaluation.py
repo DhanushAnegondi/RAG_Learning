@@ -109,7 +109,7 @@ def run(args) -> int:
     output.parent.mkdir(parents=True, exist_ok=True)
     work = output.parent / ("indexes-" + uuid4().hex[:10])
     report = {"kind": "live-fictional-fixture-comparison", "utc": datetime.now(timezone.utc).isoformat(),
-              "model": args.model or os.getenv("EXP_LLM_MODEL", "meta/llama-3.3-70b-instruct"),
+              "model": args.model or os.getenv("EXP_LLM_MODEL", "nvidia/nemotron-3.5-bolt-e4b"),
               "embedding_model": retrieval_v2.embedding_model(),
               "baseline": "V1 fast mode (current UI default); V2 includes evidence checking",
               "answers_enabled": args.answers, "dataset": str(Path(args.dataset).resolve()),
@@ -127,7 +127,7 @@ def run(args) -> int:
                     if version == "v1":
                         result = engine.ground(row["question"], grade=False)
                         if args.answers:
-                            result["answer"] = generate_answer(row["question"], result["context"], model=args.model)
+                            result["answer"] = generate_answer(row["question"], result["context"], model=args.model or os.getenv("EXP_LLM_MODEL", "nvidia/nemotron-3.5-bolt-e4b"))
                     elif args.answers:
                         result = pipeline.draft(row["question"], model=args.model)
                     else:
