@@ -17,6 +17,8 @@ if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 The key is needed only for ingestion/live model calls, not offline tests or question-set validation.
 The existing model list was recorded in June 2026; provider availability can change. Choose an
 available model with structured-output support. A refusal or unsupported schema blocks V2 drafts.
+The old default chat model returned HTTP 410 during the November 2026 check; an available chat
+model is still needed for end-to-end answers. The default V2 embedding endpoint was verified live.
 
 ## 2. Run offline checks
 
@@ -33,6 +35,16 @@ the dataset and makes no API calls.
 
 ## 3. Run a live synthetic comparison
 
+For retrieval only, with no chat model or generated answers:
+
+```powershell
+..\.venv\Scripts\python.exe eval/retrieval_check.py
+```
+
+This compares V1 dense retrieval with V2's pre-reranking hybrid candidates at top four on 30
+answerable fictional questions. It does not measure coverage, abstention, answer accuracy or the
+full V2 reranker. Results are saved to `eval/results/retrieval-live.json`.
+
 ```powershell
 # Short smoke check first; uses fictional documents, isolated disposable indexes and your NVIDIA key.
 ..\.venv\Scripts\python.exe -m copilot.cli evaluate --live --limit 4
@@ -45,7 +57,7 @@ the dataset and makes no API calls.
 ```
 
 Use `--model <available-model-id>` to keep a chosen answer/check model fixed. The embedding model is
-`EXP_V2_EMBED_MODEL` (default `nvidia/llama-3.2-nv-embedqa-1b-v2`). The report records both. Each live run builds
+`EXP_V2_EMBED_MODEL` (default `nvidia/nemotron-3.5-embed-1b`). The report records both. Each live run builds
 fresh fixture indexes under the report's directory; your personal indexes are not used or changed.
 Results, generated text and indexes are ignored by Git.
 

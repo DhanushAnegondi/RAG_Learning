@@ -19,7 +19,7 @@ from .llm import chat
 STATUSES = {"confirmed", "unverified", "draft", "synthetic"}
 
 def embedding_model():
-    return os.getenv("EXP_V2_EMBED_MODEL", "nvidia/llama-3.2-nv-embedqa-1b-v2")
+    return os.getenv("EXP_V2_EMBED_MODEL", "nvidia/nemotron-3.5-embed-1b")
 
 def get_embeddings():
     from langchain_nvidia_ai_endpoints import NVIDIAEmbeddings
