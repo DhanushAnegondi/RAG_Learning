@@ -38,3 +38,23 @@ def test_stack_is_rendered_as_categories_without_a_story(monkeypatch):
     monkeypatch.setattr(answer,'chat',lambda *args:Fake())
     output=answer.generate_answer('What is my tech stack?', '[S1] Python and SQL',persona='',style='',cite_sources=True)
     assert output == '- **Languages:** Python, SQL [S1]'
+
+
+@pytest.mark.parametrize('refs', [[],['S9']])
+def test_each_stack_group_needs_valid_citations(monkeypatch,refs):
+    from copilot import answer
+    class Fake:
+        def with_structured_output(self,schema): return self
+        def invoke(self,messages):
+            return answer.StackAnswer(groups=[answer.StackGroup(category='Languages',technologies=['Python'],source_ids=['S1']),
+                answer.StackGroup(category='Cloud',technologies=['AWS'],source_ids=refs)])
+    monkeypatch.setattr(answer,'chat',lambda *a:Fake())
+    with pytest.raises(ValueError):
+        answer.generate_answer('What is my tech stack?', '[S1] Python',persona='',style='',cite_sources=True)
+
+
+def test_stack_names_are_extracted_from_the_dedicated_source():
+    from copilot.answer import extract_stack
+    context='[S1] Employer: Rocket; source: Rocket/Rocket_KB_01_Stack_and_Tools.md\n## Languages\n- Python: scripts\n- SQL (transformations)'
+    assert extract_stack('What is my tech stack at Rocket?',context)=='- **Languages:** Python, SQL [S1]'
+    assert extract_stack('What did I do at Rocket?',context) is None

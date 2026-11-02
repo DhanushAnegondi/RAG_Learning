@@ -4,6 +4,10 @@ V2 chooses an answer shape from the question: technology lists for stack questio
 professional summary for introductions, and supported actions/results for experience questions.
 Mixed questions about an incident and its tools retain the story. A request for team management
 still requires a documented leadership episode; the app must not invent one from technical tasks.
+Simple stack questions use extractive category lists when a reviewed `Stack_and_Tools.md` source is
+available. Other drafts are checked and may receive one source-only revision before a final check.
+For failures, the UI exposes check details. Broader personal answers still depend on the source notes;
+technical task lists do not establish leadership or collaboration episodes by themselves.
 
 If embeddings are unavailable, explicitly build a keyword index with
 `python -m copilot.cli ingest --version v2 --keyword-only`. The UI shows the actual search mode.

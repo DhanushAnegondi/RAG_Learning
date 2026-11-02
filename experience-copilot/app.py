@@ -91,9 +91,13 @@ if st.button("Draft my answer", type="primary") and question.strip():
             st.markdown(result["answer"])
         else:
             st.warning(result["answer"])
+            if result.get('verification_reason') or result.get('error'):
+                with st.expander('Answer check details'):
+                    st.write(result.get('verification_reason') or 'The model service was unavailable: ' + result['error'])
         with st.expander("Supporting evidence"):
             for source in result["sources"]:
-                st.write(f"[{source['id']}] {source['employer']} — {source['project']}")
+                project_label = '' if source.get('project') == 'unspecified' else ' — ' + source.get('project','')
+                st.write(f"[{source['id']}] {source['employer']}{project_label}")
                 st.caption(f"{source['source']} · version {source['version']} · ownership: {source['ownership']}")
             st.text(result["context"])
         st.caption("V2 · reviewed sources · hybrid retrieval · model-checked draft (review it yourself before use).")

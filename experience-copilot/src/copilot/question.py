@@ -8,9 +8,9 @@ def intent(question: str) -> str:
         return "experience"
     if re.search(r"tech(?:nology|nical)?\s+stack|\btools\b|\btechnologies\b|\bframeworks\b|programming languages", q):
         return "stack"
-    if re.search(r"tell me about yourself|introduce yourself|your background|my background|about myself|professional background|walk me through (?:your|my) (?:resume|career)", q):
+    if re.search(r"tell me about yourself|introduce yourself|your background|my background|about myself|professional background|walk me through (?:your|my) (?:resume|career)|what strengths|bring to .*role", q):
         return "introduction"
-    if re.search(r"(?:a|the) time|time when|time you|experience|what (?:did|have) (?:i|you)|responsibilit|accomplish|achievement|manage(?:d)? (?:a|the) team", q):
+    if re.search(r"(?:a|the) time|time when|time you|experience|what (?:did|have) (?:i|you)|responsibilit|accomplish|achievement|(?:challenging|difficult) project|manage(?:d)? (?:a|the) team", q):
         return "experience"
     return "direct"
 
@@ -28,6 +28,8 @@ def guidance(question: str) -> str:
                 "natural first-person overview: work focus, two or three relevant contributions and strengths. "
                 "Do not demand precise titles, dates, role at every employer or a career goal to answer. "
                 "Avoid inventing chronology, years of experience, current employment or aspirations. "
+                "When the evidence spans several experience areas, summarize at least two relevant areas; "
+                "do not turn the whole introduction into one employer's story unless the user asks for that. "
                 "Use employer names and relationships only as documented; a folder label is not a job title. "
                 "Use a concise spoken paragraph with citations.")
     if mode == "experience":
@@ -47,3 +49,8 @@ def search_question(question: str) -> str:
     if intent(question) == "introduction":
         return "data engineering contributions experience interview safe claims personal actions"
     return question
+
+
+def names_only_stack(question: str) -> bool:
+    return intent(question)=='stack' and not re.search(
+        r'what.*(?:use.*for|used.*for)|how|explain|describe|\bnot\b|\bnever\b|\bshould\b|\brecommend',question,re.I)

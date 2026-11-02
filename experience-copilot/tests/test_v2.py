@@ -193,6 +193,68 @@ def test_checked_draft_passes(monkeypatch):
     assert pipeline.draft("q")["verified"] is True
 
 
+def test_rejected_draft_is_revised_and_checked_again(monkeypatch):
+    monkeypatch.setattr(pipeline,'ground',lambda *a,**k:{'covered':True,'context':'facts','sources':[{'id':'S1'}]})
+    feedback=[]
+    drafts=[]
+    def generate(*args,**kwargs):
+        feedback.append(kwargs['revision_feedback'])
+        drafts.append(kwargs['revision_draft'])
+        return 'Supported fact [S1].'
+    monkeypatch.setattr(pipeline,'generate_answer',generate)
+    checks=iter([pipeline.ClaimCheck(supported=False,reason='Remove unsupported claim'),pipeline.ClaimCheck(supported=True,reason='supported')])
+    class Checker:
+        def with_structured_output(self,schema): return self
+        def invoke(self,messages): return next(checks)
+    monkeypatch.setattr(pipeline,'chat',lambda *args:Checker())
+    result=pipeline.draft('q')
+    assert result['verified'] and len(result['review_attempts'])==2
+    assert feedback==['','Remove unsupported claim']
+    assert drafts==['','Supported fact [S1].']
+
+
+def test_grouped_citations_cannot_hide_an_unknown_source(monkeypatch):
+    monkeypatch.setattr(pipeline,'ground',lambda *a,**k:{'covered':True,'context':'facts','sources':[{'id':'S1'}]})
+    monkeypatch.setattr(pipeline,'generate_answer',lambda *a,**k:'Claim [S9, S1].')
+    monkeypatch.setattr(pipeline,'chat',lambda *a:pytest.fail('Invalid citations must not reach model approval'))
+    assert pipeline.draft('q')['verified'] is False
+
+
+def test_malformed_group_cannot_hide_an_unknown_source(monkeypatch):
+    monkeypatch.setattr(pipeline,'ground',lambda *a,**k:{'covered':True,'context':'facts','sources':[{'id':'S1'}]})
+    monkeypatch.setattr(pipeline,'generate_answer',lambda *a,**k:'Supported [S1]. Other [S1, S999 and S1].')
+    monkeypatch.setattr(pipeline,'chat',lambda *a:pytest.fail('Malformed citations must not reach approval'))
+    assert pipeline.draft('q')['verified'] is False
+
+
+def test_introduction_does_not_add_unselected_sources(monkeypatch,doc):
+    a,b=passage(doc),passage(doc,key='b',employer='Cedar')
+    monkeypatch.setattr(v2,'retrieve_candidates',lambda *args:[a,b])
+    monkeypatch.setattr(v2,'chat',lambda *args:model(v2.EvidenceDecision(ranked_ids=['chunk1'],sufficient=True,missing='')))
+    result=v2.ground('Tell me about yourself')
+    assert [s['employer'] for s in result['sources']]==['Northstar']
+
+
+def test_insufficient_decision_drops_invalid_references_without_generating(monkeypatch,doc):
+    monkeypatch.setattr(v2,'retrieve_candidates',lambda *args:[passage(doc)])
+    monkeypatch.setattr(v2,'chat',lambda *args:model(v2.EvidenceDecision(ranked_ids=['no-support'],sufficient=False,missing='Describe your leadership episode')))
+    result=v2.ground('Tell me about a time managing direct reports')
+    assert not result['covered'] and not result['sources'] and not result.get('error')
+
+
+def test_technical_work_alone_does_not_become_collaboration_story(monkeypatch):
+    monkeypatch.setattr(pipeline,'ground',lambda *a,**k:{'covered':True,'context':'Built a Python data pipeline.','sources':[{'id':'S1'}]})
+    monkeypatch.setattr(pipeline,'generate_answer',lambda *a,**k:pytest.fail('No collaboration evidence'))
+    result=pipeline.draft('Tell me about a time you worked with others')
+    assert not result['covered'] and 'collaboration episode' in result['answer']
+
+
+def test_unspecified_company_gets_a_focused_followup(monkeypatch):
+    monkeypatch.setattr(pipeline,'ground',lambda *a,**k:pytest.fail('No company supplied'))
+    result=pipeline.draft('Why do you want to work at our company?')
+    assert not result['covered'] and 'Which company and role' in result['answer']
+
+
 def test_indexes_must_be_separate(monkeypatch, tmp_path):
     monkeypatch.setenv("EXP_PERSIST_DIR", str(tmp_path / "v1"))
     monkeypatch.setenv("EXP_V2_PERSIST_DIR", str(tmp_path / "v1/child"))
