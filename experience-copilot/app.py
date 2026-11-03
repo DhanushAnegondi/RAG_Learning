@@ -19,9 +19,29 @@ from copilot.engine import ground
 from copilot.llm import MODELS
 from copilot.suggest import suggest_style
 
-st.set_page_config(page_title="Experience Copilot", page_icon="🗣️")
-st.title("🗣️ Experience Copilot")
-st.caption("Answers about your experience, grounded in your own documents, written in your voice.")
+st.set_page_config(page_title="Experience Copilot", layout="wide")
+st.markdown("""<style>
+.stApp { background: #f3f7f3; color: #20322d; }
+[data-testid="stHeader"] { background: #f3f7f3; }
+[data-testid="stSidebar"] { background: #173f35; }
+[data-testid="stSidebar"] * { color: #f2f8f3; }
+[data-testid="stSidebar"] input, [data-testid="stSidebar"] [data-baseweb="select"] * { color: #20322d !important; }
+[data-testid="stSidebar"] input, [data-testid="stSidebar"] [data-baseweb="select"] > div { background: #fff !important; }
+.block-container { max-width: 1050px; padding-top: 3rem; padding-bottom: 5rem; }
+h1, h2, h3, p, label { color: #20322d; }
+.stButton button[kind="primary"] { background: #24634e; border: 0; color: white; border-radius: 8px; padding: .65rem 1.4rem; }
+.stButton button[kind="primary"]:hover { background: #173f35; color: white; }
+[data-testid="stCaptionContainer"] p { color: #52695c; }
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] p { color: #cce0d2; }
+.stButton button[kind="primary"] * { color: white !important; }
+textarea::placeholder { color: #62776a !important; opacity: 1; }
+textarea { background: white !important; color: #20322d !important; border: 1px solid #b7c9bd !important; border-radius: 8px !important; }
+[data-testid="stExpander"] { border: 1px solid #cbd9cf; border-radius: 10px; background: #fff; }
+::selection { background: #bfe2cc; color: #173f35; }
+</style>""", unsafe_allow_html=True)
+st.title("Experience Copilot")
+st.markdown("### Find the words for your work.")
+st.caption("Ask a question and build an answer from your experience documents.")
 from copilot.retrieval_v2 import index_dir
 index_path = index_dir() / 'index.json'
 if index_path.exists():
@@ -38,7 +58,12 @@ if not settings.nvidia_api_key:
     st.stop()
 
 with st.sidebar:
-    st.header("Controls")
+    st.header("Answer settings")
+    st.caption("Choose how you want to practice.")
+    guide = Path(__file__).parent / "docs" / "learning-guide.html"
+    if guide.exists():
+        st.download_button("Open the learning guide", guide.read_bytes(), file_name="experience-copilot-learning-guide.html", mime="text/html", help="Save the offline guide and open it in your browser.")
+    st.divider()
     version = st.selectbox("RAG version", ("v1", "v2"), index=1,
                            help="V1: original baseline. V2: reviewed evidence, hybrid retrieval and checked citations.")
     employer = st.text_input("Employer filter (V2, optional)")
@@ -63,6 +88,8 @@ with st.sidebar:
     st.caption(f"Persona: `{os.path.basename(settings.persona_path)}`")
     st.caption(f"Docs: `{settings.corpus_dir}`")
 
+st.markdown("### Your question")
+st.caption("Try a technology list, an introduction, or a specific project story.")
 question = st.text_area(
     "Question about your experience",
     placeholder="e.g. What data pipeline are you most proud of?",
@@ -87,6 +114,7 @@ if st.button("Draft my answer", type="primary") and question.strip():
         except FileNotFoundError:
             st.error("Build the V2 index first: copilot ingest --version v2. See docs/TESTING.md.")
             st.stop()
+        st.markdown("### Your draft")
         if result.get("verified"):
             st.markdown(result["answer"])
         else:
@@ -100,7 +128,7 @@ if st.button("Draft my answer", type="primary") and question.strip():
                 st.write(f"[{source['id']}] {source['employer']}{project_label}")
                 st.caption(f"{source['source']} · version {source['version']} · ownership: {source['ownership']}")
             st.text(result["context"])
-        st.caption("V2 · reviewed sources · hybrid retrieval · model-checked draft (review it yourself before use).")
+        st.caption("V2 · reviewed sources · " + ("keyword search" if snapshot.get("retrieval_mode") == "keyword" else "hybrid retrieval") + " · review the answer and its sources before use.")
         st.stop()
     chosen_len, chosen_tone = length, tone
     if length == "auto" or tone == "auto":
