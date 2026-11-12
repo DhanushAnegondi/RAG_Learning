@@ -1,6 +1,6 @@
 # Evaluation results
 
-Generated 2026-11-11 22:52 UTC by `python -m eval.report` from the latest recorded run of each (system, suite, mode). Anything not run is marked "not run"; no number here is estimated.
+Generated 2026-11-12 02:38 UTC by `python -m eval.report` from the latest recorded run of each (system, suite, mode). Anything not run is marked "not run"; no number here is estimated.
 
 **Limits:** the eval set has 40 questions (6 to 14 per category), so differences of a few points are within noise; per-category cells rest on very few rows.
 
@@ -86,14 +86,14 @@ not run for either system.
 
 | Run | Commit / dirty / src hash | Models | Corpus hash | Eval-set hash | Rate / seed | Time (UTC) | File |
 |---|---|---|---|---|---|---|---|
-| v0 chaos (offline), n=40, network blocked | `f2b924c029` dirty=False src `aeb1a4d3a3` | fakes (configured names not called) | `e2f8b2e92f5d` | `3bacc920a1fe` | 0.0 / 7 | 2026-11-11T22:50:03+00:00 | `results/v0_chaos_offline_r0_20261111T225003565311Z.json` |
-| v1 chaos (offline), n=40, network blocked | `f2b924c029` dirty=True src `04cdbe2edb` | fakes (configured names not called) | `e2f8b2e92f5d` | `3bacc920a1fe` | 0.0 / 7 | 2026-11-11T22:50:10+00:00 | `results/v1_chaos_offline_r0_20261111T225010791494Z.json` |
-| v0 chaos (offline), n=40, network blocked | `f2b924c029` dirty=False src `aeb1a4d3a3` | fakes (configured names not called) | `e2f8b2e92f5d` | `3bacc920a1fe` | 0.05 / 7 | 2026-11-11T22:50:03+00:00 | `results/v0_chaos_offline_r0.05_20261111T225003646320Z.json` |
-| v1 chaos (offline), n=40, network blocked | `f2b924c029` dirty=True src `04cdbe2edb` | fakes (configured names not called) | `e2f8b2e92f5d` | `3bacc920a1fe` | 0.05 / 7 | 2026-11-11T22:50:10+00:00 | `results/v1_chaos_offline_r0.05_20261111T225010876220Z.json` |
-| v0 chaos (offline), n=40, network blocked | `f2b924c029` dirty=False src `aeb1a4d3a3` | fakes (configured names not called) | `e2f8b2e92f5d` | `3bacc920a1fe` | 0.1 / 7 | 2026-11-11T22:50:03+00:00 | `results/v0_chaos_offline_r0.1_20261111T225003724043Z.json` |
-| v1 chaos (offline), n=40, network blocked | `f2b924c029` dirty=True src `04cdbe2edb` | fakes (configured names not called) | `e2f8b2e92f5d` | `3bacc920a1fe` | 0.1 / 7 | 2026-11-11T22:50:10+00:00 | `results/v1_chaos_offline_r0.1_20261111T225010956290Z.json` |
-| v0 chaos (offline), n=40, network blocked | `f2b924c029` dirty=False src `aeb1a4d3a3` | fakes (configured names not called) | `e2f8b2e92f5d` | `3bacc920a1fe` | 0.3 / 7 | 2026-11-11T22:50:03+00:00 | `results/v0_chaos_offline_r0.3_20261111T225003803208Z.json` |
-| v1 chaos (offline), n=40, network blocked | `f2b924c029` dirty=True src `04cdbe2edb` | fakes (configured names not called) | `e2f8b2e92f5d` | `3bacc920a1fe` | 0.3 / 7 | 2026-11-11T22:50:11+00:00 | `results/v1_chaos_offline_r0.3_20261111T225011035275Z.json` |
+| v0 chaos (offline), n=40, network blocked | `f2b924c029` dirty=False src `aeb1a4d3a3` | fakes (configured names not called) | `e2f8b2e92f5d` | `3bacc920a1fe` | 0.0 / 7 | 2026-11-12T02:38:02+00:00 | `results/v0_chaos_offline_r0_20261112T023802340007Z.json` |
+| v1 chaos (offline), n=40, network blocked | `c3eef5146d` dirty=False src `8038d820dd` | fakes (configured names not called) | `e2f8b2e92f5d` | `3bacc920a1fe` | 0.0 / 7 | 2026-11-12T02:38:07+00:00 | `results/v1_chaos_offline_r0_20261112T023807829621Z.json` |
+| v0 chaos (offline), n=40, network blocked | `f2b924c029` dirty=False src `aeb1a4d3a3` | fakes (configured names not called) | `e2f8b2e92f5d` | `3bacc920a1fe` | 0.05 / 7 | 2026-11-12T02:38:02+00:00 | `results/v0_chaos_offline_r0.05_20261112T023802445668Z.json` |
+| v1 chaos (offline), n=40, network blocked | `c3eef5146d` dirty=False src `8038d820dd` | fakes (configured names not called) | `e2f8b2e92f5d` | `3bacc920a1fe` | 0.05 / 7 | 2026-11-12T02:38:07+00:00 | `results/v1_chaos_offline_r0.05_20261112T023807955122Z.json` |
+| v0 chaos (offline), n=40, network blocked | `f2b924c029` dirty=False src `aeb1a4d3a3` | fakes (configured names not called) | `e2f8b2e92f5d` | `3bacc920a1fe` | 0.1 / 7 | 2026-11-12T02:38:02+00:00 | `results/v0_chaos_offline_r0.1_20261112T023802546347Z.json` |
+| v1 chaos (offline), n=40, network blocked | `c3eef5146d` dirty=False src `8038d820dd` | fakes (configured names not called) | `e2f8b2e92f5d` | `3bacc920a1fe` | 0.1 / 7 | 2026-11-12T02:38:08+00:00 | `results/v1_chaos_offline_r0.1_20261112T023808061800Z.json` |
+| v0 chaos (offline), n=40, network blocked | `f2b924c029` dirty=False src `aeb1a4d3a3` | fakes (configured names not called) | `e2f8b2e92f5d` | `3bacc920a1fe` | 0.3 / 7 | 2026-11-12T02:38:02+00:00 | `results/v0_chaos_offline_r0.3_20261112T023802645784Z.json` |
+| v1 chaos (offline), n=40, network blocked | `c3eef5146d` dirty=False src `8038d820dd` | fakes (configured names not called) | `e2f8b2e92f5d` | `3bacc920a1fe` | 0.3 / 7 | 2026-11-12T02:38:08+00:00 | `results/v1_chaos_offline_r0.3_20261112T023808172172Z.json` |
 | v0 quality (live), n=40 | `f2b924c029` dirty=False src `aeb1a4d3a3` | gen `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning`, grader `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning`, embed `nvidia/nemotron-3.5-embed-1b`, judge `deepseek-ai/deepseek-v4.1-flash` | `e2f8b2e92f5d` | `3bacc920a1fe` | - / 7 | 2026-11-11T21:27:20+00:00 | `results/v0_quality_live_20261111T212720930965Z.json` |
 | v1 quality (live), n=40 | `f2b924c029` dirty=True src `04cdbe2edb` | gen `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning`, grader `nvidia/nemotron-3.5-bolt-e4b`, embed `nvidia/nemotron-3.5-embed-1b`, judge `deepseek-ai/deepseek-v4.1-flash` | `e2f8b2e92f5d` | `3bacc920a1fe` | - / 7 | 2026-11-11T21:59:30+00:00 | `results/v1_quality_live_20261111T215930974428Z.json` |
 
