@@ -11,4 +11,7 @@ dist/
 
 # Vector store + eval artifacts
 chroma_store/
-eval/results_*.json
+
+# Runtime artifacts
+traces/
+eval/results/

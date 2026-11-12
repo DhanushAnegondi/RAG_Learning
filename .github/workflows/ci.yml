@@ -1,0 +1,175 @@
+name: ci
+
+on:
+  push:
+    paths:
+      - "corrective-rag/**"
+      - "experience-copilot/**"
+      - ".github/workflows/ci.yml"
+  pull_request:
+    paths:
+      - "corrective-rag/**"
+      - "experience-copilot/**"
+      - ".github/workflows/ci.yml"
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "eval-live: only the first N eval rows"
+        type: string
+        default: "40"
+      system:
+        description: "eval-live: system to evaluate"
+        type: choice
+        options: [v1, v0, both]
+        default: v1
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  corrective-rag:
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: corrective-rag
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: corrective-rag/requirements.txt
+      - name: Install
+        working-directory: .
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e "corrective-rag[dev]"
+      - name: Lint
+        run: ruff check .
+      - name: Tests (offline, no key)
+        env:
+          NVIDIA_API_KEY: ""
+        run: |
+          unset NVIDIA_API_KEY
+          python -m pytest -q tests eval/tests
+      - name: Chaos smoke (offline, v1)
+        run: |
+          unset NVIDIA_API_KEY
+          python -m eval.run --system v1 --suite chaos --offline --rates 0,0.1 --seed 7
+      - name: Chaos gate
+        run: |
+          python - <<'PY'
+          import glob, json, sys
+
+          files = sorted(glob.glob("eval/results/v1_chaos_offline_*.json"))
+          if not files:
+              sys.exit("gate: no chaos result files produced")
+          failed, recovery_seen = False, False
+          for f in files:
+              a = json.load(open(f, encoding="utf-8"))["aggregates"]
+              crash, rec = a["crash_rate"], a["error_recovery_rate"]
+              print(f"{f}: n={a['n']} crash_rate={crash} error_recovery_rate={rec}")
+              if crash is None or crash > 0:
+                  print("  FAIL: crash_rate > 0")
+                  failed = True
+              if rec is not None:
+                  recovery_seen = True
+                  if rec < 1.0:
+                      print("  FAIL: error_recovery_rate < 1.0")
+                      failed = True
+          if not recovery_seen:
+              print("FAIL: no faulted questions, recovery rate never measured")
+              failed = True
+          sys.exit(1 if failed else 0)
+          PY
+
+  experience-copilot:
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: experience-copilot
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            corrective-rag/requirements.txt
+            experience-copilot/requirements.txt
+      - name: Install corrective-rag, then experience-copilot
+        working-directory: .
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e "corrective-rag[dev]"
+          pip install -r experience-copilot/requirements.txt
+          pip install -e experience-copilot
+      - name: Lint
+        run: ruff check .
+      - name: Tests (offline, no key)
+        env:
+          NVIDIA_API_KEY: ""
+        run: |
+          unset NVIDIA_API_KEY
+          python -m pytest -q
+
+  eval-live:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: corrective-rag
+    env:
+      NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+      LIMIT: ${{ inputs.limit }}
+      SYSTEM: ${{ inputs.system }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check out v0-baseline
+        if: inputs.system == 'v0' || inputs.system == 'both'
+        uses: actions/checkout@v4
+        with:
+          ref: v0-baseline
+          path: v0-baseline
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: corrective-rag/requirements.txt
+      - name: Install
+        working-directory: .
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e "corrective-rag[dev]"
+      - name: Require secret
+        run: |
+          if [ -z "$NVIDIA_API_KEY" ]; then
+            echo "NVIDIA_API_KEY repository secret is not set" >&2
+            exit 1
+          fi
+      - name: Live quality suite
+        run: |
+          case "$LIMIT" in ''|*[!0-9]*) echo "limit must be an integer" >&2; exit 1;; esac
+          if [ "$SYSTEM" = "v1" ] || [ "$SYSTEM" = "both" ]; then
+            python -m eval.run --system v1 --suite quality --limit "$LIMIT"
+          fi
+          if [ "$SYSTEM" = "v0" ] || [ "$SYSTEM" = "both" ]; then
+            python -m eval.run --system v0 --src "$GITHUB_WORKSPACE/v0-baseline/corrective-rag/src" \
+              --suite quality --limit "$LIMIT"
+          fi
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-results-${{ github.run_id }}
+          path: corrective-rag/eval/results/
+          if-no-files-found: warn

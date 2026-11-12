@@ -1,6 +1,6 @@
-"""CRAG graph nodes. Each node has signature `node(state) -> dict` (a partial state update).
+"""CRAG graph nodes. Each node is a plain function `node(state, <deps>) -> dict` returning a
+PARTIAL state update; graph.py binds the dependencies (settings, LLM client, retriever).
 
-Submodules are imported by their full path (e.g. `from crag.nodes.grade import grade_documents`)
-rather than re-exported here, so the submodule names are not shadowed by the functions — this keeps
-each node module independently monkeypatchable in tests.
+Submodules are imported by full path (`from crag.nodes.grade import grade_documents`) rather than
+re-exported here, so each stays independently monkeypatchable in tests.
 """

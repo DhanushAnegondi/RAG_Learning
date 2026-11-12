@@ -1,32 +1,41 @@
-"""Auto-suggest length/tone via a plain-text prompt + parse (mocked)."""
-from copilot.suggest import StyleSuggestion, suggest_style
+"""Auto-suggest via LLMClient with a heuristic fallback."""
+from copilot.suggest import StyleSuggestion, heuristic_style, suggest_style
+from eval.fakes import install
 
 
-def test_suggest_parses_the_models_line(monkeypatch, fake_llm):
-    monkeypatch.setattr(
-        "copilot.suggest.chat", lambda *a, **k: fake_llm(text="length=short; tone=conversational")
+def test_suggest_parses_the_models_line(settings, client_for):
+    install(lambda m, msgs, s: "length=short; tone=conversational")
+    out = suggest_style("Tell me about yourself", settings=settings, client=client_for(settings))
+    assert (out.length, out.tone) == ("short", "conversational")
+
+
+def test_suggest_uses_the_grader_model_by_default(settings, client_for):
+    seen = []
+    install(lambda m, msgs, s: seen.append(m) or "length=medium; tone=formal")
+    suggest_style("q", settings=settings, client=client_for(settings))
+    assert seen == [settings.grader_model]
+
+
+def test_suggest_recovers_from_loose_wording(settings, client_for):
+    install(lambda m, msgs, s: "I'd go with a long, professional answer here.")
+    out = suggest_style("Walk me through it", settings=settings, client=client_for(settings))
+    assert (out.length, out.tone) == ("long", "professional")
+
+
+def test_suggest_falls_back_to_heuristic_on_provider_failure(settings, client_for):
+    install(lambda m, msgs, s: RuntimeError("provider down"))
+    out = suggest_style(
+        "Walk me through the pipeline design", settings=settings, client=client_for(settings)
     )
-    out = suggest_style("Tell me about yourself")
-    assert out.length == "short"
-    assert out.tone == "conversational"
+    assert out.reason.startswith("heuristic") and out.length == "long"
 
 
-def test_suggest_recovers_from_loose_wording(monkeypatch, fake_llm):
-    # model didn't use the exact format but mentioned valid words
-    monkeypatch.setattr(
-        "copilot.suggest.chat",
-        lambda *a, **k: fake_llm(text="I'd go with a long, professional answer here."),
-    )
-    out = suggest_style("Walk me through the pipeline")
-    assert out.length == "long"
-    assert out.tone == "professional"
+def test_suggest_falls_back_on_unusable_reply(settings, client_for):
+    install(lambda m, msgs, s: "no idea, sorry")
+    out = suggest_style("Tell me about yourself", settings=settings, client=client_for(settings))
+    assert out.reason.startswith("heuristic") and out.length == "short"
 
 
-def test_suggest_falls_back_on_empty_output(monkeypatch, fake_llm):
-    monkeypatch.setattr("copilot.suggest.chat", lambda *a, **k: fake_llm(text=""))
-    out = suggest_style("anything")
-    assert out.length == "medium" and out.tone == "professional"
-
-
-def test_style_suggestion_schema():
+def test_heuristic_default_and_schema():
+    assert heuristic_style("Something else entirely").length == "medium"
     assert set(StyleSuggestion.model_fields) == {"length", "tone", "reason"}

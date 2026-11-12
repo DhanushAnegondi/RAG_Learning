@@ -1,32 +1,53 @@
-"""decide() is the interview-critical routing function. It must be pure and key-free."""
+"""decide() / verdict_for(): the CRAG three-way table, driven by settings thresholds."""
+
+import pytest
+
+from crag.config import Settings
 from crag.graph import decide
+from crag.nodes.grade import verdict_for
 
 
-def test_enough_relevant_routes_to_generate():
-    # default threshold is 2
-    assert decide({"grades": [True, True, False]}) == "generate"
+@pytest.mark.parametrize(
+    "grades,expected",
+    [
+        ([], "incorrect"),
+        ([False, False, False], "incorrect"),
+        ([True, False], "ambiguous"),
+        ([False, True, False, False], "ambiguous"),
+        ([True, True], "correct"),
+        ([True, True, True, False], "correct"),
+    ],
+)
+def test_verdict_default_thresholds(grades, expected):
+    assert verdict_for(grades, 2, 1) == expected
 
 
-def test_too_few_relevant_routes_to_correction():
-    assert decide({"grades": [True, False, False]}) == "transform_query"
+def test_verdict_respects_thresholds():
+    grades = [True, True]
+    assert verdict_for(grades, 3, 2) == "ambiguous"
+    assert verdict_for(grades, 3, 3) == "incorrect"
+    assert verdict_for([True], 3, 2) == "incorrect"
 
 
-def test_no_grades_routes_to_correction():
-    assert decide({"grades": []}) == "transform_query"
-    assert decide({}) == "transform_query"
+@pytest.mark.parametrize(
+    "grades,web,expected",
+    [
+        ([True, True], True, "generate"),
+        ([True, False], True, "rewrite_query"),
+        ([False, False], True, "rewrite_query"),
+        ([True, False], False, "generate"),  # web off: answer locally
+        ([False, False], False, "generate"),  # web off: generate abstains
+    ],
+)
+def test_decide_routes(grades, web, expected):
+    s = Settings(_env_file=None, web_enabled=web)
+    assert decide({"grades": grades}, s) == expected
 
 
-def test_all_relevant_routes_to_generate():
-    assert decide({"grades": [True, True, True]}) == "generate"
-
-
-def test_threshold_is_configurable(monkeypatch):
-    monkeypatch.setenv("CRAG_RELEVANCE_THRESHOLD", "1")
-    assert decide({"grades": [True, False, False]}) == "generate"
-
-
-def test_decide_does_not_mutate_state():
-    state = {"grades": [False, False]}
-    before = dict(state)
-    decide(state)
-    assert state == before
+def test_decide_uses_settings_thresholds_and_is_pure():
+    s = Settings(_env_file=None, correct_threshold=3, ambiguous_threshold=2)
+    state = {"grades": [True, True], "question": "q"}
+    assert decide(state, s) == "rewrite_query"
+    assert state == {"grades": [True, True], "question": "q"}
+    s2 = Settings(_env_file=None, correct_threshold=3, ambiguous_threshold=2)
+    assert decide({"grades": [True, True, True]}, s2) == "generate"

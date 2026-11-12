@@ -1,55 +1,72 @@
-"""Shared fakes/fixtures. Suite runs offline (LLM mocked) but needs the `crag` package importable,
-so we add both this project's src and ../corrective-rag/src to the path."""
+"""Shared fixtures. Everything runs offline: chat and embeddings are faked at crag's seams, and
+the real root .env is never read (it may hold a live key)."""
 from __future__ import annotations
 
 import os
-import sys
+from pathlib import Path
 
 import pytest
+from crag.config import Settings as CragSettings
+from crag.llm import LLMClient, reset_factories
+from crag.nodes import web_search
 
-_HERE = os.path.dirname(__file__)
-sys.path.insert(0, os.path.abspath(os.path.join(_HERE, "..", "src")))
-sys.path.insert(0, os.path.abspath(os.path.join(_HERE, "..", "..", "corrective-rag", "src")))
+from copilot.config import Settings
+from copilot.ingest import build_index
+from eval.fakes import install
 
-
-class _Resp:
-    def __init__(self, content):
-        self.content = content
-
-
-class _FakeStructured:
-    def __init__(self, value):
-        self.value = value
-
-    def invoke(self, _msg):
-        return self.value
+EXAMPLES = Path(__file__).resolve().parents[1] / "examples"
 
 
-class FakeLLM:
-    """Fake ChatNVIDIA: `text` for generation, `suggestion` for with_structured_output."""
-
-    def __init__(self, text="FAKE ANSWER", suggestion=None):
-        self.text = text
-        self.suggestion = suggestion
-
-    def invoke(self, _messages):
-        return _Resp(self.text)
-
-    def stream(self, _messages):
-        for word in self.text.split(" "):
-            yield _Resp(word + " ")
-
-    def with_structured_output(self, _schema):
-        return _FakeStructured(self.suggestion)
+@pytest.fixture(autouse=True)
+def _isolate(monkeypatch):
+    for name in list(os.environ):
+        if name.startswith(("EXP_", "CRAG_")) or name == "NVIDIA_API_KEY":
+            monkeypatch.delenv(name, raising=False)
+    monkeypatch.setitem(Settings.model_config, "env_file", None)
+    monkeypatch.setitem(CragSettings.model_config, "env_file", None)
+    reset_factories()
+    web_search.reset_breaker()
+    yield
+    reset_factories()
+    web_search.reset_breaker()
 
 
 @pytest.fixture
-def fake_llm():
-    return FakeLLM
+def make_settings(tmp_path):
+    def _make(**kw) -> Settings:
+        base = {
+            "corpus_dir": str(EXAMPLES / "corpus"),
+            "persist_dir": str(tmp_path / "index"),
+            "persona_path": str(EXAMPLES / "persona.md"),
+            "style_path": str(EXAMPLES / "style_examples.md"),
+            # Dense veto off by default so tests do not depend on hash-embedding cosine values.
+            "dense_threshold": 0.0,
+        }
+        base.update(kw)
+        return Settings(**base)
+
+    return _make
 
 
 @pytest.fixture
-def doc():
-    from langchain_core.documents import Document
+def settings(make_settings) -> Settings:
+    return make_settings()
 
-    return lambda text, **meta: Document(page_content=text, metadata=meta)
+
+@pytest.fixture
+def client_for():
+    """A no-wait, no-retry LLMClient for a copilot Settings."""
+
+    def _make(s: Settings) -> LLMClient:
+        cs = s.to_crag_settings(max_retries=0, backoff_base_s=0.0, fallback_models=[])
+        return LLMClient(cs, sleep=lambda _s: None)
+
+    return _make
+
+
+@pytest.fixture
+def indexed(settings):
+    """The example corpus indexed with fake embeddings. Tests then call `install(handler)`."""
+    install(lambda model, messages, schema: "unused")
+    build_index(settings)
+    return settings

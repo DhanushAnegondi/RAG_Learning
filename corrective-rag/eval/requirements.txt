@@ -1,0 +1,3 @@
+# Optional: only needed for `python -m eval.run ... --ragas` (extra faithfulness/context_precision).
+# The harness itself needs nothing beyond the project's own dependencies.
+ragas>=0.2

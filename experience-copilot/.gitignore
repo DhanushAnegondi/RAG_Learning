@@ -13,8 +13,8 @@ __pycache__/
 build/
 dist/
 
-# Vector index
+# Index, traces, eval output
 chroma_store/
-
-# Session process memory (not part of the project deliverable)
-ledger/
+chroma_store_demo/
+traces/
+eval/results/

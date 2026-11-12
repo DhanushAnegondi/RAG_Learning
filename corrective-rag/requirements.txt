@@ -1,27 +1,17 @@
-# Corrective RAG — core runtime + tests. Install: pip install -r requirements.txt
-# (M5 eval deps are split into requirements-eval.txt because ragas pulls a heavy tree.)
-
-# Orchestration
-langgraph>=0.2
-langchain>=0.3
-langchain-community>=0.3
-
-# LLM + embeddings — NVIDIA NIM (the user's only key). Verified model ids in docs/ARCHITECTURE.md.
-langchain-nvidia-ai-endpoints>=0.3
-
-# Vector store — Chroma, in-process, zero setup
-langchain-chroma>=0.1
-chromadb>=0.5
-
-# Document loading
-pypdf>=4.0
-
-# Web-search fallback (M4 correction path) — no key needed
-duckduckgo-search>=6.0
-
-# Config + validation
-python-dotenv>=1.0
-pydantic>=2.0
-
-# Tests (TDD) — suite runs WITHOUT a live key (LLM + embeddings mocked)
-pytest>=8.0
+# Corrective RAG v1, runtime only. Ranges are capped at the next major of the versions tested.
+# Dev tools (pytest, ruff, httpx): pip install -r requirements-dev.txt
+langgraph>=1.2,<2
+langchain-core>=1.8,<2
+langchain-text-splitters>=1.1,<2
+langchain-nvidia-ai-endpoints>=1.5,<2
+langchain-chroma>=1.1,<2
+chromadb>=1.5,<2
+rank-bm25>=0.2.2,<0.3
+pypdf>=7.0,<8
+ddgs>=9.16,<10
+tenacity>=9.2,<10
+pydantic>=2.14,<3
+pydantic-settings>=2.16,<3
+python-dotenv>=1.2,<2
+fastapi>=0.162,<1
+uvicorn>=0.54,<1

@@ -1,8 +1,10 @@
-"""CLI to exercise the copilot before the UI exists.
+"""CLI.
 
     copilot ingest
-    copilot answer "What pipeline are you most proud of?" --length medium --tone humanized
+    copilot answer "What billing pipeline are you most proud of?" --length medium --tone humanized
     copilot answer "Tell me about yourself"            # length/tone auto-picked
+
+Exit codes: 0 ok, 1 generation failed, 2 API key missing/placeholder.
 """
 from __future__ import annotations
 
@@ -10,36 +12,60 @@ import argparse
 import sys
 
 from .answer import generate_answer
-from .config import LENGTHS, TONES, get_settings
+from .config import LENGTHS, ROOT_ENV, TONES, get_settings
 from .engine import ground
+from .ingest import build_index
 from .suggest import suggest_style
+from .web import research_web
 
 
-def _ingest() -> int:
-    from .ingest import build_index
-
-    s = build_index()
-    print(f"Indexed {s.corpus_dir} -> {s.persist_dir}")
+def _ingest(settings) -> int:
+    try:
+        r = build_index(settings)
+    except ValueError as exc:  # no ingestable documents
+        print(f"Ingest failed: {exc}", file=sys.stderr)
+        return 1
+    print(
+        f"Indexed {settings.corpus_dir} -> {settings.persist_dir}: "
+        f"{len(r.added_files)} added, {len(r.updated_files)} updated, "
+        f"{len(r.removed_files)} removed, {len(r.unchanged_files)} unchanged "
+        f"({r.chunks_embedded} chunks embedded)"
+    )
     return 0
 
 
-def _answer(question, length, tone, notes, model, fast) -> int:
+def _answer(settings, question, length, tone, notes, model, fast, web) -> int:
     if length == "auto" or tone == "auto":
-        sug = suggest_style(question)
+        sug = suggest_style(question, settings=settings)
         length = sug.length if length == "auto" else length
         tone = sug.tone if tone == "auto" else tone
         print(f"(auto-picked length={length}, tone={tone})")
 
-    g = ground(question, grade=not fast)
-    if g["graded"] and not g["covered"]:
-        print(
-            "\n[!] Your documents don't strongly cover this question "
-            f"({g['n_relevant']} relevant chunk(s)). Add notes with --notes or more docs in data/corpus."
-        )
-    answer = generate_answer(
-        question, g["context"], length=length, tone=tone, extra_notes=notes, model=model
+    g = ground(question, grade=not fast, settings=settings)
+    mode = "fast" if fast else "graded"
+    print(f"coverage ({mode}): {'covered' if g.covered else 'NOT covered'}; {g.reason}")
+    if not g.covered:
+        print("[!] Your documents don't strongly cover this. Add --notes or more docs.")
+    web_ctx = ""
+    if web:
+        w = research_web(question, settings)
+        web_ctx = w.context
+        print(f"web research: {len(w.sources)} source(s) (NOT from your documents)")
+        if w.degraded or w.errors:
+            print("[web degraded] " + "; ".join(w.errors or ["web search failed"]), file=sys.stderr)
+    res = generate_answer(
+        question, g, length=length, tone=tone, extra_notes=notes, web_context=web_ctx,
+        model=model, settings=settings,
     )
-    print("\n" + answer)
+    if not res.text:
+        print("Generation failed: " + "; ".join(res.errors or res.warnings), file=sys.stderr)
+        return 1
+    print("\n" + res.text)
+    print(f"\nsources: {', '.join(g.labels) or '(none)'} | model: {res.model_used}")
+    for w_ in res.warnings:
+        print(f"[warning] {w_}")
+    if g.degraded or res.errors:
+        print("[degraded] some components failed; see errors", file=sys.stderr)
     return 0
 
 
@@ -52,18 +78,23 @@ def main(argv: list[str] | None = None) -> int:
     a.add_argument("--length", default="auto", choices=LENGTHS)
     a.add_argument("--tone", default="auto", choices=TONES)
     a.add_argument("--notes", default="", help="Extra detail to ground on when your docs are thin")
-    a.add_argument("--model", default=None, help="Model id (default: quality). See copilot.llm.MODELS")
+    a.add_argument("--model", default=None, help="Answer model id (default: EXP_ANSWER_MODEL)")
     a.add_argument("--fast", action="store_true", help="Skip per-chunk grading for a faster answer")
+    a.add_argument("--web", action="store_true", help="Opt in to web research (not from your KB)")
 
     args = p.parse_args(argv)
-    if not get_settings().nvidia_api_key:
-        print("NVIDIA_API_KEY not set. Copy .env.example to .env and paste your key.", file=sys.stderr)
+    settings = get_settings()
+    if not settings.key_configured:
+        print(
+            f"NVIDIA_API_KEY is missing or still a placeholder. Put your key in {ROOT_ENV}.",
+            file=sys.stderr,
+        )
         return 2
     if args.cmd == "ingest":
-        return _ingest()
-    if args.cmd == "answer":
-        return _answer(args.question, args.length, args.tone, args.notes, args.model, args.fast)
-    return 1
+        return _ingest(settings)
+    return _answer(
+        settings, args.question, args.length, args.tone, args.notes, args.model, args.fast, args.web
+    )
 
 
 if __name__ == "__main__":

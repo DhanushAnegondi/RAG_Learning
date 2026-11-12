@@ -1,5 +1,8 @@
-"""Experience Copilot — grounded, voice-controlled answers about your own experience.
+"""Experience Copilot: grounded, voice-controlled answers about your own experience.
 
-Reuses the `crag` package (../corrective-rag) for retrieval + grading; adds persona-conditioned,
-length/tone-controlled generation and a UI.
+Built on `crag` (../corrective-rag) as a library: hybrid retrieval, optional grading, and the
+resilient `LLMClient`. This package adds persona/length/tone-controlled generation with
+deterministic post-checks (attribution guard, length compliance).
 """
+
+__version__ = "1.0.0"

@@ -3,16 +3,14 @@ Run: python scripts/probe_models.py   (needs NVIDIA_API_KEY + crag installed for
 """
 from __future__ import annotations
 
+from crag.observability import redact
 from langchain_nvidia_ai_endpoints import ChatNVIDIA
 
 CANDIDATES = [
-    "meta/llama-3.3-70b-instruct",
-    "meta/llama-3.1-8b-instruct",
-    "meta/llama-3.1-70b-instruct",
-    "mistralai/mistral-7b-instruct-v0.3",
-    "mistralai/mixtral-8x7b-instruct-v0.1",
-    "nvidia/llama-3.1-nemotron-70b-instruct",
-    "meta/llama-3.1-405b-instruct",
+    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
+    "nvidia/nemotron-3.5-bolt-e4b",
+    "nvidia/nemotron-3.5-lightning-30b-a3b",
+    "deepseek-ai/deepseek-v4.1-flash",
 ]
 
 for m in CANDIDATES:
@@ -20,4 +18,4 @@ for m in CANDIDATES:
         ChatNVIDIA(model=m, temperature=0, max_tokens=5).invoke("hi")
         print("OK  ", m)
     except Exception as e:  # noqa: BLE001
-        print("FAIL", m, "-", str(e).splitlines()[0][:90])
+        print("FAIL", m, "-", redact(str(e).splitlines()[0])[:90])

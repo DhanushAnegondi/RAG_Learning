@@ -1,0 +1,13 @@
+# Secrets (one key file for both projects, at the repo root)
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Local session memory (not part of the deliverable)
+ledger/

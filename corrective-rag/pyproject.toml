@@ -4,15 +4,51 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "corrective-rag"
-version = "0.1.0"
-description = "Corrective RAG (CRAG) as a LangGraph state machine"
+version = "1.0.0"
+description = "Corrective RAG (CRAG) as a LangGraph state machine: hybrid retrieval, resilient LLM client, eval harness"
 requires-python = ">=3.10"
+dependencies = [
+  "langgraph>=1.2,<2",
+  "langchain-core>=1.8,<2",
+  "langchain-text-splitters>=1.1,<2",
+  "langchain-nvidia-ai-endpoints>=1.5,<2",
+  "langchain-chroma>=1.1,<2",
+  "chromadb>=1.5,<2",
+  "rank-bm25>=0.2.2,<0.3",
+  "pypdf>=7.0,<8",
+  "ddgs>=9.16,<10",
+  "tenacity>=9.2,<10",
+  "pydantic>=2.14,<3",
+  "pydantic-settings>=2.16,<3",
+  "python-dotenv>=1.2,<2",
+  "fastapi>=0.162,<1",
+  "uvicorn>=0.54,<1",
+]
 
-[tool.setuptools]
-package-dir = {"" = "src"}
+[project.optional-dependencies]
+dev = [
+  "pytest>=9.2,<10",
+  "ruff>=0.17,<1",
+  "httpx>=0.28,<1",
+]
+
+[project.scripts]
+crag = "crag.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
-[project.scripts]
-crag = "crag.cli:main"
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

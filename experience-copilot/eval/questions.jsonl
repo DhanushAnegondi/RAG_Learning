@@ -1,0 +1,17 @@
+{"id": "q01", "question": "What billing pipeline did you build at Northwind?", "in_kb": true, "labels": ["Northwind"], "length": "medium"}
+{"id": "q02", "question": "How did you improve data quality at Northwind?", "in_kb": true, "labels": ["Northwind"], "length": "short"}
+{"id": "q03", "question": "Tell me about the lakehouse migration you led at Contoso.", "in_kb": true, "labels": ["Contoso"], "length": "long"}
+{"id": "q04", "question": "How did you reduce cloud costs at Contoso?", "in_kb": true, "labels": ["Contoso"], "length": "medium"}
+{"id": "q05", "question": "How have you mentored junior engineers?", "in_kb": true, "labels": ["Northwind"], "length": "short"}
+{"id": "q06", "question": "How did you handle streaming ingestion of web events?", "in_kb": true, "labels": ["Contoso"], "length": "long"}
+{"id": "q07", "question": "Compare the Northwind billing work with the Contoso migration.", "in_kb": true, "labels": ["Northwind", "Contoso"], "length": "long"}
+{"id": "q08", "question": "Tell me about your experience writing Kubernetes operators.", "in_kb": false, "labels": [], "length": "medium"}
+{"id": "q09", "question": "What did you accomplish at Fabrikam?", "in_kb": false, "labels": [], "length": "short"}
+{"id": "q10", "question": "What is your favourite hobby outside the office?", "in_kb": false, "labels": [], "length": "short"}
+{"id": "q11", "question": "Tell me about the data pipeline you built at Fabrikam.", "in_kb": false, "labels": [], "length": "medium"}
+{"id": "q12", "question": "How did you design the pipeline architecture at Acme?", "in_kb": false, "labels": [], "length": "long"}
+{"id": "q13", "question": "What did you build at Northwind?", "in_kb": true, "labels": ["Northwind"], "length": "medium"}
+{"id": "q14", "question": "Northwind: what did you ship?", "in_kb": true, "labels": ["Northwind"], "length": "short"}
+{"id": "q15", "question": "How do you handle data quality?", "in_kb": true, "labels": ["Northwind"], "length": "medium"}
+{"id": "q16", "question": "Tell me about a data quality problem you solved.", "in_kb": true, "labels": ["Northwind"], "length": "long"}
+{"id": "q17", "question": "What billing pipeline are you most proud of?", "in_kb": true, "labels": ["Northwind"], "length": "medium"}

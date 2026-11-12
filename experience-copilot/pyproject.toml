@@ -4,15 +4,40 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "experience-copilot"
-version = "0.1.0"
-description = "Grounded, voice-controlled answers about your own experience (reuses crag)"
+version = "1.0.0"
+description = "Grounded, voice-controlled answers about your own experience, built on corrective-rag"
 requires-python = ">=3.10"
+dependencies = [
+  "corrective-rag>=1.0.0",
+  "pydantic>=2.5",
+  "pydantic-settings>=2.2",
+  "streamlit>=1.36",
+]
 
-[tool.setuptools]
-package-dir = {"" = "src"}
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.5"]
+
+[project.scripts]
+copilot = "copilot.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
-[project.scripts]
-copilot = "copilot.cli:main"
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests", "eval"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "."]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff.lint.isort]
+known-first-party = ["copilot", "eval"]

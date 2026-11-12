@@ -1,17 +1,18 @@
-"""Auto-suggest a sensible length + tone from the question (user can override in the UI).
+"""Auto-suggest a sensible length + tone from the question (the user can override).
 
-Uses a plain-text prompt + parse rather than structured output: on meta/llama-3.3-70b-instruct,
-with_structured_output for this multi-field/enum schema returned None too often. A keyword parse with
-a heuristic fallback is far more reliable here.
+Plain-text prompt + keyword parse rather than structured output: on a 30B reasoning model the
+multi-field enum schema returned None too often. The call goes through crag's `LLMClient`; on any
+failure or an empty reply a deterministic keyword heuristic answers instead, so it never fails.
 """
 from __future__ import annotations
 
 import re
 from typing import Literal
 
+from crag.llm import LLMClient
 from pydantic import BaseModel, Field
 
-from .llm import FAST_MODEL, chat
+from .config import Settings, get_settings
 
 LENGTHS = ("short", "medium", "long")
 TONES = ("formal", "professional", "conversational", "humanized")
@@ -25,11 +26,9 @@ class StyleSuggestion(BaseModel):
     reason: str = Field(description="One short clause explaining the choice.")
 
 
-DEFAULT_SUGGESTION = StyleSuggestion(length="medium", tone="professional", reason="default")
-
 _PROMPT = (
-    "You help someone answer questions about their own experience. For the question below, choose an "
-    "answer LENGTH and TONE.\n"
+    "You help someone answer questions about their own experience. For the question below, choose "
+    "an answer LENGTH and TONE.\n"
     "LENGTH must be one of: short, medium, long.\n"
     "TONE must be one of: formal, professional, conversational, humanized.\n"
     "Guidance: quick rapport questions ('tell me about yourself') lean short/medium + "
@@ -40,26 +39,60 @@ _PROMPT = (
     "Question: {question}"
 )
 
+_TECHNICAL = re.compile(
+    r"pipeline|architect|design|walk me through|how did you|optimi[sz]|scal|migrat|debug|"
+    r"trade-?off|implement|schema|latency|cost",
+    re.I,
+)
+_RAPPORT = re.compile(
+    r"yourself|introduce|why (this|our|us)|strength|weakness|hobby|motivat|passion|fit", re.I
+)
 
-def _pick(text: str, key: str, allowed: tuple[str, ...], default: str) -> str:
+
+def heuristic_style(question: str) -> StyleSuggestion:
+    """Keyword fallback (no LLM): technical -> long/professional, rapport -> short/humanized."""
+    if _TECHNICAL.search(question):
+        return StyleSuggestion(length="long", tone="professional", reason="heuristic: technical")
+    if _RAPPORT.search(question):
+        return StyleSuggestion(length="short", tone="humanized", reason="heuristic: rapport")
+    return StyleSuggestion(length="medium", tone="professional", reason="heuristic: default")
+
+
+def _pick(text: str, key: str, allowed: tuple[str, ...]) -> str | None:
     low = text.lower()
     m = re.search(rf"{key}\s*[=:]\s*([a-z]+)", low)
     if m and m.group(1) in allowed:
         return m.group(1)
-    for word in allowed:  # fallback: any allowed word from this category present in the reply
+    for word in allowed:  # fallback: any allowed word from this category in the reply
         if re.search(rf"\b{word}\b", low):
             return word
-    return default
+    return None
 
 
-def suggest_style(question: str, model: str | None = None) -> StyleSuggestion:
+def suggest_style(
+    question: str,
+    *,
+    settings: Settings | None = None,
+    client: LLMClient | None = None,
+    model: str | None = None,
+) -> StyleSuggestion:
+    s = settings or get_settings()
+    fallback = heuristic_style(question)
     try:
-        resp = chat(model or FAST_MODEL).invoke(_PROMPT.format(question=question))
-        text = getattr(resp, "content", "") or ""
-    except Exception:
-        return DEFAULT_SUGGESTION
-    if not text.strip():
-        return DEFAULT_SUGGESTION
-    length = _pick(text, "length", LENGTHS, "medium")
-    tone = _pick(text, "tone", TONES, "professional")
-    return StyleSuggestion(length=length, tone=tone, reason=text.strip().splitlines()[0][:100])
+        client = client or LLMClient(s.to_crag_settings())
+        text = client.complete(
+            [("user", _PROMPT.format(question=question))],
+            purpose="suggest",
+            model=model or s.grader_model,
+        )
+    except Exception:  # any provider fault: use the heuristic
+        return fallback
+    length = _pick(text, "length", LENGTHS)
+    tone = _pick(text, "tone", TONES)
+    if length is None and tone is None:
+        return fallback
+    return StyleSuggestion(
+        length=length or fallback.length,  # type: ignore[arg-type]
+        tone=tone or fallback.tone,  # type: ignore[arg-type]
+        reason=text.strip().splitlines()[0][:100],
+    )

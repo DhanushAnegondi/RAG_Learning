@@ -1,167 +1,65 @@
-# Architecture
+# Architecture (v1)
 
-Corrective RAG (CRAG) is a LangGraph state machine that self-corrects retrieval quality before generating an answer. It ships five nodes and one conditional edge. The interview signal is explaining `decide()` edge-by-edge.
+![Runtime architecture](diagrams/runtime-architecture.png)
 
----
+Dark variant: `diagrams/runtime-architecture-dark.png`. Eval harness: `diagrams/eval-harness.png`.
+
+## Components
+
+| Module | Responsibility |
+|---|---|
+| `config.py` | `Settings` (pydantic-settings, `CRAG_` prefix, validated). Reads the repo-root `.env`, then the project `.env`. |
+| `llm.py` | `LLMClient`: the only caller of the chat model. Timeout, retries with backoff and jitter, model fallback chain, total budget, structured-output parse fallback. |
+| `retrieval.py` | `Retriever`: dense (Chroma), BM25, or hybrid via Reciprocal Rank Fusion. Degrades to the surviving retriever on failure. |
+| `ingest/` | Loader, header-aware chunker, incremental indexer (manifest of file hashes). |
+| `nodes/` | `retrieve`, `grade`, `rewrite_query`, `web_search`, `grade_web`, `generate`. |
+| `graph.py` | `build_graph()` and the pure `decide()`. |
+| `pipeline.py` | `answer(question)` returns an `Answer`; raises only `ValueError` for invalid input. |
+| `api.py`, `cli.py` | FastAPI (`POST /v1/ask`, `/healthz`, `/readyz`) and the `crag` command. |
+| `observability.py` | `RunContext` per request (spans, LLM calls, retries, errors, degraded flag) and one JSONL trace per request. |
 
 ## Graph topology
 
 ```
-                        +----------+
-                        | retrieve |
-                        +----+-----+
-                             |
-                        +----v-----+
-                        |  grade   |
-                        +----+-----+
-                             |
-               [decide() conditional edge]
-              /                            \
-   n_relevant >= threshold          n_relevant < threshold
-             /                                \
-    +--------v------+              +----------v--------+
-    |   generate    |              | transform_query   |
-    +--------+------+              +----------+--------+
-             |                               |
-            END                    +---------v--------+
-                                   |    web_search    |
-                                   +---------+--------+
-                                             |
-                                   +---------v--------+
-                                   |    generate      |
-                                   +---------+--------+
-                                             |
-                                            END
+retrieve -> grade -> decide --correct--------------------------> generate -> END
+                        \--ambiguous / incorrect--> rewrite_query -> web_search -> grade_web -> generate
 ```
 
-The correction path (`transform_query -> web_search -> generate -> END`) is structurally terminal. There is no back-edge to `grade` and no flag like `web_search_done`. The corrective loop runs at most once by topology.
+The graph is acyclic: the correction path runs at most once, by topology.
 
----
+## State
 
-## `CRAGState` schema
+`CRAGState` is a `total=False` TypedDict; nodes return partial updates. `question` is the original
+question and is never overwritten. `rewrite_query` writes `search_query`, which only `web_search`
+reads, and `generate` always answers `question`. Other keys: `chunks`, `grades`, `web_chunks`,
+`web_grades`, `verdict`, `answer`, `citations`, `route`, `abstained`, `steps`.
 
-| Key | Type | Written by | Read by |
-|---|---|---|---|
-| `question` | `str` | caller (entry) | `retrieve`, `grade`, `transform_query`, `generate` |
-| `documents` | `List[Document]` | `retrieve` | `grade`, `generate` |
-| `grades` | `List[bool]` | `grade` | `decide()` |
-| `web_results` | `List[Document]` | `web_search` | `generate` |
-| `generation` | `str` | `generate` | caller (output) |
-| `steps` | `List[str]` | every node (appends its own name) | CLI (prints as "Route:") |
+## Routing table
 
-`grades` is `List[bool]`, one entry per chunk — parallel to `documents`. It is never `"yes"`/`"no"` strings. This per-chunk granularity is intentional: a whole-set grade cannot tell you which chunk to drop.
+Relevant count n comes from the per-chunk grades (defaults: `correct_threshold` 2, `ambiguous_threshold` 1).
 
-`total=False` on the TypedDict means all keys are optional at construction time; nodes add keys as they run.
+| Verdict | Condition | Next | Context used by `generate` | Route |
+|---|---|---|---|---|
+| correct | n >= correct_threshold | generate | relevant local chunks | `local` |
+| ambiguous | ambiguous_threshold <= n < correct_threshold | rewrite_query | relevant local + relevant web | `local+web` |
+| incorrect | n = 0 | rewrite_query | relevant web only | `web` |
+| no context | nothing relevant survives, or web disabled/failed with no local | generate | none | `abstain` (fixed message, no LLM call) |
 
----
+With `CRAG_WEB_ENABLED=false`, `decide()` always goes to `generate`.
 
-## `build_graph()` wiring
+## Reliability
 
-`build_graph()` is a factory function. It is called to produce a compiled graph; there is no module-level `app` or `graph` singleton. This keeps the graph testable (each test gets a fresh compile) and avoids import-time side effects.
+- Errors are classified as transient (timeout, 429, 5xx, connection), permanent (other 4xx) or parse errors. Only transient errors are retried.
+- After retries are exhausted the client moves down the fallback model chain; a per-call timeout and a total budget bound the time spent.
+- The grader is fail-open: a chunk whose grading fails is kept and the error is recorded.
+- Web search has a timeout and a circuit breaker (opens after consecutive failures, half-open trial after a cooldown). A failure yields no web results, not an exception.
+- If generation fails, the answer degrades to an extract of the top source.
+- `Answer.degraded` and `Answer.errors` tell the caller what was reduced. Tracing failures never break a request.
 
-```python
-def build_graph():
-    g = StateGraph(CRAGState)
+## Retrieval
 
-    g.add_node("retrieve",        retrieve)
-    g.add_node("grade",           grade_documents)
-    g.add_node("generate",        generate)
-    g.add_node("transform_query", transform_query)
-    g.add_node("web_search",      web_search)
+Hybrid retrieval fetches `fetch_k` candidates from Chroma (embedding via `nemotron-3.5-embed-1b`) and from BM25, fuses the two rankings with RRF (`rrf_k`), and returns the top `top_k`. BM25 catches exact identifiers such as fee codes that embeddings blur; dense retrieval catches paraphrase. If embeddings are down, retrieval falls back to BM25 and marks the request degraded.
 
-    g.set_entry_point("retrieve")
+## Prompt-injection hygiene
 
-    g.add_edge("retrieve",        "grade")
-    g.add_conditional_edges(
-        "grade", decide,
-        {"generate": "generate", "transform_query": "transform_query"}
-    )
-    g.add_edge("transform_query", "web_search")
-    g.add_edge("web_search",      "generate")
-    g.add_edge("generate",        END)
-
-    return g.compile()
-```
-
-Node names are the string keys above. The registered name for `grade_documents` is `"grade"`.
-
----
-
-## `decide()` — why it is pure
-
-```python
-def decide(state) -> str:
-    n_relevant = sum(1 for g in state.get("grades", []) if g)
-    threshold = get_settings().relevance_threshold  # default 2
-    return "generate" if n_relevant >= threshold else "transform_query"
-```
-
-`decide()` reads `state["grades"]` and returns a node name string. It does not write to state, has no side effects, and does not call any LLM. LangGraph requires conditional-edge functions to be pure: the router must be a deterministic mapping from state to the next node name so the graph can introspect and compile the edge map. Mutation inside a conditional edge would be invisible to the graph runtime and break reproducibility.
-
-The threshold is `Settings.relevance_threshold` (env `CRAG_RELEVANCE_THRESHOLD`, default `2`). It is not a module-level constant.
-
----
-
-## Structural stop condition
-
-The graph has no cycle. The two paths through it are:
-
-- Happy path: `retrieve -> grade -> generate -> END`
-- Correction path: `retrieve -> grade -> transform_query -> web_search -> generate -> END`
-
-Both terminate at `END`. There is no edge from `web_search` or `generate` back to `grade`. The corrective branch runs at most once regardless of whether web results are relevant. This is a deliberate design constraint: the alternative (looping back to `grade`) would require a termination guard (a flag, a counter, or a visited-set) and makes the graph harder to reason about. The structural guarantee is self-documenting.
-
----
-
-## NVIDIA AI Endpoints
-
-All LLM and embedding calls go through `langchain-nvidia-ai-endpoints`. There is no OpenAI, Anthropic, or Tavily dependency.
-
-### `get_llm()`
-
-```python
-ChatNVIDIA(model=llm_model, temperature=0)
-```
-
-Default model: `meta/llama-3.3-70b-instruct`. Temperature 0 for deterministic grading and generation.
-
-### `get_embeddings()`
-
-```python
-NVIDIAEmbeddings(model=embed_model, truncate="END")
-```
-
-Default model: `nvidia/nv-embedqa-e5-v5`. `truncate="END"` instructs the endpoint to drop tokens from the tail when a chunk exceeds the model's context window, rather than raising an error. The `input_type` (query vs. passage) is set automatically by the endpoint based on call context; it does not need to be specified explicitly.
-
-### Structured-output grader
-
-```python
-class GradeDecision(BaseModel):
-    relevant: bool = Field(description="True iff the document helps answer the question.")
-
-grader = get_llm().with_structured_output(GradeDecision)
-```
-
-`GradeDecision` has exactly one field: `relevant: bool`. The grader is invoked once per chunk so that irrelevant chunks can be identified individually. A single call over all chunks would return one verdict for the whole set, making it impossible to know which chunks to drop.
-
----
-
-## Web fallback
-
-When `decide()` routes to `transform_query`, the query is rewritten and passed to `web_search`, which uses `duckduckgo-search` (no API key required). Results are returned as `List[Document]` and merged into `web_results` in state. `generate` reads both `documents` and `web_results`.
-
----
-
-## Configuration
-
-`get_settings()` reads environment variables on every call (no caching). It does not raise if `NVIDIA_API_KEY` is absent, so tests can import the module without a key. The CLI checks the key at startup and exits with code 2 and a message if it is missing.
-
-| Setting | Env var | Default |
-|---|---|---|
-| `nvidia_api_key` | `NVIDIA_API_KEY` | — |
-| `llm_model` | `CRAG_LLM_MODEL` | `meta/llama-3.3-70b-instruct` |
-| `embed_model` | `CRAG_EMBED_MODEL` | `nvidia/nv-embedqa-e5-v5` |
-| `top_k` | `CRAG_TOP_K` | `4` |
-| `relevance_threshold` | `CRAG_RELEVANCE_THRESHOLD` | `2` |
-| `persist_dir` | `CRAG_PERSIST_DIR` | _(project default: `chroma_store/`)_ |
-| `corpus_dir` | `CRAG_CORPUS_DIR` | `data/corpus` |
+Retrieved and web text is wrapped in `<doc id=N>` blocks and the prompts tell the model to treat it as data. Citation ids that do not exist are stripped.
