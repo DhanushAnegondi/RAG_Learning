@@ -1,0 +1,63 @@
+{
+ "table": "agent.checkpoints",
+ "row_count": 80,
+ "columns": [
+  [
+   "thread_id",
+   "text"
+  ],
+  [
+   "checkpoint_ns",
+   "text"
+  ],
+  [
+   "checkpoint_id",
+   "text"
+  ],
+  [
+   "parent_checkpoint_id",
+   "text"
+  ],
+  [
+   "type",
+   "text"
+  ],
+  [
+   "checkpoint",
+   "jsonb"
+  ],
+  [
+   "metadata",
+   "jsonb"
+  ]
+ ],
+ "sample": [
+  [
+   "proof-20261115T170939",
+   "",
+   "1f1e1175-d29e-6ecb-bfff-12e5fa9fc73d",
+   null,
+   null,
+   "{'v': 4, 'id': '1f1e1175-d29e-6ecb-bfff-12e5fa9fc73d', 'ts': '2026-11-15T17:09:48.872263+00:00', 'versions_see...",
+   "{'step': -1, 'source': 'input', 'parents': {}, 'user_id': 'local'}"
+  ],
+  [
+   "proof-20261115T170939",
+   "",
+   "1f1e1175-d515-6f7e-8000-a45d65af50c0",
+   "1f1e1175-d29e-6ecb-bfff-12e5fa9fc73d",
+   null,
+   "{'v': 4, 'id': '1f1e1175-d515-6f7e-8000-a45d65af50c0', 'ts': '2026-11-15T17:09:49.130739+00:00', 'versions_see...",
+   "{'step': 0, 'source': 'loop', 'parents': {}, 'user_id': 'local'}"
+  ],
+  [
+   "proof-20261115T170939",
+   "",
+   "1f1e1175-d742-60ea-8001-ad5ee12e8170",
+   "1f1e1175-d515-6f7e-8000-a45d65af50c0",
+   null,
+   "{'v': 4, 'id': '1f1e1175-d742-60ea-8001-ad5ee12e8170', 'ts': '2026-11-15T17:09:49.358513+00:00', 'versions_see...",
+   "{'step': 1, 'source': 'loop', 'parents': {}, 'user_id': 'local'}"
+  ]
+ ]
+}

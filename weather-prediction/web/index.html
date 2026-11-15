@@ -29,6 +29,7 @@
   <button role="tab" data-tab="score">Scoreboard</button>
   <button role="tab" data-tab="record">Track record</button>
   <button role="tab" data-tab="data">Data</button>
+  <button role="tab" data-tab="ask">Ask</button>
 </nav>
 
 <main>
@@ -97,6 +98,17 @@
   <h3>Tables</h3>
   <p class="hint">Every table in the warehouse, raw to final, with its columns, row count and first rows.</p>
   <div id="tables"></div>
+</section>
+<section id="tab-ask" class="tab" hidden>
+  <h2>Ask</h2>
+  <p class="hint">A planning assistant that reads the same tables as the other tabs. It may only state numbers that are stored in the database; if it cannot support a figure, it says so. It does not make forecasts.</p>
+  <div id="chat" class="chat" aria-live="polite"></div>
+  <form id="ask" class="ask">
+    <input type="text" name="question" maxlength="2000" required autocomplete="off" placeholder="e.g. Is Saturday warm enough for the beach, and how sure is that?">
+    <button type="submit">Ask</button>
+    <button type="button" id="new-chat" class="ghost">New conversation</button>
+  </form>
+  <p id="ask-error" class="error" role="alert"></p>
 </section>
 </main>
 <div id="tip" class="tip" hidden></div>

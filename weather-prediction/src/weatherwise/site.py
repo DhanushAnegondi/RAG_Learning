@@ -10,17 +10,30 @@ from datetime import date, datetime
 from pathlib import Path
 
 import pandas as pd
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from psycopg_pool import ConnectionPool
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 
 from weatherwise import observations, pipeline, warehouse
-from weatherwise.config import CITIES, database_url
+from weatherwise.agent import graph as assistant
+from weatherwise.config import CITIES, database_url, load_env
 
 ROOT = Path(__file__).resolve().parents[2]
 WEB = ROOT / "web"
+
+
+class Question(BaseModel):
+    question: str = Field(min_length=1, max_length=2000)
+    thread_id: str | None = Field(None, max_length=64)
+
+    @field_validator("question")
+    @classmethod
+    def not_blank(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("the question is empty")
+        return v.strip()
 
 
 class Entry(BaseModel):
@@ -57,8 +70,11 @@ def query(con, name: str, params: dict | None = None) -> pd.DataFrame:
     return warehouse.frame(con, sql, params)
 
 
-def create_app(url: str | None = None, data_dir: str | Path | None = None, today=None) -> FastAPI:
-    """`today(city) -> date` is injectable so tests do not depend on the clock."""
+def create_app(
+    url: str | None = None, data_dir: str | Path | None = None, today=None, agent_model=None
+) -> FastAPI:
+    """`today(city) -> date` is injectable so tests do not depend on the clock, and
+    `agent_model` so the assistant can run offline."""
     url = url or database_url()
     data_dir = Path(data_dir) if data_dir else ROOT / "data"
     today = today or pipeline.city_today
@@ -73,6 +89,8 @@ def create_app(url: str | None = None, data_dir: str | Path | None = None, today
         with ConnectionPool(url, min_size=1, max_size=4, kwargs={"autocommit": True}) as pool:
             state["pool"] = pool
             yield
+        if state.get("agent"):
+            state["agent"].close()
 
     app = FastAPI(title="weatherwise", lifespan=lifespan)
 
@@ -209,6 +227,26 @@ def create_app(url: str | None = None, data_dir: str | Path | None = None, today
     def refresh_status() -> dict:
         return state["refresh"]
 
+    def agent():
+        """The assistant, built on first use: its pool and the model client."""
+        with lock:
+            if not state.get("agent"):
+                try:
+                    state["agent"] = assistant.build_agent(url, model=agent_model)
+                except assistant.MissingKey as exc:
+                    raise HTTPException(503, str(exc)) from exc
+            return state["agent"]
+
+    @app.post("/api/agent/ask")
+    def ask(q: Question) -> dict:
+        """One question to the assistant. Send the returned thread_id back to continue
+        the same conversation."""
+        return agent().ask(q.question, q.thread_id)
+
+    @app.get("/api/agent/thread")
+    def thread(thread_id: str = Query(max_length=64)) -> dict:
+        return {"thread_id": thread_id, "messages": agent().history(thread_id)}
+
     @app.get("/")
     def home() -> FileResponse:
         return FileResponse(WEB / "index.html")
@@ -220,6 +258,7 @@ def create_app(url: str | None = None, data_dir: str | Path | None = None, today
 def main() -> None:
     import uvicorn
 
+    load_env()
     app = create_app()
     uvicorn.run(app, host="127.0.0.1", port=8000)
 

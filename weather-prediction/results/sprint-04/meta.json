@@ -1,0 +1,64 @@
+{
+ "title": "sprint-04: LangGraph planning assistant over the forecast database",
+ "goal": "An assistant that answers planning questions from the stored forecasts and their measured errors, and cannot state a number the database does not hold. Read-only typed SQL tools, every tool call logged, conversation state checkpointed to Postgres, preferences remembered across conversations, a killed run resumable.",
+ "pattern": "LangGraph StateGraph (route, model, tools, answer) + Postgres checkpointer and store + read-only role",
+ "findings": [
+  "Tests: 184 passed in 441.16s (0:07:21) (real Postgres test database, scripted offline model).",
+  "Mutation check: 52/52 mutations killed.",
+  "Kill-and-resume proof on the real database: 8 of 8 checks passed. child exit code: 137 in the first process; a second process resumed the thread; the tool that had finished was not run again (same finish time, attempts = 1).",
+  "Resumed answer, every number taken from a tool result: The forecast high for 2026-11-15 is 72.1 F. Day-ahead published forecasts have missed by 2.2 F on average.",
+  "Two defects found by the proof and fixed: the read-only role had no grant on marts built before it existed; checkpoints were written in the background, so a hard kill could race the save (now written synchronously).",
+  "Live run against Claude (run/live.out): 5 questions, 9 tool calls. 4 answers passed the number check; 1 was refused because the rewritten answer still held a number that is in no tool result. Preferences saved in one conversation were used in a new one.",
+  "Seen in the live run, and not caught: an answer stated a 0.5 F gap that the model had subtracted itself. It passed because 0.5 appears elsewhere in the same tool result. The check matches digits, not meaning."
+ ],
+ "commands": [
+  "make test",
+  "make check",
+  "make mutate",
+  "make prove-resume",
+  "make agent Q=\"Is Saturday warm enough for the beach?\"",
+  "make site"
+ ],
+ "scripts": [
+  "scripts/prove_resume.py",
+  "scripts/run_agent.py",
+  "scripts/write_agent_results.py",
+  "sql/agent/check_day.sql",
+  "sql/agent/get_data_health.sql",
+  "sql/agent/get_forecast_error_by_lead.sql",
+  "sql/agent/get_outlook.sql",
+  "sql/agent/get_scoreboard.sql",
+  "sql/agent/grant_reader.sql",
+  "sql/migrations/002_agent.sql",
+  "src/weatherwise/agent/__init__.py",
+  "src/weatherwise/agent/graph.py",
+  "src/weatherwise/agent/grounding.py",
+  "src/weatherwise/agent/scripted.py",
+  "src/weatherwise/agent/tools.py",
+  "tests/test_sprint4_agent.py"
+ ],
+ "table_order": [
+  "tool_call",
+  "checkpoints",
+  "checkpoint_writes",
+  "store"
+ ],
+ "captions": {
+  "01_tools.csv": {
+   "title": "The assistant's tools",
+   "note": "Fixed queries with typed arguments. There is no tool that takes SQL."
+  },
+  "02_tool_calls_resume_proof.csv": {
+   "title": "Tool-call log of the kill-and-resume proof",
+   "note": "From agent.tool_call for the proof thread. attempts counts real executions; the first call kept attempts = 1 across the kill."
+  }
+ },
+ "limits": [
+  "The number check is strict on purpose: a figure the model works out itself (a sum, a difference, a unit conversion) is refused even when it is right.",
+  "The number check reads digits. It does not check that a number is attached to the right day or the right quantity, and it does not check words ('warm', 'likely'). A figure the model computes passes if the same digits happen to be in a tool result; the live run shows one such case.",
+  "One local user. Threads are not access-controlled: anyone who can reach the site and knows a thread id can read that conversation.",
+  "The live run is five questions read by hand, not a scored evaluation. A scored question set against the live model is sprint 05.",
+  "The 79 mutants of sprints 01-03 were not rerun this sprint (the machine was short of memory); the mutation figure above covers the sprint-04 files only.",
+  "A tool cut off mid-query is run again on resume. That is safe here because every data tool is read-only."
+ ]
+}

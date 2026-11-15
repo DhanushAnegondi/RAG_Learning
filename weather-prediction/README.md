@@ -18,12 +18,13 @@ Default city: **Torrance, California** (shown in °F; other cities are one confi
 1. [What it found for Torrance](#what-it-found-for-torrance)
 2. [How the site works](#how-the-site-works)
 3. [How the forecast is made](#how-the-forecast-is-made)
-4. [Run it](#run-it)
-5. [Daily use](#daily-use)
-6. [How it is tested](#how-it-is-tested)
-7. [Honest limits](#honest-limits)
-8. [Repo layout](#repo-layout)
-9. [Sprints](#sprints)
+4. [The planning assistant](#the-planning-assistant)
+5. [Run it](#run-it)
+6. [Daily use](#daily-use)
+7. [How it is tested](#how-it-is-tested)
+8. [Honest limits](#honest-limits)
+9. [Repo layout](#repo-layout)
+10. [Sprints](#sprints)
 
 ---
 
@@ -69,7 +70,7 @@ So "forecast 28, got 31" is not rare: about one day in twelve, even for tomorrow
 
 ## How the site works
 
-Start it with `make site` and open <http://localhost:8000>. Five tabs:
+Start it with `make site` and open <http://localhost:8000>. Six tabs:
 
 ### 1. Forecast
 ![Forecast tab](results/sprint-03/site/forecast.png)
@@ -125,6 +126,14 @@ the chosen one highlighted.
 A health check (rows received, usable days, rejected days, missing days per source) and every
 table in the database, raw to final, with its columns, row count and first rows.
 
+### 6. Ask
+
+A chat box over the same tables. Ask a planning question ("Is Saturday warm enough for the
+beach, and how sure is that?"). Under each answer the page lists which tables were read and
+whether the numbers passed the check described in
+[The planning assistant](#the-planning-assistant). It needs an Anthropic API key in `.env`;
+without one the tab says so and the rest of the site works as before.
+
 ---
 
 ## How the forecast is made
@@ -169,12 +178,97 @@ was made, so it widens when recent forecasts have been poor.
 **6. Log everything.** Every forecast is stored with its issue date. That log is what the site
 compares your readings against.
 
-### Why no AI agent makes the forecast
+---
 
-A language model cannot lower a temperature error; arithmetic on measured errors can. So the
-numbers come from the statistical models above. A LangGraph assistant that reads these tables
-and answers planning questions is the next sprint (see [Sprints](#sprints)); it will explain the
-numbers, never invent them.
+## The planning assistant
+
+The forecast numbers come from the statistical models above. A language model cannot lower a
+temperature error; arithmetic on measured errors can. The assistant's job is different: read
+those numbers and turn them into a plain answer to a planning question. It is built with
+LangGraph and calls Claude through the API.
+
+**What it can do**
+
+| Tool | What it reads |
+|---|---|
+| `get_outlook` | the newest forecast: high, low and likely range per day, 1 to 30 days |
+| `get_forecast_error_by_lead` | how far off forecasts have been, by days ahead |
+| `check_day` | a day you entered: every forecast made for it against your reading |
+| `get_scoreboard` | the score on your own readings |
+| `get_data_health` | what data arrived, what was rejected, when the forecast last ran |
+| `remember_preference`, `recall_preferences` | your units, home city, temperature thresholds |
+
+Each data tool is one fixed SQL file in `sql/agent/` with typed arguments. There is no tool
+that accepts SQL, and none that writes a forecast.
+
+**The four rules it is built around**
+
+1. **It cannot change data.** Tool queries run as a database role that can only read five
+   tables and views, inside a transaction with a 10-second limit. A test tries to delete,
+   insert and read raw tables through it; all three are refused by Postgres.
+2. **It cannot state a number the database does not hold.** After the model answers, code
+   compares every number and date in the answer with the tool results, the tool arguments
+   and your own words. If one is missing, the model gets one chance to rewrite. If it is
+   still there, you see a refusal instead of the answer. Tool results carry both °C and °F
+   so the model never converts units itself.
+3. **Nothing is lost on a crash.** The conversation is saved to Postgres after every step.
+   Each tool call is written to `agent.tool_call` with a unique id and its result, so a run
+   that is killed part-way resumes from the last step and returns the finished tool's stored
+   result instead of running it again.
+4. **Failures are said out loud.** A slow query is cancelled and retried twice with a
+   growing pause; if the data still cannot be read the assistant says so and does not
+   estimate. A model outage produces a clear message, not an answer. Each conversation stops
+   after 200 model calls.
+
+**The graph**
+
+```
+question -> route -> model -> tools -> model -> ... -> answer check -> reply
+            |        |        |                        |
+            |        |        |                        +- unsupported number: one rewrite, then refuse
+            |        |        +- validate arguments, run as read-only role, log, retry, replay
+            |        +- count the call, stop at the limit, report an outage
+            +- load saved preferences
+```
+
+**Memory.** Two kinds, both in Postgres. The conversation (a *thread*) is checkpointed, so
+you can close the page and continue later. Preferences are stored per user and shared by all
+of that user's threads: say "use Fahrenheit" once and a new conversation knows it.
+
+**Evidence**, in `results/sprint-04/`:
+
+- `run/resume.out`: a process is killed inside its second tool call; a new process resumes
+  the thread; the first tool is not run again. All 8 checks pass on the real Torrance data.
+- `metrics/02_tool_calls_resume_proof.csv`: the tool-call log of that run.
+- `review.md`: findings from two independent reviews and what was done about each.
+
+- `run/live.out`: five questions put to Claude on the real data.
+
+**What a real session looked like** (from `run/live.out`, shortened):
+
+> **Q:** From now on use Fahrenheit, my home city is Torrance, and warn me about any day above 75 F.
+> *three `remember_preference` calls*
+>
+> **Q, in a new conversation:** Any days in the next week I should worry about?
+> *`get_outlook`, `get_forecast_error_by_lead`*
+> **A:** No day in the next week looks like a problem. Every forecast high stays below your
+> hot-day threshold, and the top of every high range is also below it. [...] Today, Sunday:
+> the high is 72.1 F, likely between 70.2 and 74.5 F. This is the warmest day, and the top of
+> its range is the closest to your threshold.
+>
+> **Q:** What will the high be in Torrance on Christmas Day, December 25?
+> *`get_outlook` (30 days: the data stops before then)*
+> **A:** I cannot give that answer: it contained figures that are not in the forecast data I
+> can read. [...]
+
+Four of the five answers passed the number check. The Christmas one was refused: the model's
+rewritten answer still held a number that no tool had returned.
+
+**Where the check falls short, seen in that same run.** One answer said the two forecasts
+differ by "0.5 F". The model had subtracted two tool numbers itself, which the rules forbid,
+and it passed, because 0.5 also appears elsewhere in that tool result. The check matches
+digits; it does not know what a number is attached to. A scored question set that grades
+answers against the database is the next sprint.
 
 ---
 
@@ -189,12 +283,20 @@ make run        # fetch real data, load, train, forecast (about 5 minutes the fi
 make site       # open http://localhost:8000
 ```
 
+For the assistant, copy `.env.example` to `.env` and set `ANTHROPIC_API_KEY`. Then use the
+Ask tab, or the terminal:
+
+```bash
+make agent Q="Is Saturday warm enough for the beach, and how sure is that?"
+```
+
 Other commands:
 
 ```bash
-make test       # 132 tests against a real Postgres test database
+make test       # 184 tests against a real Postgres test database
 make check      # ruff + sqlfluff
 make mutate     # break the code on purpose; every break must fail a test
+make prove-resume  # kill the assistant mid-run, resume it, check nothing ran twice
 make results    # rebuild results/index.html (every sprint, every table, every output)
 make down       # stop Postgres (data is kept in a Docker volume)
 ```
@@ -220,11 +322,15 @@ happens, and nothing can change it afterwards.
 ## How it is tested
 
 - **Tests first.** Each test was seen failing before its code existed
-  (`results/<sprint>/run/red*.out`), then passing. 132 tests, listed with the bug each one
+  (`results/<sprint>/run/red*.out`), then passing. 184 tests, listed with the bug each one
   catches in [`tests/CATALOG.md`](tests/CATALOG.md).
 - **Real database.** Tests run against Postgres, not a mock.
-- **Mutation check.** A script breaks the code in 79 specific ways (flip a sign, drop a
-  key column, let the model peek at the future). Each break must make a named test fail.
+- **Mutation check.** A script breaks the code in 131 specific ways (flip a sign, drop a
+  key column, let the model peek at the future). Each break must make a named test fail. This sprint the 52 breaks of the assistant's files were run (52 caught); the 79 older ones were last run in sprint 03.
+- **The assistant is tested offline.** A scripted stand-in replaces the model, so tests
+  need no API key and give the same result every time. They cover the read-only role, the
+  tool log and replay, timeouts and retries, the number check, the call limit, preferences
+  across conversations and resume after a crash.
 - **No peeking.** The last 12 months are never used to fit, choose or tune anything. Tests
   inject a +10 °C jump into that window and assert nothing learned from it.
 - **Two independent reviews per sprint**, one of the code and one of the tests. Findings and
@@ -250,6 +356,10 @@ happens, and nothing can change it afterwards.
 - **For Torrance, two of the four weather models are the same series**, so the blend really has
   three independent inputs.
 - Temperature only. Rain is fetched but not modelled.
+- **The assistant's number check reads digits, not meaning.** It stops invented figures. It
+  does not check that a correct number is attached to the right day, and it refuses a sum
+  or difference the model works out itself, even a correct one.
+- **One local user.** Conversations are not access-controlled.
 
 ---
 
@@ -261,7 +371,9 @@ sql/migrations/          table definitions, applied in order
 sql/raw/                 loaders (insert ... on conflict)
 sql/staging/, sql/marts/ cleaning rules, forecast-vs-actual tables, verification views
 sql/site/, sql/checks/   the site's queries, checksum and test reset
+sql/agent/               the assistant's tool queries and its read-only grants
 src/weatherwise/         ingest, warehouse, models, deep (LSTM), pipeline, observations, site, report
+src/weatherwise/agent/   tools, grounding (the number check), graph, scripted (offline model)
 web/                     the site's page, script and styles
 scripts/                 one entry point per make target
 tests/                   tests and CATALOG.md
@@ -278,8 +390,8 @@ data/                    CSV backups of your entries and the live forecast log
 |---|---|---|
 | 01 | Forecast-error audit and first 7/30-day outlook (Bengaluru, DuckDB) | done |
 | 02 | Torrance, four weather models, blend and recent-bias correction, LSTM, forecast log, site | built on DuckDB, frozen, carried into 03 |
-| 03 | Port to Postgres in Docker: migrations, safe reloads, same numbers | this sprint |
-| 04 | LangGraph planning assistant: typed read-only SQL tools, checkpoints, memory, logged tool calls | planned |
+| 03 | Port to Postgres in Docker: migrations, safe reloads, same numbers | done |
+| 04 | LangGraph planning assistant: typed read-only SQL tools, checkpoints, memory, logged tool calls, number check | this sprint |
 | 05 | Operations: daily run, drift detection with approval, scored question set, fault injection | planned |
 
 Plan and acceptance criteria: [`docs/spec-postgres-agent.md`](docs/spec-postgres-agent.md).

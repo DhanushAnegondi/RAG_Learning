@@ -87,3 +87,12 @@ details { margin: 12px 0; } summary { cursor: pointer; color: var(--accent); pad
 .tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--page); padding: 6px 9px;
   border-radius: 6px; font-size: 12px; line-height: 1.4; z-index: 5; max-width: 240px; }
 .linkbtn { border: 0; background: none; color: var(--accent); padding: 0; text-decoration: underline; }
+.chat { display: flex; flex-direction: column; gap: 10px; min-height: 120px; max-height: 60vh; overflow-y: auto;
+  background: var(--surface); border: 1px solid var(--grid); border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+.chat:empty::before { content: "No questions yet."; color: var(--muted); }
+.msg { max-width: 72ch; padding: 9px 12px; border-radius: 10px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.msg.user { align-self: flex-end; background: var(--chip); }
+.msg.assistant { align-self: flex-start; border: 1px solid var(--grid); background: var(--page); }
+.msg .trail { margin-top: 6px; font-size: 12px; color: var(--muted); }
+.ask { display: flex; gap: 8px; flex-wrap: wrap; }
+.ask input { flex: 1 1 260px; min-width: 0; }

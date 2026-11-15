@@ -6,7 +6,8 @@ const state = { city: null, unit: "F", cities: [], outlook: null };
 const api = async (path, opts) => {
   const r = await fetch(path, opts);
   const body = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(body.detail || `request failed (${r.status})`);
+  const detail = Array.isArray(body.detail) ? body.detail.map((d) => d.msg).join("; ") : body.detail;
+  if (!r.ok) throw new Error(detail || `request failed (${r.status})`);
   return body;
 };
 const esc = (v) => String(v ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -305,8 +306,51 @@ async function loadData() {
     `<div class="scroll">${table(t.columns.map(([n], i) => ({ label: n, get: (r) => r[i] })), t.sample)}</div></details>`).join("");
 }
 
+// ---- Ask tab ----
+const chat = { thread: null };
+try { chat.thread = localStorage.getItem("ww-thread"); } catch { /* private window */ }
+function bubble(role, text, trail) {
+  const el = document.createElement("div");
+  el.className = `msg ${role}`;
+  el.textContent = text;
+  if (trail) { const t = document.createElement("div"); t.className = "trail"; t.textContent = trail; el.appendChild(t); }
+  $("chat").appendChild(el);
+  el.scrollIntoView({ block: "nearest" });
+  return el;
+}
+async function loadAsk() {
+  if ($("chat").childElementCount || !chat.thread) return;
+  try {
+    const t = await api(`/api/agent/thread?thread_id=${encodeURIComponent(chat.thread)}`);
+    t.messages.forEach((m) => bubble(m.role, m.content));
+  } catch (e) { $("ask-error").textContent = e.message; }
+}
+$("ask").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  const box = ev.target.elements.question, question = box.value.trim();
+  if (!question) return;
+  $("ask-error").textContent = "";
+  bubble("user", question);
+  const wait = bubble("assistant", "Reading the data…");
+  box.value = ""; box.disabled = true;
+  try {
+    const out = await api("/api/agent/ask", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question, thread_id: chat.thread }) });
+    chat.thread = out.thread_id;
+    try { localStorage.setItem("ww-thread", chat.thread); } catch { /* private window */ }
+    const used = out.tool_calls.map((c) => `${c.tool} (${c.status}${c.row_count == null ? "" : `, ${c.row_count} rows`})`).join(" · ");
+    wait.remove();
+    bubble("assistant", out.answer, [used && `Read: ${used}`, out.error ? `no answer: ${out.error}` : out.grounded ? "numbers checked against the data" : "answer withheld: unsupported numbers"].filter(Boolean).join(" · "));
+  } catch (e) { wait.remove(); $("ask-error").textContent = e.message; }
+  box.disabled = false; box.focus();
+});
+$("new-chat").addEventListener("click", () => {
+  chat.thread = null; $("chat").innerHTML = ""; $("ask-error").textContent = "";
+  try { localStorage.removeItem("ww-thread"); } catch { /* private window */ }
+});
+
 // ---- shell ----
-const LOADERS = { forecast: loadForecast, check: loadEntries, score: loadScore, record: loadRecord, data: loadData };
+const LOADERS = { forecast: loadForecast, check: loadEntries, score: loadScore, record: loadRecord, data: loadData, ask: loadAsk };
 let tab = "forecast";
 async function show(name) {
   tab = name;

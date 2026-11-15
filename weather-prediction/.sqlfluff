@@ -9,6 +9,8 @@ exclude_rules = RF04
 param_style = pyformat
 city = 'torrance'
 day = '2026-01-01'
+days = 7
+variable = 'tmax'
 
 [sqlfluff:rules:capitalisation.keywords]
 capitalisation_policy = lower

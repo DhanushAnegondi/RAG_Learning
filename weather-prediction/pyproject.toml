@@ -15,6 +15,10 @@ dependencies = [
     "fastapi>=0.110",
     "uvicorn>=0.29",
     "tzdata>=2024.1",
+    "langgraph>=1.2.22,<2",
+    "langgraph-checkpoint-postgres>=3.2.1,<4",
+    "langchain-core>=1.8.1,<2",
+    "langchain-anthropic>=1.7.10,<2",
 ]
 
 [project.optional-dependencies]
@@ -43,3 +47,4 @@ addopts = "-q"
 [tool.ruff.lint.per-file-ignores]
 "scripts/mutation_check.py" = ["E501"]
 "scripts/make_arch_src.py" = ["E501"]
+"scripts/make_agent_arch_src.py" = ["E501"]

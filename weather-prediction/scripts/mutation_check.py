@@ -25,6 +25,9 @@ OB = "src/weatherwise/observations.py"
 WH = "src/weatherwise/warehouse.py"
 S = "src/weatherwise/site.py"
 D = "src/weatherwise/deep.py"
+AT = "src/weatherwise/agent/tools.py"
+AG = "src/weatherwise/agent/grounding.py"
+GR = "src/weatherwise/agent/graph.py"
 MART = "sql/marts/01_mart_forecast_error.sql"
 LEAD = "sql/marts/02_mart_error_by_lead.sql"
 MUTATIONS = [  # (file, original, mutant, what it simulates); the full suite runs each time
@@ -419,6 +422,311 @@ MUTATIONS = [  # (file, original, mutant, what it simulates); the full suite run
         "request keeps its pooled connection",
     ),
     (OB, 'if note and "\\x00" in note:', "if False:", "unstorable note reaches the driver"),
+    # ---- sprint 04: the assistant ----
+    (
+        AT,
+        'con.execute("set local role weatherwise_reader")',
+        'con.execute("select 1")',
+        "tools run with full privileges",
+    ),
+    (
+        AT,
+        "[ms])\n            return con.execute(sql, params)",
+        "['0'])\n            return con.execute(sql, params)",
+        "tool queries have no timeout",
+    ),
+    (AT, 'if done and done[0]["status"] == "ok":', "if False:", "a finished tool call runs again"),
+    (
+        AT,
+        """call_id = f"{thread_id}:{call['id']}\"""",
+        "call_id = call['id']",
+        "threads share tool call ids",
+    ),
+    (
+        AT,
+        'out[k[:-2] + "_f"] = round(v * 1.8, 1)',
+        'out[k[:-2] + "_f"] = round(v * 1.8 + 32, 1)',
+        "a miss converted as a temperature",
+    ),
+    (
+        AT,
+        "RETRIES = 2  # after the first attempt",
+        "RETRIES = 0  # after the first attempt",
+        "tool failures are not retried",
+    ),
+    (AT, "sleep(0.5 * 2**attempt)", "sleep(0.5)", "retries do not back off"),
+    (
+        AT,
+        'model_config = ConfigDict(extra="forbid")',
+        'model_config = ConfigDict(extra="ignore")',
+        "unknown tool arguments accepted",
+    ),
+    (
+        AT,
+        "days: int = Field(7, ge=1, le=30,",
+        "days: int = Field(7, ge=1, le=3000,",
+        "outlook days unbounded",
+    ),
+    (
+        AT,
+        "preferences(ctx.store, ctx.user_id).items()",
+        'preferences(ctx.store, "local").items()',
+        "preferences leak between users",
+    ),
+    (
+        AT,
+        '            status, failure = "error", exc\n            attempt = RETRIES\n',
+        '            status, failure = "error", exc\n',
+        "a permission error is retried",
+    ),
+    (AT, 'if v.upper() not in ("C", "F"):', "if False:", "any unit accepted as a preference"),
+    (AG, "slack = 0.5 * 10**-decimals + 1e-9", "slack = 5.0", "number check accepts near misses"),
+    (
+        AG,
+        "            values.update(float(p) for p in m.groups())\n",
+        "",
+        "day of month not supported by a date",
+    ),
+    (
+        AG,
+        'text = LIST_MARK.sub(" ", ISO_DATE.sub(" ", text))',
+        'text = ISO_DATE.sub(" ", text)',
+        "list numbering flagged as invented",
+    ),
+    (
+        AG,
+        'bad = [d for d in ISO_DATE.findall(text) if "-".join(d) not in dates]',
+        "bad = []",
+        "invented dates pass the number check",
+    ),
+    (
+        GR,
+        'if state.get("rewrites", 0) < 1:',
+        'if state.get("rewrites", 0) < 0:',
+        "no rewrite offered",
+    ),
+    (
+        GR,
+        'return {"messages": [AIMessage(content=REFUSAL, id=draft.id)], "unsupported": bad}',
+        'return {"unsupported": bad}',
+        "an unsupported number is shown",
+    ),
+    (GR, "        if used >= limit:\n", "        if False:\n", "model call cap removed"),
+    (
+        GR,
+        '"prefs": toolbox.preferences(store, user),',
+        '"prefs": {},',
+        "saved preferences never reach the model",
+    ),
+    (
+        GR,
+        "or (isinstance(m, HumanMessage) and not internal(m)):",
+        "or isinstance(m, HumanMessage):",
+        "the correction note counts as a source",
+    ),
+    (
+        GR,
+        '    if not os.environ.get("ANTHROPIC_API_KEY"):\n',
+        "    if False:\n",
+        "missing key not reported",
+    ),
+    (
+        GR,
+        "            if isinstance(m, HumanMessage) and not internal(m):\n                out.append",
+        "            if isinstance(m, HumanMessage):\n                out.append",
+        "internal notes shown in the history",
+    ),
+    (
+        "sql/agent/get_outlook.sql",
+        "select max(newest.issued_on) from log_forecast as newest",
+        "select min(newest.issued_on) from log_forecast as newest",
+        "assistant reads an old outlook",
+    ),
+    (
+        "sql/agent/get_outlook.sql",
+        "and lead_days <= %(days)s",
+        "and lead_days <= 30",
+        "outlook ignores the days asked for",
+    ),
+    (
+        "sql/agent/check_day.sql",
+        "where city = %(city)s and date = %(day)s",
+        "where city = %(city)s",
+        "check_day ignores the day",
+    ),
+    (
+        "sql/agent/get_forecast_error_by_lead.sql",
+        "round(cast(100 * leads.share_off_3c as numeric), 1)",
+        "round(cast(leads.share_off_3c as numeric), 1)",
+        "share reported as a fraction, labelled percent",
+    ),
+    (
+        "sql/migrations/002_agent.sql",
+        "grant select on log_forecast, app_model_eval, app_run to weatherwise_reader;",
+        "grant select on log_forecast, app_model_eval, app_run, raw_actual_daily to weatherwise_reader;",
+        "reader role can read raw tables",
+    ),
+    (
+        "sql/agent/grant_reader.sql",
+        "execute format('grant select on %I to weatherwise_reader', mart);",
+        "perform 1;",
+        "marts unreadable after a rebuild",
+    ),
+]
+
+
+# Sprint-04 review: grounding.py was rewritten, so its first mutants are replaced, and the
+# fixes made after the two reviews get their own.
+STALE = {
+    "number check accepts near misses",
+    "day of month not supported by a date",
+    "list numbering flagged as invented",
+    "invented dates pass the number check",
+}
+CFG = "src/weatherwise/config.py"
+MUTATIONS = [m for m in MUTATIONS if m[3] not in STALE] + [
+    (
+        AG,
+        "slack = 0.5 * 10**-decimals + 1e-9 if decimals else 1e-9",
+        "slack = 5.0",
+        "number check accepts near misses",
+    ),
+    (
+        AG,
+        "slack = 0.5 * 10**-decimals + 1e-9 if decimals else 1e-9",
+        "slack = 0.5 * 10**-decimals + 1e-9",
+        "a whole number matches any value that rounds to it",
+    ),
+    (
+        AG,
+        "            values.add(float(y))\n",
+        "            values.update((float(y), float(m), float(d)))\n",
+        "day of month counts as any number",
+    ),
+    (
+        AG,
+        "        if not 1 <= day <= 31:\n",
+        "        if False:\n",
+        "a number after may is read as a date",
+    ),
+    (
+        AG,
+        'text = LIST_MARK.sub(" ", MONTH_DAY.sub(written_date, text))',
+        "text = MONTH_DAY.sub(written_date, text)",
+        "list numbering flagged as invented",
+    ),
+    (
+        AG,
+        'bad = ["-".join(d) for d in ISO_DATE.findall(text) if tuple(map(int, d)) not in dates]',
+        "bad = []",
+        "invented dates pass the number check",
+    ),
+    (
+        AG,
+        "            bad.append(m.group(0))\n        return",
+        "            pass\n        return",
+        "an invented written date passes",
+    ),
+    (
+        AT,
+        'con.execute("set local transaction_read_only = on")',
+        'con.execute("select 1")',
+        "tool transaction is not read-only",
+    ),
+    (
+        AT,
+        'if (done[0]["tool"], done[0]["args"]) != (name, raw):',
+        "if False:",
+        "a reused call id is answered from the log",
+    ),
+    (
+        AT,
+        "        if v is not None and k in tool.temps:",
+        "        if k in tool.temps:",
+        "a missing value crashes the conversion",
+    ),
+    (
+        AT,
+        'self.value = f"{n:g} {unit} ({other})"',
+        'self.value = f"{round(c, 1)} C ({round(c * 1.8 + 32, 1)} F)"',
+        "the user's threshold number is rewritten",
+    ),
+    (
+        AT,
+        "ctx.store.put((PREFS, ctx.user_id), args.key",
+        'ctx.store.put((PREFS, "local"), args.key',
+        "preferences saved under the wrong user",
+    ),
+    (AT, '"rows": rows[:MAX_ROWS]}', '"rows": rows}', "a huge result is sent whole"),
+    (
+        AT,
+        "        except Exception as exc:  # a permission, SQL or code error will not fix itself",
+        "        except psycopg.Error as exc:  # a permission, SQL or code error will not fix itself",
+        "a bug in a tool strands the conversation",
+    ),
+    (
+        GR,
+        "            if self.graph.get_state(config).next:\n",
+        "            if False:\n",
+        "a new question lands on an unfinished run",
+    ),
+    (
+        GR,
+        '            if not self.graph.get_state(config).values.get("messages"):\n',
+        "            if False:\n",
+        "resuming an unknown thread crashes",
+    ),
+    (
+        GR,
+        'if reason in STOPPED and (reason != "max_tokens" or not reply.tool_calls):',
+        "if False:",
+        "a refusal or cut-off reply is shown as the answer",
+    ),
+    (
+        GR,
+        'rejected = getattr(exc, "status_code", None) in (400, 401, 403, 404)',
+        "rejected = False",
+        "a bad key looks like an outage",
+    ),
+    (
+        GR,
+        '            "error": None,\n            "unsupported": [],\n',
+        '            "unsupported": [],\n',
+        "an old error sticks to the conversation",
+    ),
+    (
+        GR,
+        "        asked = max(",
+        "        asked = min(",
+        "earlier questions' tool calls reported again",
+    ),
+    (
+        GR,
+        'sources.extend(json.dumps(c["args"]) for c in m.tool_calls)',
+        "pass",
+        "tool arguments are not a source",
+    ),
+    (GR, ', json.dumps(state.get("prefs"))]', "]", "saved preferences are not a source"),
+    (
+        "sql/agent/get_outlook.sql",
+        "    and kind = 'live'\n    and lead_days",
+        "    and lead_days",
+        "a replayed forecast leaks into the outlook",
+    ),
+    (
+        "sql/agent/grant_reader.sql",
+        "        if to_regclass(mart) is not null then",
+        "        if true then",
+        "assistant cannot start before the first run",
+    ),
+    (CFG, 'encoding="utf-8-sig"', 'encoding="utf-8"', "a BOM hides the first key"),
+    (
+        CFG,
+        "        if value and not os.environ.get(key):",
+        "        if value:",
+        ".env replaces a variable that is already set",
+    ),
+    (CFG, '.removeprefix("export ")', "", "export lines in .env are ignored"),
 ]
 
 
@@ -431,6 +739,8 @@ def test_order(rel: str) -> list[str]:
     names = sorted(p.name for p in (ROOT / "tests").glob("test_*.py"))
     model_code = rel in (M, P, D)
     first = [n for n in names if (n in MODEL_TESTS) == model_code]
+    if "agent" in rel or rel.endswith("config.py"):
+        first = ["test_sprint4_agent.py"]
     return [f"tests/{n}" for n in first + [n for n in names if n not in first]]
 
 
@@ -444,14 +754,17 @@ def drop_test_schema() -> None:
         name = con.execute("select current_database()").fetchall()[0][0]
         if not name.endswith("_test"):
             raise RuntimeError(f"refusing to drop the schema of {name!r}")
+        con.execute("drop schema if exists agent cascade")
         con.execute("drop schema public cascade")
         con.execute("create schema public")
 
 
 def main() -> int:
     print(f"# mutation run {datetime.now(UTC):%FT%TZ}; KILLED = a test failed (exit 1)")
+    # optional arguments: run only the mutants of files whose path contains one of the words
+    todo = [m for m in MUTATIONS if not sys.argv[1:] or any(w in m[0] for w in sys.argv[1:])]
     bad = 0
-    for rel, old, new, what in MUTATIONS:
+    for rel, old, new, what in todo:
         path = ROOT / rel
         src = path.read_text(encoding="utf-8")
         if old not in src:
@@ -460,9 +773,9 @@ def main() -> int:
             continue
         path.write_text(src.replace(old, new, 1), encoding="utf-8")
         migration = rel.startswith("sql/migrations/")
-        if migration:
-            drop_test_schema()
         try:
+            if migration:
+                drop_test_schema()
             r = subprocess.run(
                 [sys.executable, "-m", "pytest", "-q", "-x", "-rf", "--tb=no", *test_order(rel)],
                 cwd=ROOT,
@@ -479,7 +792,7 @@ def main() -> int:
         status = {0: "SURVIVED", 1: "KILLED  "}.get(r.returncode, "CRASHED ")
         bad += r.returncode != 1
         print(f"{status} {what:36s} by {killer}")
-    print(f"\n{len(MUTATIONS) - bad}/{len(MUTATIONS)} mutations killed by a failing test")
+    print(f"\n{len(todo) - bad}/{len(todo)} mutations killed by a failing test")
     return 1 if bad else 0
 
 

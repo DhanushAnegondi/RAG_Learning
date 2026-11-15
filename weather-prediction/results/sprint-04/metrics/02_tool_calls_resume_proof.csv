@@ -1,0 +1,3 @@
+call_id,tool,args,status,attempts,row_count,ms,started_at,finished_at
+proof-20261115T195415:call_1,get_outlook,"{'city': 'torrance', 'days': 1}",ok,1,1,69,2026-11-15 19:54:19.612960,2026-11-15 19:54:19.808160
+proof-20261115T195415:call_2,get_forecast_error_by_lead,"{'city': 'torrance', 'variable': 'tmax'}",ok,2,7,201,2026-11-15 19:54:19.896217,2026-11-15 19:54:24.700834

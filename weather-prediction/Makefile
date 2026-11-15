@@ -1,12 +1,14 @@
 PY := .venv/Scripts/python
 S := .claude/skills/stack-diagram/scripts
-SPRINT ?= sprint-03
+SPRINT ?= sprint-04
 CITY ?= torrance
-TESTS ?= 132
-MUTANTS ?= 79
+TESTS ?= 184
+MUTANTS ?= 52
+# sprint-03 diagram: ARCH=scripts/make_arch_src.py SPRINT=sprint-03
+ARCH ?= scripts/make_agent_arch_src.py
 RUN := results/$(SPRINT)/run
 
-.PHONY: setup up down migrate test check run site results diagram mutate
+.PHONY: setup up down migrate test check run site results diagram mutate agent prove-resume
 
 setup:
 	uv venv -p 3.11 .venv && uv pip install -p .venv --extra-index-url https://download.pytorch.org/whl/cpu --index-strategy unsafe-best-match -e ".[dev]" && $(PY) -m playwright install chromium
@@ -30,7 +32,7 @@ run:
 	PYTHONIOENCODING=utf-8 $(PY) -u scripts/run_pipeline.py --city $(CITY) --sprint $(SPRINT) 2>&1 | tee $(RUN)/pipeline.out
 
 diagram:
-	$(PY) scripts/make_arch_src.py $(TESTS) $(MUTANTS)
+	$(PY) $(ARCH) $(TESTS) $(MUTANTS)
 	$(PY) $(S)/build.py results/$(SPRINT)/arch.src.html .stack-icons results/$(SPRINT)/architecture.html --fonts .claude/skills/stack-diagram/assets/fonts
 	$(PY) $(S)/render_png.py results/$(SPRINT)/architecture.html results/$(SPRINT)/architecture.png --selector .canvas --scale 2
 
@@ -40,6 +42,12 @@ site:
 results:
 	$(PY) scripts/build_results.py
 	$(PY) $(S)/render_png.py results/index.html results/index.png --full-page --single --scale 1
+
+agent:
+	$(PY) scripts/run_agent.py "$(Q)"
+
+prove-resume:
+	$(PY) scripts/prove_resume.py 2>&1 | tee $(RUN)/resume.out
 
 mutate:
 	$(PY) scripts/mutation_check.py 2>&1 | tee $(RUN)/mutation.out

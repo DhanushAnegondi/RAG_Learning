@@ -134,12 +134,18 @@ def restore(con: psycopg.Connection, data_dir: str | Path) -> None:
                 load(con, table, df)
 
 
+def grant_reader(con: psycopg.Connection) -> None:
+    """Let the assistant's read-only role read the marts that exist right now."""
+    run_sql_file(con, SQL_DIR / "agent" / "grant_reader.sql")
+
+
 def build_models(con: psycopg.Connection) -> None:
     """Rebuild staging views and marts in one transaction, so readers never see a gap."""
     with con.transaction():
         for stage in ("staging", "marts"):
             for path in sorted((SQL_DIR / stage).glob("*.sql")):
                 run_sql_file(con, path)
+        grant_reader(con)
 
 
 def snapshot(con: psycopg.Connection, table: str, n: int = 5) -> dict:
