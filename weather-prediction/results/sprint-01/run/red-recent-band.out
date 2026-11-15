@@ -1,0 +1,9 @@
+# RED for recent-year band (rolling-origin CV), 8-year history. 2026-11-15T01:40:50Z
+$ .venv/Scripts/python -m pytest -q --tb=line tests/test_models.py -k recent_year
+F                                                                        [100%]
+================================== FAILURES ===================================
+E   assert (-0.6 < -1.9581771113050335)
+D:\Projects\AI_projects\weatherwise\tests\test_models.py:189: assert (-0.6 < -1.9581771113050335)
+=========================== short test summary info ===========================
+FAILED tests/test_models.py::test_corrector_band_reflects_most_recent_year - ...
+exit=1

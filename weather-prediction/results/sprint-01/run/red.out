@@ -1,0 +1,86 @@
+# RED run against signature-only stubs (NotImplementedError). 2026-11-15T01:29:12Z
+$ .venv/Scripts/python -m pytest -q -rf --tb=line
+FFFFFFFFFFFFFFFFFFFFFEEEEEEEE                                            [100%]
+=================================== ERRORS ====================================
+_____ ERROR at setup of test_load_is_idempotent_and_replaces_changed_rows _____
+E   NotImplementedError
+_____ ERROR at setup of test_load_duplicate_key_in_one_batch_fails_loudly _____
+E   NotImplementedError
+______________ ERROR at setup of test_load_rejects_unknown_table ______________
+E   NotImplementedError
+_________ ERROR at setup of test_published_daily_uses_full_days_only __________
+E   NotImplementedError
+_____ ERROR at setup of test_forecast_error_sign_is_forecast_minus_actual _____
+E   NotImplementedError
+_____ ERROR at setup of test_forecast_error_excludes_days_without_actuals _____
+E   NotImplementedError
+_________ ERROR at setup of test_error_by_lead_metrics_hand_computed __________
+E   NotImplementedError
+_______ ERROR at setup of test_snapshot_reports_schema_count_and_sample _______
+E   NotImplementedError
+================================== FAILURES ===================================
+E   NotImplementedError
+D:\Projects\AI_projects\weatherwise\src\weatherwise\ingest.py:3: NotImplementedError
+E   NotImplementedError
+D:\Projects\AI_projects\weatherwise\src\weatherwise\ingest.py:4: NotImplementedError
+E   NotImplementedError
+D:\Projects\AI_projects\weatherwise\src\weatherwise\ingest.py:4: NotImplementedError
+E   NotImplementedError
+D:\Projects\AI_projects\weatherwise\src\weatherwise\ingest.py:3: NotImplementedError
+E   NotImplementedError
+D:\Projects\AI_projects\weatherwise\src\weatherwise\ingest.py:2: NotImplementedError
+E   NotImplementedError
+D:\Projects\AI_projects\weatherwise\src\weatherwise\ingest.py:2: NotImplementedError
+E   NotImplementedError
+D:\Projects\AI_projects\weatherwise\src\weatherwise\ingest.py:2: NotImplementedError
+E   NotImplementedError
+D:\Projects\AI_projects\weatherwise\src\weatherwise\ingest.py:2: NotImplementedError
+E   NotImplementedError
+D:\Projects\AI_projects\weatherwise\src\weatherwise\models.py:1: NotImplementedError
+E   NotImplementedError
+D:\Projects\AI_projects\weatherwise\src\weatherwise\models.py:1: NotImplementedError
+E   NotImplementedError
+D:\Projects\AI_projects\weatherwise\src\weatherwise\models.py:5: NotImplementedError
+E   NotImplementedError
+D:\Projects\AI_projects\weatherwise\src\weatherwise\models.py:6: NotImplementedError
+E   NotImplementedError
+D:\Projects\AI_projects\weatherwise\src\weatherwise\models.py:7: NotImplementedError
+E   NotImplementedError
+D:\Projects\AI_projects\weatherwise\src\weatherwise\models.py:1: NotImplementedError
+E   NotImplementedError
+D:\Projects\AI_projects\weatherwise\src\weatherwise\models.py:1: NotImplementedError
+E   NotImplementedError
+D:\Projects\AI_projects\weatherwise\src\weatherwise\models.py:1: NotImplementedError
+E   NotImplementedError
+D:\Projects\AI_projects\weatherwise\src\weatherwise\models.py:1: NotImplementedError
+E   NotImplementedError
+D:\Projects\AI_projects\weatherwise\src\weatherwise\models.py:11: NotImplementedError
+E   NotImplementedError
+D:\Projects\AI_projects\weatherwise\src\weatherwise\report.py:1: NotImplementedError
+E   NotImplementedError
+D:\Projects\AI_projects\weatherwise\src\weatherwise\report.py:1: NotImplementedError
+E   NotImplementedError
+D:\Projects\AI_projects\weatherwise\src\weatherwise\report.py:1: NotImplementedError
+=========================== short test summary info ===========================
+FAILED tests/test_ingest.py::test_parse_daily_keeps_rows_and_nulls_as_nan - N...
+FAILED tests/test_ingest.py::test_parse_previous_runs_goes_wide_to_long_by_lead_and_drops_nulls
+FAILED tests/test_ingest.py::test_parse_previous_runs_missing_lead_column_raises
+FAILED tests/test_ingest.py::test_parse_daily_without_daily_block_raises - No...
+FAILED tests/test_ingest.py::test_fetch_json_retries_transient_then_succeeds
+FAILED tests/test_ingest.py::test_fetch_json_does_not_retry_client_error - No...
+FAILED tests/test_ingest.py::test_fetch_json_gives_up_after_retries - NotImpl...
+FAILED tests/test_ingest.py::test_fetch_json_error_body_with_200_raises - Not...
+FAILED tests/test_models.py::test_seasonal_features_peak_and_period - NotImpl...
+FAILED tests/test_models.py::test_climatology_recovers_season_and_trend - Not...
+FAILED tests/test_models.py::test_anomaly_decay_learns_geometric_ratio - NotI...
+FAILED tests/test_models.py::test_split_by_date_is_strict - NotImplementedError
+FAILED tests/test_models.py::test_interval_coverage_inclusive_bounds - NotImp...
+FAILED tests/test_models.py::test_corrector_removes_constant_warm_bias - NotI...
+FAILED tests/test_models.py::test_corrector_keeps_raw_when_forecast_is_unbiased
+FAILED tests/test_models.py::test_corrector_intervals_cover_about_80_percent
+FAILED tests/test_models.py::test_corrector_rejects_unseen_lead - NotImplemen...
+FAILED tests/test_models.py::test_outlook_blends_short_and_long_range - NotIm...
+FAILED tests/test_report.py::test_page_lists_sprints_newest_first - NotImplem...
+FAILED tests/test_report.py::test_page_shows_terminal_output_verbatim_and_escaped
+FAILED tests/test_report.py::test_page_shows_table_schema_count_and_sample - ...
+exit=1

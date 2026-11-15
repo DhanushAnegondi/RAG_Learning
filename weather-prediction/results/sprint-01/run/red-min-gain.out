@@ -1,0 +1,9 @@
+# RED for min_gain selection margin. 2026-11-15T01:38:20Z
+$ .venv/Scripts/python -m pytest -q --tb=line tests/test_models.py -k keeps_raw
+F                                                                        [100%]
+================================== FAILURES ===================================
+E   TypeError: LeadCorrector.__init__() got an unexpected keyword argument 'min_gain'
+D:\Projects\AI_projects\weatherwise\tests\test_models.py:89: TypeError: LeadCorrector.__init__() got an unexpected keyword argument 'min_gain'
+=========================== short test summary info ===========================
+FAILED tests/test_models.py::test_corrector_keeps_raw_when_forecast_is_unbiased
+exit=1

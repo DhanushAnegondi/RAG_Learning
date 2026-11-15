@@ -1,0 +1,20 @@
+[start] city=bengaluru today=2026-11-14 db=warehouse.duckdb utc=2026-11-15T02:22:31Z
+[fetch] actuals (ERA5 archive) 1995-01-01..2026-11-13
+[load] raw_actual_daily rows=11640
+[fetch] published forecasts 2022-01-01..2022-12-31 hourly values=61320 table rows=294756
+[fetch] published forecasts 2023-01-01..2023-12-31 hourly values=61019 table rows=294756
+[fetch] published forecasts 2024-01-01..2024-12-31 hourly values=57841 table rows=294756
+[fetch] published forecasts 2025-01-01..2025-12-31 hourly values=61320 table rows=294756
+[fetch] published forecasts 2026-01-01..2026-11-13 hourly values=53256 table rows=294756
+[load] raw_live_forecast rows=16 (issued_on=2026-11-14)
+[table] raw_actual_daily: 11640 rows
+[table] raw_published_hourly: 294756 rows
+[table] raw_live_forecast: 16 rows
+[table] stg_actual_daily: 11640 rows
+[table] stg_published_daily: 12278 rows
+[table] mart_forecast_error: 24556 rows
+[table] mart_error_by_lead: 14 rows
+[split] train < 2025-11-14 <= test
+[eval tmax] short-range lead1 published MAE 0.69 -> corrected 0.69; long-range lead30 model 1.39 vs clim 1.45
+[eval tmin] short-range lead1 published MAE 0.44 -> corrected 0.44; long-range lead30 model 0.95 vs clim 0.98
+[done] wrote results\sprint-01

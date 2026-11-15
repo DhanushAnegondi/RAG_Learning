@@ -1,0 +1,9 @@
+# RED for the added long-range backtest test. 2026-11-15T01:30:50Z
+$ .venv/Scripts/python -m pytest -q --tb=line tests/test_models.py::test_long_range_backtest_hand_computed
+F                                                                        [100%]
+================================== FAILURES ===================================
+E   NotImplementedError
+D:\Projects\AI_projects\weatherwise\src\weatherwise\models.py:12: NotImplementedError
+=========================== short test summary info ===========================
+FAILED tests/test_models.py::test_long_range_backtest_hand_computed - NotImpl...
+exit=1
