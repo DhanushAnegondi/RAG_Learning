@@ -21,6 +21,8 @@ DAILY_VARS = {
     "temperature_2m_min": "tmin_c",
     "precipitation_sum": "precip_mm",
 }
+# best_match is what Open-Meteo publishes by default; the others feed the multi-model blend.
+MODELS = ("best_match", "gfs_seamless", "ecmwf_ifs025", "gem_seamless")
 
 
 class IngestError(Exception):
@@ -72,26 +74,55 @@ def parse_daily(payload: dict, city: str) -> pd.DataFrame:
     return df[["city", "date", "tmax_c", "tmin_c", "precip_mm"]]
 
 
+def _model_col(block: dict, base: str, model: str) -> str:
+    """Open-Meteo suffixes columns with the model name only when several models are asked for."""
+    for col in (f"{base}_{model}", base):
+        if col in block:
+            return col
+    raise IngestError(f"payload is missing {base} for model {model}")
+
+
 def parse_previous_runs(
-    payload: dict, city: str, leads: Iterable[int] = range(1, 8)
+    payload: dict,
+    city: str,
+    leads: Iterable[int] = range(1, 8),
+    models: Iterable[str] = ("best_match",),
 ) -> pd.DataFrame:
     block = payload.get("hourly")
     if not block or "time" not in block:
         raise IngestError("payload has no hourly block")
     ts = pd.to_datetime(block["time"])
     parts = []
-    for lead in leads:
-        col = f"temperature_2m_previous_day{lead}"
-        if col not in block:
-            raise IngestError(f"payload is missing {col}")
-        parts.append(
-            pd.DataFrame(
-                {"ts_local": ts, "lead_days": lead, "temp_c": pd.to_numeric(pd.Series(block[col]))}
+    for model in models:
+        for lead in leads:
+            col = _model_col(block, f"temperature_2m_previous_day{lead}", model)
+            parts.append(
+                pd.DataFrame(
+                    {
+                        "model": model,
+                        "ts_local": ts,
+                        "lead_days": lead,
+                        "temp_c": pd.to_numeric(pd.Series(block[col])),
+                    }
+                )
             )
-        )
     df = pd.concat(parts, ignore_index=True).dropna(subset=["temp_c"])
     df.insert(0, "city", city)
-    return df[["city", "ts_local", "lead_days", "temp_c"]].reset_index(drop=True)
+    return df[["city", "model", "ts_local", "lead_days", "temp_c"]].reset_index(drop=True)
+
+
+def parse_daily_models(payload: dict, city: str, models: Iterable[str]) -> pd.DataFrame:
+    """Daily forecast for several weather models -> one row per model and date."""
+    block = payload.get("daily")
+    if not block or "time" not in block:
+        raise IngestError("payload has no daily block")
+    parts = []
+    for model in models:
+        one = {"time": block["time"]}
+        for src in DAILY_VARS:
+            one[src] = block.get(f"{src}_{model}", block.get(src, [None] * len(block["time"])))
+        parts.append(parse_daily({"daily": one}, city).assign(model=model))
+    return pd.concat(parts, ignore_index=True)
 
 
 def _loc(city) -> dict:
@@ -103,12 +134,26 @@ def fetch_actuals(session, city, start: str, end: str) -> pd.DataFrame:
     return parse_daily(fetch_json(session, ARCHIVE_URL, params), city.name)
 
 
-def fetch_published(session, city, start: str, end: str, leads=range(1, 8)) -> pd.DataFrame:
+def fetch_published(
+    session, city, start: str, end: str, leads=range(1, 8), models=MODELS
+) -> pd.DataFrame:
     hourly = ",".join(f"temperature_2m_previous_day{n}" for n in leads)
-    params = {**_loc(city), "start_date": start, "end_date": end, "hourly": hourly}
-    return parse_previous_runs(fetch_json(session, PREVIOUS_RUNS_URL, params), city.name, leads)
+    params = {
+        **_loc(city),
+        "start_date": start,
+        "end_date": end,
+        "hourly": hourly,
+        "models": ",".join(models),
+    }
+    payload = fetch_json(session, PREVIOUS_RUNS_URL, params)
+    return parse_previous_runs(payload, city.name, leads, models)
 
 
-def fetch_live_forecast(session, city, days: int = 16) -> pd.DataFrame:
-    params = {**_loc(city), "forecast_days": days, "daily": ",".join(DAILY_VARS)}
-    return parse_daily(fetch_json(session, FORECAST_URL, params), city.name)
+def fetch_live_forecast(session, city, days: int = 16, models=MODELS) -> pd.DataFrame:
+    params = {
+        **_loc(city),
+        "forecast_days": days,
+        "daily": ",".join(DAILY_VARS),
+        "models": ",".join(models),
+    }
+    return parse_daily_models(fetch_json(session, FORECAST_URL, params), city.name, models)

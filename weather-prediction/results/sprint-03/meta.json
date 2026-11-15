@@ -1,0 +1,181 @@
+{
+  "title": "sprint-03: Postgres port of the multi-model forecast, forecast log and verification site (torrance)",
+  "goal": "Run everything built in sprint 02 on Postgres in Docker (migrations, repeatable loads, same numbers). Beat the published forecast where the data allows it (blend of weather models, recent-bias tracking, an LSTM for days 8-30), keep every forecast in a log, and let the user check any day they observed against what was forecast, on a local site.",
+  "pattern": "batch ELT: raw -> staging -> marts (Postgres) + per-lead MOS + forecast log + FastAPI site",
+  "findings": [
+    "Daily high, 1-7 days ahead on the test window: the published forecast missed by 1.58 C on average, weatherwise by 1.33 C (-16%). Methods picked in CV, before the test window was used: blend x6, ens_mean x1.",
+    "Daily low, 1-7 days ahead on the test window: the published forecast missed by 2.87 C on average, weatherwise by 0.94 C (-67%). Methods picked in CV, before the test window was used: blend x7.",
+    "Daily high, 8-30 days ahead: validation picked lstm (validation MAE: decay 2.13, lstm 2.03, mix 2.06). Test-window MAE in C: decay 2.79, lstm 2.87, mix 2.82, climatology 2.85.",
+    "Daily low, 8-30 days ahead: validation picked decay (validation MAE: decay 1.15, lstm 1.21, mix 1.17). Test-window MAE in C: decay 2.05, lstm 1.86, mix 1.95, climatology 2.26.",
+    "For torrance, Open-Meteo's best_match forecast equals gfs_seamless on 100.0% of rows, so the blend really has three independent weather models, not four.",
+    "Published day-ahead max-temp forecasts for torrance (2022-01-01 to 2026-11-13, 1756 days) missed by 1.243 C on average; 20% of days were off by 2 C or more and 8% by 3 C or more (worst 7.4 C).",
+    "Forecasts issued 7 days ahead missed by 1.748 C on average; 16% of days were off by 3 C or more.",
+    "Bias: published max temps run -0.62 C at lead 1 over the whole period (positive = forecast too warm); it drifts by year as the upstream model changes.",
+    "Test window (2025-11-14 onward), max temp: a correction was chosen in CV at every lead; correction lowered error at lead 1, 2, 3, 4, 5, 6, 7; no lead got worse. The p10-p90 range held the actual value on 72.9% to 78.4% of days (target 80%).",
+    "min temp: a correction was chosen in CV at every lead; correction lowered error at lead 1, 2, 3, 4, 5, 6, 7; no lead got worse. The p10-p90 range held the actual value on 72.9% to 79.7% of days (target 80%).",
+    "Beyond a week: max temp lead 30: model 2.91 C vs climatology 2.86 C vs persistence 4.09 C; min temp lead 30: model 2.1 C vs climatology 2.3 C vs persistence 2.45 C."
+  ],
+  "commands": [
+    "make test",
+    "make check",
+    "make mutate",
+    "make run",
+    "make site"
+  ],
+  "scripts": [
+    "scripts/build_results.py",
+    "scripts/capture_site.py",
+    "scripts/compare_frozen.py",
+    "scripts/make_arch_src.py",
+    "scripts/mutation_check.py",
+    "scripts/run_pipeline.py",
+    "scripts/run_site.py",
+    "sql/checks/checksum.sql",
+    "sql/checks/reset_test.sql",
+    "sql/marts/01_mart_forecast_error.sql",
+    "sql/marts/02_mart_error_by_lead.sql",
+    "sql/marts/03_mart_model_pairs.sql",
+    "sql/marts/04_mart_data_quality.sql",
+    "sql/marts/05_mart_verification.sql",
+    "sql/marts/06_mart_scoreboard.sql",
+    "sql/migrations/000_schema_migration.sql",
+    "sql/migrations/001_tables.sql",
+    "sql/raw/delete_user_observation.sql",
+    "sql/raw/load_actual_daily.sql",
+    "sql/raw/load_forecast_log.sql",
+    "sql/raw/load_live_forecast.sql",
+    "sql/raw/load_model_eval.sql",
+    "sql/raw/load_published_hourly.sql",
+    "sql/raw/load_run.sql",
+    "sql/raw/load_user_observation.sql",
+    "sql/site/check.sql",
+    "sql/site/error_by_lead.sql",
+    "sql/site/forecast_cities.sql",
+    "sql/site/history.sql",
+    "sql/site/issues.sql",
+    "sql/site/leaderboard.sql",
+    "sql/site/observations.sql",
+    "sql/site/outlook.sql",
+    "sql/site/quality.sql",
+    "sql/site/runs.sql",
+    "sql/site/scoreboard.sql",
+    "sql/staging/stg_actual_daily.sql",
+    "sql/staging/stg_published_daily.sql",
+    "sql/staging/stg_quality_issues.sql",
+    "src/weatherwise/__init__.py",
+    "src/weatherwise/config.py",
+    "src/weatherwise/deep.py",
+    "src/weatherwise/ingest.py",
+    "src/weatherwise/models.py",
+    "src/weatherwise/observations.py",
+    "src/weatherwise/pipeline.py",
+    "src/weatherwise/report.py",
+    "src/weatherwise/site.py",
+    "src/weatherwise/warehouse.py",
+    "web/app.js",
+    "web/index.html",
+    "web/style.css"
+  ],
+  "table_order": [
+    "raw_actual_daily",
+    "raw_published_hourly",
+    "raw_live_forecast",
+    "raw_user_observation",
+    "stg_actual_daily",
+    "stg_published_daily",
+    "stg_quality_issues",
+    "mart_forecast_error",
+    "mart_error_by_lead",
+    "mart_model_pairs",
+    "mart_data_quality",
+    "log_forecast",
+    "app_model_eval",
+    "mart_verification",
+    "mart_scoreboard"
+  ],
+  "captions": {
+    "01_outlook_next_30_days.csv": {
+      "title": "Outlook from 2026-11-14: next 30 days",
+      "note": "Range = p10-p90 of the last 120 misses known on the issue day, aiming for 8 in 10 days inside. Measured on the test window it held: tmax short 73-78%; tmax long 66-74%; tmin short 73-80%; tmin long 70-74%. Days 1-7 use the published forecast, corrected by the method CV picked. Days 8-30 are climatology plus an anomaly forecast, because no archived forecasts past 7 days exist to check the published 8-16 day values (shown as published_* for reference)."
+    },
+    "02_published_error_by_lead.csv": {
+      "title": "How wrong published forecasts were, by lead",
+      "note": "error = forecast - actual. share_off_2c = fraction of days off by 2 C or more."
+    },
+    "03_worst_day_ahead_misses.csv": {
+      "title": "Worst day-ahead misses",
+      "note": "Lead 1, largest absolute errors."
+    },
+    "04_short_range_eval_tmax.csv": {
+      "title": "Next-week model vs baselines on the test window: max temp",
+      "note": "Same days for every method. chosen_method is picked by 4-fold rolling-origin CV over the last training year and must beat raw by 2%, else the published forecast is kept. last_365d_only_mae_c = ablation trained on the final year only. start_band_c = the range the model starts the test window with; band_coverage_pct = how often the adaptive range held the actual value."
+    },
+    "04_short_range_eval_tmin.csv": {
+      "title": "Next-week model vs baselines: min temp",
+      "note": ""
+    },
+    "05_long_range_eval_tmax.csv": {
+      "title": "Next-month model vs baselines on the test window: max temp",
+      "note": "lead_days here counts from the last observed day, one more than the lead the same forecast has in the forecast log. model_mae_c = the method validation picked (chosen_method). decay = climatology + fading anomaly, lstm = climatology + LSTM anomaly, mix = their average. anomaly_kept = share of today's anomaly the decay model carries to that lead."
+    },
+    "06_leaderboard_test_mae_tmax.csv": {
+      "title": "Every method on the test window: daily high (MAE, C)",
+      "note": "raw = published forecast; linear, gbm = fixed corrections; drift = recent-bias correction; ens_mean = average of the weather models; blend = boosting on all models; decay, lstm, mix = long-range methods. chosen was picked on training data only, so it is not always the row minimum."
+    },
+    "06_leaderboard_test_mae_tmin.csv": {
+      "title": "Every method on the test window: daily low (MAE, C)",
+      "note": ""
+    },
+    "07_data_quality.csv": {
+      "title": "Data health after cleaning",
+      "note": "rejected_days = days dropped by the cleaning rules (impossible value, max below min, or a forecast day without all 24 hours); missing_days = calendar days inside the range with no usable row."
+    },
+    "08_cleaning_rejections.csv": {
+      "title": "Rows rejected by value checks",
+      "note": "Empty means every value was inside -60..60 C and max >= min."
+    },
+    "05_long_range_eval_tmin.csv": {
+      "title": "Next-month model vs baselines: min temp",
+      "note": ""
+    }
+  },
+  "limits": [
+    "Actuals are ERA5 reanalysis for the grid cell, not a weather station; the last few days of the archive are preliminary.",
+    "Published forecasts are Open-Meteo's best-match model (previous_dayN hourly values aggregated to daily max/min), not a specific app's forecast.",
+    "Leads 8-30 have no day-level skill in any public model; the 30-day line is a seasonal expectation with a measured range, not a weather forecast.",
+    "One test window of 12 months; MAE differences under about 0.1 C are within noise.",
+    "Training rows are cut on target date, not issue date: up to 6 days of actuals just before the test window were not yet known when a lead-7 forecast was issued (about 0.1% of rows).",
+    "Temperature only. Rain is fetched but not modelled this sprint.",
+    "The site compares your reading with a forecast of the grid-cell value. A yard thermometer or a nearby airport can sit a steady 1-3 C away from the grid data; the scoreboard reports that gap separately.",
+    "Method list revised once after seeing sprint-02 test numbers (adaptive range and the mix candidate were added then). The clean check from here on is the live forecast log against entries on the site.",
+    "Recent-bias and adaptive-range inputs assume yesterday's actual is in the archive when today's forecast is made; the newest archive days are preliminary.",
+    "A forecast issued during the day is up to a day fresher than the lead it is scored as (previous_dayN means at least N x 24 hours old)."
+  ],
+  "provenance": {
+    "run_utc": "2026-11-15T05:53:49Z",
+    "city": {
+      "name": "torrance",
+      "latitude": 33.8358,
+      "longitude": -118.3406,
+      "timezone": "America/Los_Angeles",
+      "unit": "F"
+    },
+    "test_start": "2025-11-14",
+    "args": {
+      "city": "torrance",
+      "data_dir": "D:\\Projects\\AI_projects\\RAG_Learning\\weather-prediction\\data",
+      "sprint": "sprint-03",
+      "actuals_start": "1995-01-01",
+      "published_start": "2022-01-01",
+      "test_months": 12,
+      "skip_fetch": false,
+      "no_lstm": false
+    },
+    "python": "3.11.3",
+    "psycopg": "3.3.9",
+    "postgres": "18.7 (Debian 18.7-1.pgdg13+2)",
+    "pandas": "3.1.1",
+    "sklearn": "1.9.1",
+    "torch": "2.15.0+cpu"
+  }
+}

@@ -1,0 +1,84 @@
+# mutation run 2026-11-15T07:14:30Z; KILLED = a test failed (exit 1)
+KILLED   error sign flipped                   by tests/test_review_fixes.py::test_sql_keeps_cities_and_leads_apart
+KILLED   partial days kept                    by tests/test_sprint2_data.py::test_cleaning_drops_a_forecast_day_with_one_impossible_hour
+KILLED   inner join became left join          by tests/test_review_fixes.py::test_actual_with_null_max_is_dropped_end_to_end
+KILLED   join key loses city                  by tests/test_review_fixes.py::test_sql_keeps_cities_and_leads_apart
+KILLED   duplicate keys in a batch accepted   by tests/test_review_fixes.py::test_every_loader_is_idempotent_and_rejects_duplicate_batches[actual_daily]
+KILLED   corrected max not replaced on reload by tests/test_sprint3_postgres.py::test_checksum_is_stable_on_reload_and_moves_when_a_value_changes
+KILLED   load is not one transaction          by tests/test_review_fixes.py::test_fetch_all_on_new_years_day_never_requests_an_inverted_range
+KILLED   reset allowed on the real database   by tests/test_sprint3_postgres.py::test_reset_refuses_a_database_that_is_not_for_tests
+KILLED   migrations re-applied                by tests/test_review_fixes.py::test_fetch_all_on_new_years_day_never_requests_an_inverted_range
+KILLED   checksum blind to values             by tests/test_sprint3_postgres.py::test_checksum_is_stable_on_reload_and_moves_when_a_value_changes
+KILLED   live forecast key loses issued_on    by tests/test_review_fixes.py::test_fetch_all_on_new_years_day_never_requests_an_inverted_range
+KILLED   leads merged in staging grain        by tests/test_review_fixes.py::test_sql_keeps_cities_and_leads_apart
+KILLED   null or impossible max reaches the marts by tests/test_sprint2_data.py::test_cleaning_rejects_impossible_actuals_and_lists_the_reason
+KILLED   rmse computed as mae                 by tests/test_review_fixes.py::test_error_by_lead_rmse_and_quantiles_hand_computed
+KILLED   share_off_3c boundary                by tests/test_review_fixes.py::test_share_off_counts_an_error_of_exactly_3c
+KILLED   lead labelled off by one             by tests/test_ingest.py::test_parse_previous_runs_goes_wide_to_long_by_lead_and_drops_nulls
+KILLED   429 not retried                      by tests/test_review_fixes.py::test_fetch_json_retries_429_with_exponential_backoff
+KILLED   non-JSON 5xx not retried             by tests/test_review_fixes.py::test_fetch_json_retries_gateway_error_with_html_body
+KILLED   timezone dropped from requests       by tests/test_review_fixes.py::test_fetchers_send_location_timezone_and_variables
+KILLED   selection margin removed             by tests/test_models.py::test_corrector_keeps_raw_when_forecast_is_unbiased
+KILLED   test start date leaks into train     by tests/test_models.py::test_split_by_date_is_strict
+KILLED   band built from stale years          by tests/test_models.py::test_corrector_band_reflects_most_recent_year
+KILLED   band clamp removed                   by tests/test_review_fixes.py::test_corrector_band_always_contains_prediction
+KILLED   partial anomaly windows              by tests/test_review_fixes.py::test_anomaly_decay_with_three_day_window_hand_computed
+KILLED   stale anomaly accepted               by tests/test_review_fixes.py::test_recent_anomaly_uses_contiguous_window_and_checks_age
+KILLED   missing published days accepted      by tests/test_review_fixes.py::test_outlook_refuses_missing_published_forecast[0]
+KILLED   day 7 not corrected                  by tests/test_review_fixes.py::test_outlook_seam_between_day_7_and_day_8
+KILLED   decay coefficient misaligned         by tests/test_review_fixes.py::test_outlook_seam_between_day_7_and_day_8
+KILLED   long-range bands in-sample           by tests/test_review_fixes.py::test_long_range_bands_are_out_of_sample
+KILLED   long-range fit sees test window      by tests/test_review_fixes.py::test_evaluate_long_never_learns_from_the_test_window
+KILLED   inverted range on 1 January          by tests/test_review_fixes.py::test_fetch_all_on_new_years_day_never_requests_an_inverted_range
+KILLED   terminal output not escaped          by tests/test_report.py::test_page_shows_terminal_output_verbatim_and_escaped
+KILLED   sprints oldest first                 by tests/test_report.py::test_page_lists_sprints_newest_first
+KILLED   weather model drops out of the key   by tests/test_review_fixes.py::test_fetch_all_on_new_years_day_never_requests_an_inverted_range
+KILLED   hindcast can overwrite a live forecast by -
+KILLED   replay deletes live forecasts        by tests/test_sprint2_data.py::test_forecast_log_keeps_live_rows_when_hindcasts_are_replayed
+KILLED   other models leak into published error by tests/test_sprint2_data.py::test_error_mart_uses_only_the_published_model
+KILLED   impossible forecast hour kept        by tests/test_sprint2_data.py::test_cleaning_drops_a_forecast_day_with_one_impossible_hour
+KILLED   max below min accepted               by tests/test_sprint2_data.py::test_cleaning_rejects_impossible_actuals_and_lists_the_reason
+KILLED   impossible min accepted              by tests/test_sprint2_data.py::test_cleaning_rejects_impossible_actuals_and_lists_the_reason
+KILLED   gfs column filled from ecmwf         by tests/test_sprint2_data.py::test_model_pairs_put_other_models_beside_the_published_forecast
+KILLED   rejected days not counted            by tests/test_sprint2_data.py::test_data_quality_counts_rejected_and_missing_days
+KILLED   hindcast preferred over live         by tests/test_sprint2_data.py::test_verification_compares_the_entry_with_the_forecast_and_prefers_live
+KILLED   verification error sign flipped      by tests/test_site.py::test_entering_a_day_in_fahrenheit_returns_the_comparison
+KILLED   inside-range ignores the upper edge  by tests/test_sprint3_postgres.py::test_a_reading_above_the_range_is_outside
+KILLED   outlook shows the oldest forecast    by tests/test_site.py::test_outlook_is_the_latest_live_forecast_only
+KILLED   fahrenheit conversion wrong          by tests/test_site.py::test_entering_a_day_in_fahrenheit_returns_the_comparison
+KILLED   future entry accepted                by tests/test_site.py::test_bad_entry_is_refused_with_a_readable_reason
+KILLED   high below low accepted              by tests/test_sprint2_data.py::test_observation_rejects_bad_entries_with_a_reason[day2-15.0-25.0-C-below]
+KILLED   impossible entry accepted            by tests/test_sprint2_data.py::test_observation_rejects_bad_entries_with_a_reason[day3-200.0-15.0-F-outside]
+KILLED   default model mislabelled            by tests/test_review_fixes.py::test_sql_keeps_cities_and_leads_apart
+KILLED   backup includes hindcasts            by tests/test_sprint2_data.py::test_backup_restores_entries_and_live_forecasts_into_a_new_database
+KILLED   every model reads best_match         by tests/test_sprint2_data.py::test_parse_daily_models_reads_one_series_per_model
+KILLED   recent bias peeks one day            by tests/test_sprint2_models.py::test_recent_bias_equals_a_constant_error
+KILLED   drift adds the bias                  by tests/test_sprint2_models.py::test_drift_candidate_subtracts_the_recent_bias
+KILLED   missing model counted as zero        by tests/test_sprint2_models.py::test_ens_mean_averages_the_models_that_exist
+KILLED   all-NaN model column kept            by tests/test_sprint2_models.py::test_corrector_picks_blend_when_another_model_is_sharper
+KILLED   adaptive range peeks one day         by tests/test_sprint2_models.py::test_adaptive_band_follows_recent_misses_and_never_peeks
+KILLED   adaptive range can exclude the forecast by tests/test_sprint2_models.py::test_adaptive_band_follows_recent_misses_and_never_peeks
+KILLED   long-range override ignored          by tests/test_sprint2_models.py::test_outlook_passes_extra_model_columns_and_accepts_a_long_range_override
+KILLED   LSTM wins on a sliver                by tests/test_sprint2_models.py::test_long_range_method_needs_a_clear_win_over_the_simple_model
+KILLED   today from UTC, not the city         by tests/test_sprint2_models.py::test_city_today_uses_the_city_clock_not_the_computer_clock
+KILLED   issue day computed forwards          by tests/test_sprint2_models.py::test_log_rows_record_the_issue_day_as_target_minus_lead
+KILLED   long-range selection sees test window by tests/test_sprint2_models.py::test_long_range_selection_and_range_never_see_the_test_window
+KILLED   bad entry reported as success        by tests/test_site.py::test_bad_entry_is_refused_with_a_readable_reason
+KILLED   LSTM keeps the last epoch, not the best by tests/test_sprint3_postgres.py::test_lstm_keeps_its_best_epoch_not_its_last
+KILLED   same-day rerun rewrites a live forecast by tests/test_sprint3_review.py::test_a_live_forecast_is_written_once_and_a_same_day_rerun_cannot_change_it
+KILLED   identical reload rewrites every row  by tests/test_sprint3_review.py::test_loaded_at_moves_only_when_a_value_changed
+KILLED   checksum blind to forecast values    by tests/test_sprint3_review.py::test_checksum_sees_a_changed_forecast_hour_and_a_changed_live_value
+KILLED   reset skips its guard                by tests/test_sprint3_review.py::test_reset_runs_no_sql_on_a_database_that_is_not_for_tests
+KILLED   migrations run newest first          by tests/test_sprint3_review.py::test_migrations_run_in_name_order_and_stop_at_the_first_failure
+KILLED   recent bias a day late               by tests/test_sprint2_models.py::test_recent_bias_only_uses_errors_known_when_the_forecast_was_issued
+KILLED   adaptive range a day late            by tests/test_sprint2_models.py::test_adaptive_band_follows_recent_misses_and_never_peeks
+KILLED   adaptive range window doubled        by tests/test_sprint2_models.py::test_adaptive_band_follows_recent_misses_and_never_peeks
+KILLED   long replay filed a day early        by tests/test_sprint3_review.py::test_run_city_logs_live_and_replayed_forecasts_and_replaces_the_leaderboard
+KILLED   mix is not the average               by tests/test_sprint3_review.py::test_long_range_candidates_share_rows_and_mix_is_their_average
+KILLED   timestamps lose their time           by tests/test_sprint3_review.py::test_records_keeps_midnight_timestamps_as_timestamps
+KILLED   request keeps its pooled connection  by tests/test_sprint3_review.py::test_failed_requests_give_their_connection_back
+KILLED   unstorable note reaches the driver   by tests/test_sprint3_review.py::test_long_range_choice_at_exactly_the_margin_and_a_note_that_cannot_be_stored
+
+79/79 mutations killed by a failing test
+
+[exited with code 0]

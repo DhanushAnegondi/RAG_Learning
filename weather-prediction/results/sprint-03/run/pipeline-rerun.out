@@ -1,0 +1,12 @@
+[start] city=torrance today=2026-11-14 (city clock) db=weatherwise utc=2026-11-15T05:54:20Z
+[fetch] actuals (ERA5 archive) 1995-01-01..2026-11-13
+[load] raw_actual_daily rows=11640
+[fetch] published forecasts 2022-01-01..2022-12-31 hourly values=122640 table rows=931453
+[fetch] published forecasts 2023-01-01..2023-12-31 hourly values=121856 table rows=931453
+[fetch] published forecasts 2024-01-01..2024-12-31 hourly values=229124 table rows=931453
+[fetch] published forecasts 2025-01-01..2025-12-31 hourly values=245280 table rows=931453
+[fetch] published forecasts 2026-01-01..2026-11-13 hourly values=212553 table rows=931453
+[load] raw_live_forecast rows=64 (issued_on=2026-11-14)
+[checksum] raw_actual_daily rows=11640 digest=787424844578237319244
+[checksum] raw_live_forecast rows=64 digest=-97087622810963481845
+[checksum] raw_published_hourly rows=931453 digest=-3033062765516420294168

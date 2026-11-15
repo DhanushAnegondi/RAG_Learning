@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .ruff_cache/
-data/warehouse.duckdb*
-data/raw/
+data/
+ledger/
 .stack-icons/
+.env

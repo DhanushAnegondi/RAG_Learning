@@ -49,3 +49,14 @@ def test_page_shows_table_schema_count_and_sample(tmp_path):
     assert "11,234" in html
     assert "DOUBLE" in html
     assert "bengaluru" in html
+
+
+def test_report_embeds_site_screenshots(tmp_path):
+    """Fails if screenshots of the running site are left out of the results page."""
+    d = tmp_path / "sprint-01"
+    (d / "site").mkdir(parents=True)
+    (d / "meta.json").write_text('{"title": "t", "goal": "g"}', encoding="utf-8")
+    (d / "site" / "zq-forecast-zq.png").write_bytes(b"\x89PNG fake")
+    page = build_page(tmp_path)
+    assert "zq-forecast-zq tab" in page
+    assert "data:image/png;base64,iVBORyBmYWtl" in page

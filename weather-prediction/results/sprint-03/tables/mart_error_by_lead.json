@@ -1,0 +1,140 @@
+{
+ "table": "mart_error_by_lead",
+ "row_count": 14,
+ "columns": [
+  [
+   "city",
+   "text"
+  ],
+  [
+   "variable",
+   "text"
+  ],
+  [
+   "lead_days",
+   "integer"
+  ],
+  [
+   "n_days",
+   "bigint"
+  ],
+  [
+   "bias_c",
+   "double precision"
+  ],
+  [
+   "mae_c",
+   "double precision"
+  ],
+  [
+   "rmse_c",
+   "double precision"
+  ],
+  [
+   "p10_error_c",
+   "double precision"
+  ],
+  [
+   "p90_error_c",
+   "double precision"
+  ],
+  [
+   "share_off_2c",
+   "double precision"
+  ],
+  [
+   "share_off_3c",
+   "double precision"
+  ],
+  [
+   "max_abs_error_c",
+   "double precision"
+  ]
+ ],
+ "sample": [
+  [
+   "torrance",
+   "tmax",
+   1,
+   1756,
+   -0.625,
+   1.243,
+   1.646,
+   -2.4,
+   1.1,
+   0.197,
+   0.0786,
+   7.4
+  ],
+  [
+   "torrance",
+   "tmax",
+   2,
+   1755,
+   -0.638,
+   1.212,
+   1.595,
+   -2.4,
+   1.1,
+   0.1892,
+   0.0678,
+   7.6
+  ],
+  [
+   "torrance",
+   "tmax",
+   3,
+   1754,
+   -0.634,
+   1.316,
+   1.731,
+   -2.5,
+   1.2,
+   0.2138,
+   0.0827,
+   8.2
+  ],
+  [
+   "torrance",
+   "tmax",
+   4,
+   1753,
+   -0.588,
+   1.366,
+   1.788,
+   -2.6,
+   1.4,
+   0.2499,
+   0.089,
+   8.5
+  ],
+  [
+   "torrance",
+   "tmax",
+   5,
+   1752,
+   -0.621,
+   1.467,
+   1.927,
+   -2.9,
+   1.5,
+   0.2723,
+   0.1216,
+   9.6
+  ],
+  [
+   "torrance",
+   "tmax",
+   6,
+   1751,
+   -0.542,
+   1.574,
+   2.082,
+   -3.0,
+   1.8,
+   0.2987,
+   0.1502,
+   9.9
+  ]
+ ]
+}

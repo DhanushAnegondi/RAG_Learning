@@ -3,11 +3,12 @@
 import json
 from datetime import date
 
-import duckdb
 import numpy as np
 import pandas as pd
+import psycopg
 import pytest
 import requests
+from conftest import fresh_db
 
 from weatherwise import ingest, models, pipeline, warehouse
 from weatherwise.config import City
@@ -114,7 +115,7 @@ def empty_answer(url: str, params: dict) -> Resp:
 def test_fetch_all_on_new_years_day_never_requests_an_inverted_range():
     """Fails if on 1 January the loop asks for 2027-01-01..2026-12-31 (API answers 400)."""
     s = Router(empty_answer)
-    con = warehouse.connect(":memory:")
+    con = fresh_db()
     pipeline.fetch_all(con, CITY, "2020-01-01", "2026-06-01", date(2027, 1, 1), session=s)
     pub = [c["params"] for c in s.calls if "previous" in c["url"]]
     assert [(c["start_date"], c["end_date"]) for c in pub] == [("2026-06-01", "2026-12-31")]
@@ -153,7 +154,7 @@ def test_sql_keeps_cities_and_leads_apart():
     Day 2025-01-01, actual max 30 in both cities.
     city a: lead 1 flat 31 (error +1), lead 2 flat 33 (error +3). city b: lead 1 flat 26 (-4).
     """
-    con = warehouse.connect(":memory:")
+    con = fresh_db()
     for city, lead, t in (("a", 1, 31.0), ("a", 2, 33.0), ("b", 1, 26.0)):
         warehouse.load(con, "published_hourly", hourly(city, "2025-01-01", lead, [t] * 24))
     for city in ("a", "b"):
@@ -172,7 +173,7 @@ def test_error_by_lead_rmse_and_quantiles_hand_computed():
     Errors over 5 days: -2, -1, 0, 1, 2 -> rmse sqrt(10/5) = 1.414,
     p10 = -2 + 0.4 * 1 = -1.6, p90 = 1.6 (linear interpolation).
     """
-    con = warehouse.connect(":memory:")
+    con = fresh_db()
     for i, err in enumerate([-2.0, -1.0, 0.0, 1.0, 2.0]):
         day = f"2025-01-0{i + 1}"
         warehouse.load(con, "published_hourly", hourly("a", day, 1, [30.0 + err] * 24))
@@ -186,7 +187,7 @@ def test_error_by_lead_rmse_and_quantiles_hand_computed():
 
 def test_actual_with_null_max_is_dropped_end_to_end():
     """Fails if a parsed null max reaches the marts (staging null filter removed)."""
-    con = warehouse.connect(":memory:")
+    con = fresh_db()
     payload = {
         "daily": {
             "time": ["2025-01-01"],
@@ -218,17 +219,17 @@ def dup_frames() -> dict[str, pd.DataFrame]:
 @pytest.mark.parametrize("table", ["actual_daily", "published_hourly", "live_forecast"])
 def test_every_loader_is_idempotent_and_rejects_duplicate_batches(table):
     """Fails if any loader duplicates on rerun or silently collapses duplicate keys."""
-    con = warehouse.connect(":memory:")
+    con = fresh_db()
     df = dup_frames()[table]
     assert warehouse.load(con, table, df) == 1
     assert warehouse.load(con, table, df) == 1
-    with pytest.raises(duckdb.Error):
+    with pytest.raises(psycopg.Error):
         warehouse.load(con, table, pd.concat([df, df], ignore_index=True))
 
 
 def test_live_forecasts_from_different_issue_days_both_survive():
     """Fails if issued_on drops out of the key and a new forecast overwrites yesterday's."""
-    con = warehouse.connect(":memory:")
+    con = fresh_db()
     base = actual("a", "2025-01-05", 30.0, 20.0)
     warehouse.load(con, "live_forecast", base.assign(issued_on=pd.Timestamp("2025-01-01")))
     n = warehouse.load(con, "live_forecast", base.assign(issued_on=pd.Timestamp("2025-01-02")))
@@ -238,7 +239,7 @@ def test_live_forecasts_from_different_issue_days_both_survive():
 def test_snapshot_rejects_unknown_table():
     """Fails if snapshot formats an unchecked table name into SQL."""
     with pytest.raises(ValueError):
-        warehouse.snapshot(warehouse.connect(":memory:"), "nope; drop table x")
+        warehouse.snapshot(fresh_db(), "nope; drop table x")
 
 
 # --- code review 3, 4 / test review 5: outlook guards and seams --------------------------
@@ -414,7 +415,7 @@ def test_evaluate_short_never_learns_from_the_test_window():
     clim = models.Climatology().fit(act.index, act.to_numpy())
     a, _ = pipeline.evaluate_short(pairs, act, clim, t0)
     b, _ = pipeline.evaluate_short(shifted, act, clim, t0)
-    cols = ["chosen_method", "band_p10_p90_c"]
+    cols = ["chosen_method", "start_band_c"]
     assert a[cols].equals(b[cols])
 
 
@@ -458,6 +459,8 @@ def test_short_range_findings_report_kept_raw_and_worst_lead():
     assert "kept the published forecast at lead 1" in text
     assert "lead 3" in text and "-66.7%" in text
     assert "60.0" in text and "81.0" in text
+    none_kept = pipeline.short_range_finding("max temp", ev.assign(chosen_method="blend"))
+    assert "lead none" not in none_kept and "at every lead" in none_kept
 
 
 # --- test review 12, 13, 16: report and vacuous asserts ---------------------------------
@@ -507,7 +510,7 @@ def test_share_off_counts_an_error_of_exactly_3c():
 
     Errors +3 and +1 -> share_off_3c 0.5, share_off_2c 0.5.
     """
-    con = warehouse.connect(":memory:")
+    con = fresh_db()
     for day, fc in (("2025-01-01", 33.0), ("2025-01-02", 31.0)):
         warehouse.load(con, "published_hourly", hourly("a", day, 1, [fc] * 24))
         warehouse.load(con, "actual_daily", actual("a", day, 30.0, 20.0))

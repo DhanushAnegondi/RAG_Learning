@@ -1,9 +1,14 @@
 [sqlfluff]
-dialect = duckdb
-templater = raw
+dialect = postgres
+templater = placeholder
 max_line_length = 100
 # RF04: `date` mirrors the Open-Meteo field name across SQL and Python; renaming it buys nothing.
 exclude_rules = RF04
+
+[sqlfluff:templater:placeholder]
+param_style = pyformat
+city = 'torrance'
+day = '2026-01-01'
 
 [sqlfluff:rules:capitalisation.keywords]
 capitalisation_policy = lower

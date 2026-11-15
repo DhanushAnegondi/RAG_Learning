@@ -1,10 +1,11 @@
-"""SQL layer on a real DuckDB engine: raw loads, staging aggregation, error marts."""
+"""SQL layer on a real Postgres engine: raw loads, staging aggregation, error marts."""
 
-import duckdb
 import pandas as pd
+import psycopg
 import pytest
+from conftest import fresh_db
 
-from weatherwise.warehouse import build_models, connect, load, snapshot
+from weatherwise.warehouse import build_models, load, snapshot
 
 
 def hourly(city: str, day: str, lead: int, temps: list[float]) -> pd.DataFrame:
@@ -37,7 +38,7 @@ DAY1_TEMPS = [18.0 + h for h in range(14)] + [30.0 - h for h in range(10)]
 
 @pytest.fixture
 def con():
-    c = connect(":memory:")
+    c = fresh_db()
     yield c
     c.close()
 
@@ -60,7 +61,7 @@ def test_load_is_idempotent_and_replaces_changed_rows(con):
 def test_load_duplicate_key_in_one_batch_fails_loudly(con):
     """Fails if two rows for the same city+date are silently collapsed."""
     df = actual("c", [("2025-01-01", 29.0, 19.0), ("2025-01-01", 30.0, 19.0)])
-    with pytest.raises(duckdb.Error):
+    with pytest.raises(psycopg.Error):
         load(con, "actual_daily", df)
 
 
@@ -127,5 +128,5 @@ def test_snapshot_reports_schema_count_and_sample(con):
     snap = snapshot(con, "raw_actual_daily", n=5)
     assert snap["table"] == "raw_actual_daily"
     assert snap["row_count"] == 1
-    assert ("tmax_c", "DOUBLE") in [tuple(c) for c in snap["columns"]]
+    assert ("tmax_c", "double precision") in [tuple(c) for c in snap["columns"]]
     assert len(snap["sample"]) == 1

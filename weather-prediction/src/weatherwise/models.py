@@ -1,8 +1,14 @@
 """Forecast models.
 
-Short range (leads 1-7): the published forecast, corrected per lead for its measured bias
-(model output statistics). Candidates raw / linear / gradient boosting compete on a
-chronological validation slice; the band is the validation residual p10-p90.
+Short range (leads 1-7): the published forecast, corrected per lead (model output statistics).
+Candidates compete in rolling-origin CV; the band is the out-of-fold residual p10-p90.
+  raw       the published forecast as is
+  linear    fixed correction from forecast value and season
+  gbm       gradient boosting on the same inputs
+  drift     subtract the recent bias of the forecast (decaying average of errors already
+            verified when the forecast was issued); follows the bias as upstream models change
+  ens_mean  mean of the weather models available that day
+  blend     gradient boosting on every model, their disagreement, and the recent bias
 
 Long range (leads 8-30): no forecast model has day-level skill there, so: seasonal
 climatology with a warming trend, plus today's anomaly decayed per lead by a learned factor.
@@ -18,6 +24,37 @@ from sklearn.linear_model import LinearRegression
 
 YEAR_DAYS = 365.25
 CANDIDATES = ("raw", "linear", "gbm")
+MODEL_COLS = ("fc_gfs", "fc_ecmwf", "fc_gem")  # other weather models, beside forecast_c
+
+
+def candidates(df: pd.DataFrame) -> tuple[str, ...]:
+    """Candidate methods the columns of df can support."""
+    out = list(CANDIDATES)
+    if "bias_recent" in df.columns:
+        out.append("drift")
+    if any(c in df.columns for c in MODEL_COLS):
+        out += ["ens_mean", "blend"]
+    return tuple(out)
+
+
+def add_recent_bias(
+    pairs: pd.DataFrame, halflife: float = 14, min_periods: int = 7
+) -> pd.DataFrame:
+    """Adds bias_recent: decaying average of (forecast - actual) for the same lead, using only
+    errors already verified when the forecast was issued.
+
+    A lead-L forecast for day D is issued on D-L; the newest lead-L forecast with a known
+    outcome then is the one for D-L-1, so the average is shifted L+1 days. Rows without an
+    actual (future days) get the last known value.
+    """
+    out = pairs.copy()
+    out["bias_recent"] = np.nan
+    for lead, g in out.groupby("lead_days"):
+        s = (g["forecast_c"] - g["actual_c"]).set_axis(pd.DatetimeIndex(g["date"]))
+        daily = s.reindex(pd.date_range(s.index.min(), s.index.max(), freq="D"))
+        ew = daily.ewm(halflife=halflife, min_periods=min_periods).mean().shift(int(lead) + 1)
+        out.loc[g.index, "bias_recent"] = ew.reindex(s.index).to_numpy()
+    return out
 
 
 def seasonal_features(dates) -> np.ndarray:
@@ -73,18 +110,46 @@ def _features(df: pd.DataFrame) -> np.ndarray:
     return np.column_stack([df["forecast_c"].to_numpy(), seasonal_features(df["date"])])
 
 
+def _model_matrix(df: pd.DataFrame) -> np.ndarray:
+    """forecast_c and the other weather models, NaN where a model has no forecast."""
+    cols = [df["forecast_c"].to_numpy(dtype=float)]
+    cols += [
+        df[c].to_numpy(dtype=float) if c in df.columns else np.full(len(df), np.nan)
+        for c in MODEL_COLS
+    ]
+    return np.column_stack(cols)
+
+
+def _blend_features(df: pd.DataFrame) -> np.ndarray:
+    """Published forecast, how far each other model disagrees with it, recent bias, season.
+    Disagreements (not raw values) so trees can learn to trust one model directly."""
+    m = _model_matrix(df)
+    if "bias_recent" in df.columns:
+        bias = df["bias_recent"].to_numpy(dtype=float)
+    else:
+        bias = np.full(len(df), np.nan)
+    return np.column_stack([m[:, 0], m[:, 1:] - m[:, :1], bias, seasonal_features(df["date"])])
+
+
 def _fit_candidate(name: str, df: pd.DataFrame):
     """Returns predict(df) -> corrected forecast. Models learn the correction actual - forecast."""
     if name == "raw":
         return lambda d: d["forecast_c"].to_numpy(dtype=float)
+    if name == "drift":
+        return lambda d: (d["forecast_c"] - d["bias_recent"].fillna(0.0)).to_numpy(dtype=float)
+    if name == "ens_mean":
+        return lambda d: np.nanmean(_model_matrix(d), axis=1)
+    feats = _blend_features if name == "blend" else _features
     if name == "linear":
         est = LinearRegression()
     else:
         est = HistGradientBoostingRegressor(
             max_iter=200, learning_rate=0.05, max_leaf_nodes=15, random_state=0
         )
-    est.fit(_features(df), df["actual_c"] - df["forecast_c"])
-    return lambda d: d["forecast_c"].to_numpy(dtype=float) + est.predict(_features(d))
+    x = feats(df)
+    keep = ~np.isnan(x).all(axis=0)  # a model with no history yet (all NaN) cannot be binned
+    est.fit(x[:, keep], df["actual_c"] - df["forecast_c"])
+    return lambda d: d["forecast_c"].to_numpy(dtype=float) + est.predict(feats(d)[:, keep])
 
 
 class LeadCorrector:
@@ -110,7 +175,8 @@ class LeadCorrector:
     def _oof(self, g: pd.DataFrame) -> dict[str, tuple[np.ndarray, np.ndarray]]:
         """Out-of-fold (actual, prediction) per candidate."""
         end = g["date"].max() + pd.Timedelta(days=1)
-        acts, preds = [], {n: [] for n in CANDIDATES}
+        names = candidates(g)
+        acts, dates, preds = [], [], {n: [] for n in names}
         for k in range(self.n_folds, 0, -1):
             start = end - pd.Timedelta(days=k * self.fold_days)
             val = g[(g["date"] >= start) & (g["date"] < start + pd.Timedelta(days=self.fold_days))]
@@ -118,11 +184,13 @@ class LeadCorrector:
             if val.empty or len(past) < 30:
                 continue
             acts.append(val["actual_c"].to_numpy())
-            for name in CANDIDATES:
+            dates.append(val["date"].to_numpy())
+            for name in names:
                 preds[name].append(_fit_candidate(name, past)(val))
         if not acts:
             raise ValueError("not enough history for cross-validation")
         actual = np.concatenate(acts)
+        self._oof_dates = pd.DatetimeIndex(np.concatenate(dates))
         return {n: (actual, np.concatenate(p)) for n, p in preds.items()}
 
     def fit(self, df: pd.DataFrame) -> "LeadCorrector":
@@ -130,6 +198,8 @@ class LeadCorrector:
         self.val_mae: dict[int, dict[str, float]] = {}
         self.band: dict[int, tuple[float, float]] = {}
         self.models: dict[int, object] = {}
+        self.oof_resid: dict[int, pd.Series] = {}  # chosen method, for adaptive_band
+        self.all_models: dict[int, dict[str, object]] = {}  # every candidate, for the leaderboard
         for lead, g in df.groupby("lead_days"):
             g = g.sort_values("date")
             oof = self._oof(g)
@@ -140,10 +210,21 @@ class LeadCorrector:
             actual, pred = oof[best]
             lo, hi = np.quantile(actual - pred, self.quantiles)
             lead = int(lead)
+            self.oof_resid[lead] = pd.Series(actual - pred, index=self._oof_dates)
             self.method[lead], self.val_mae[lead] = best, maes
             self.band[lead] = (min(float(lo), 0.0), max(float(hi), 0.0))
-            self.models[lead] = _fit_candidate(best, g)  # refit on all training rows
+            self.all_models[lead] = {n: _fit_candidate(n, g) for n in oof}  # all training rows
+            self.models[lead] = self.all_models[lead][best]
         return self
+
+    def predict_all(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Every candidate's prediction, one column per method (leaderboard only)."""
+        names = list(next(iter(self.all_models.values())))
+        out = pd.DataFrame(index=df.index, columns=names, dtype=float)
+        for lead, g in df.groupby("lead_days"):
+            for name, model in self.all_models[int(lead)].items():
+                out.loc[g.index, name] = model(g)
+        return out
 
     def predict(self, df: pd.DataFrame) -> pd.DataFrame:
         out = pd.DataFrame(index=df.index, columns=["pred_c", "lo_c", "hi_c"], dtype=float)
@@ -157,6 +238,43 @@ class LeadCorrector:
             out.loc[g.index, "lo_c"] = pred + lo
             out.loc[g.index, "hi_c"] = pred + hi
         return out
+
+
+def adaptive_band(
+    frame: pd.DataFrame,
+    resid_hist: dict[int, pd.Series],
+    window: int = 120,
+    quantiles: tuple[float, float] = (0.1, 0.9),
+    min_n: int = 30,
+) -> pd.DataFrame:
+    """p10-p90 range from the last `window` misses known when each forecast was issued.
+
+    `resid_hist[lead]` is a date-indexed series of actual - forecast from before the frame
+    (out-of-fold or validation residuals). Rows of `frame` with an `actual_c` add their own miss
+    for later rows. A lead-L forecast for day D can use misses for days up to D-L-1. Where
+    fewer than `min_n` misses are known, the whole history's quantiles are used.
+    """
+    out = pd.DataFrame(index=frame.index, columns=["lo_c", "hi_c"], dtype=float)
+    for lead, g in frame.groupby("lead_days"):
+        lead = int(lead)
+        hist = resid_hist[lead].dropna()
+        resid = hist
+        if "actual_c" in g.columns:
+            new = (g["actual_c"] - g["pred_c"]).set_axis(pd.DatetimeIndex(g["date"])).dropna()
+            resid = pd.concat([hist[~hist.index.isin(new.index)], new]).sort_index()
+        days = pd.date_range(resid.index.min(), max(resid.index.max(), g["date"].max()), freq="D")
+        known = resid.reindex(days)
+        # rolling over known misses only (a missing day is skipped, not counted)
+        roll = known.dropna().rolling(window, min_periods=min_n)
+        edges = {}
+        fallbacks = np.quantile(hist, quantiles)
+        for name, qv, fallback in zip(("lo_c", "hi_c"), quantiles, fallbacks, strict=True):
+            s = roll.quantile(qv).reindex(days).ffill().shift(lead + 1)
+            edges[name] = s.reindex(pd.DatetimeIndex(g["date"])).fillna(float(fallback)).to_numpy()
+        pred = g["pred_c"].to_numpy(dtype=float)
+        out.loc[g.index, "lo_c"] = pred + np.minimum(edges["lo_c"], 0.0)
+        out.loc[g.index, "hi_c"] = pred + np.maximum(edges["hi_c"], 0.0)
+    return out
 
 
 def long_range_backtest(
@@ -233,8 +351,12 @@ def assemble_outlook(
     long_quantiles: dict[int, tuple[float, float]],
     short_leads: int = 7,
     horizon: int = 30,
+    long_pred: np.ndarray | None = None,
+    long_source: str = "climatology + anomaly",
 ) -> pd.DataFrame:
-    """Next `horizon` days: corrected forecast up to short_leads, then climatology + anomaly.
+    """Next `horizon` days: corrected forecast up to short_leads, then climatology + anomaly
+    (or `long_pred`, e.g. from the LSTM, when given). Extra columns of `live` (other weather
+    models, recent bias) are handed to the corrector.
 
     shortcut: leads count from `today`, while the anomaly is from the last observed day (usually
     yesterday), so the decay is applied one day early; fine at a 30-day horizon.
@@ -245,10 +367,10 @@ def assemble_outlook(
         {"date": dates, "lead_days": np.arange(1, horizon + 1), "raw_forecast_c": raw}
     )
     base = clim.predict(dates)
-    out["pred_c"] = base + coef[:horizon] * recent_anomaly
+    out["pred_c"] = base + coef[:horizon] * recent_anomaly if long_pred is None else long_pred
     out["lo_c"] = out["pred_c"] + [long_quantiles[n][0] for n in out["lead_days"]]
     out["hi_c"] = out["pred_c"] + [long_quantiles[n][1] for n in out["lead_days"]]
-    out["source"] = "climatology + anomaly"
+    out["source"] = long_source
     short = out["lead_days"] <= short_leads
     missing = out.loc[short & out["raw_forecast_c"].isna(), "lead_days"].tolist()
     if missing:
@@ -257,6 +379,9 @@ def assemble_outlook(
         rows = out.loc[short, ["date", "lead_days"]].assign(
             forecast_c=out.loc[short, "raw_forecast_c"]
         )
+        extra = live.set_index("date").drop(columns="forecast_c").reindex(rows["date"])
+        for col in extra.columns:
+            rows[col] = extra[col].to_numpy()
         pred = corrector.predict(rows)
         out.loc[short, ["pred_c", "lo_c", "hi_c"]] = pred[["pred_c", "lo_c", "hi_c"]].to_numpy()
         out.loc[short, "source"] = "corrected forecast"

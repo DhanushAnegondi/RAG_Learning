@@ -63,7 +63,8 @@ def test_parse_previous_runs_goes_wide_to_long_by_lead_and_drops_nulls():
         }
     }
     df = parse_previous_runs(payload, city="testville", leads=[1, 3])
-    assert list(df.columns) == ["city", "ts_local", "lead_days", "temp_c"]
+    assert list(df.columns) == ["city", "model", "ts_local", "lead_days", "temp_c"]
+    assert (df["model"] == "best_match").all()
     got = sorted(zip(df["lead_days"], df["ts_local"].dt.hour, df["temp_c"], strict=True))
     assert got == [(1, 0, 20.0), (1, 1, 21.0), (3, 0, 22.0)]
 

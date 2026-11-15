@@ -1,0 +1,71 @@
+{
+ "table": "mart_verification",
+ "row_count": 0,
+ "columns": [
+  [
+   "city",
+   "VARCHAR"
+  ],
+  [
+   "date",
+   "DATE"
+  ],
+  [
+   "variable",
+   "VARCHAR"
+  ],
+  [
+   "lead_days",
+   "INTEGER"
+  ],
+  [
+   "kind",
+   "VARCHAR"
+  ],
+  [
+   "issued_on",
+   "DATE"
+  ],
+  [
+   "method",
+   "VARCHAR"
+  ],
+  [
+   "pred_c",
+   "DOUBLE"
+  ],
+  [
+   "lo_c",
+   "DOUBLE"
+  ],
+  [
+   "hi_c",
+   "DOUBLE"
+  ],
+  [
+   "published_c",
+   "DOUBLE"
+  ],
+  [
+   "observed_c",
+   "DOUBLE"
+  ],
+  [
+   "era5_c",
+   "DOUBLE"
+  ],
+  [
+   "our_error_c",
+   "DOUBLE"
+  ],
+  [
+   "published_error_c",
+   "DOUBLE"
+  ],
+  [
+   "inside_range",
+   "BOOLEAN"
+  ]
+ ],
+ "sample": []
+}

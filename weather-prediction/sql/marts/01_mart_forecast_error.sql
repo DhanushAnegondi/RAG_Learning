@@ -1,7 +1,10 @@
 -- One row per city, date, lead, variable. error_c = forecast - actual (positive = too warm).
-create or replace table mart_forecast_error as
+drop table if exists mart_forecast_error cascade;
+
+create table mart_forecast_error as
 with published as (
     select * from stg_published_daily
+    where model = 'best_match'
 ),
 
 actual as (

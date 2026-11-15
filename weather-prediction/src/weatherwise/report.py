@@ -8,6 +8,7 @@ Per sprint folder (results/<sprint>/):
   tables/*.json    warehouse snapshots: schema, row count, sample rows
   run/*.out        terminal output, shown verbatim
   review.md        ponytail review findings and fixes
+  site/*.png       screenshots of the running site, embedded
 """
 
 import base64
@@ -107,6 +108,17 @@ def _sprint(d: Path) -> str:
                 f"<figure>{_img(c)}<figcaption class='caption'>"
                 f"{escape(captions.get(c.name, {}).get('title', c.stem))}</figcaption></figure>"
                 for c in charts
+            )
+            + "</div>"
+        )
+    shots = sorted((d / "site").glob("*.png"))
+    if shots:
+        parts.append(
+            "<h3>The site (screenshots from the running app)</h3><div class='grid'>"
+            + "".join(
+                f"<figure>{_img(c)}<figcaption class='caption'>{escape(c.stem)} tab</figcaption>"
+                "</figure>"
+                for c in shots
             )
             + "</div>"
         )

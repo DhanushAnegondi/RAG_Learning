@@ -1,0 +1,80 @@
+{
+ "table": "stg_published_daily",
+ "row_count": 38778,
+ "columns": [
+  [
+   "city",
+   "text"
+  ],
+  [
+   "model",
+   "text"
+  ],
+  [
+   "date",
+   "date"
+  ],
+  [
+   "lead_days",
+   "integer"
+  ],
+  [
+   "tmax_c",
+   "double precision"
+  ],
+  [
+   "tmin_c",
+   "double precision"
+  ]
+ ],
+ "sample": [
+  [
+   "torrance",
+   "best_match",
+   "2022-01-01",
+   1,
+   15.2,
+   10.5
+  ],
+  [
+   "torrance",
+   "best_match",
+   "2022-01-01",
+   2,
+   15.6,
+   10.7
+  ],
+  [
+   "torrance",
+   "best_match",
+   "2022-01-01",
+   3,
+   15.7,
+   10.7
+  ],
+  [
+   "torrance",
+   "best_match",
+   "2022-01-01",
+   4,
+   16.3,
+   11.3
+  ],
+  [
+   "torrance",
+   "best_match",
+   "2022-01-01",
+   5,
+   15.2,
+   8.7
+  ],
+  [
+   "torrance",
+   "best_match",
+   "2022-01-01",
+   6,
+   15.8,
+   10.6
+  ]
+ ]
+}
