@@ -2,6 +2,7 @@
 services:
   db:
     image: postgres:18
+    restart: unless-stopped  # back by itself after a crash or a Docker restart
     environment:
       POSTGRES_USER: weatherwise
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-weatherwise}

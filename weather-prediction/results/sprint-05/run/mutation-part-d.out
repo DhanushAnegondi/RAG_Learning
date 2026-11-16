@@ -1,0 +1,5 @@
+# mutation run 2026-11-16T06:17:28Z; KILLED = a test failed (exit 1)
+KILLED   s5: a rerun keeps the failed attempt's record by tests/test_sprint5_ops.py::test_a_new_attempt_starts_with_a_clean_record
+KILLED   s5: a rerun forgets the decision     by tests/test_sprint5_ops.py::test_a_decision_survives_an_attempt_that_fails_before_the_gate
+
+2/2 mutations killed by a failing test

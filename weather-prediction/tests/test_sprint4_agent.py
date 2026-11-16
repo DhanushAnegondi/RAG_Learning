@@ -404,6 +404,11 @@ def test_a_number_that_stays_invented_is_refused_not_shown(con):
     assert "99" not in json.dumps(shown)  # must not make it a source, or reach history
     assert "cannot" in out["answer"] and out["model_calls"] == 3
     assert shown[-1]["content"] == out["answer"]
+    # both drafts are kept for audit, in order, with what was wrong with each
+    assert [(r["draft"], r["unsupported"]) for r in out["rejected"]] == [
+        ("It will reach 99 F tomorrow.", ["99"]),
+        ("It will still reach 99 F tomorrow.", ["99"]),
+    ]
 
 
 def test_model_failure_gives_a_clear_error_and_no_guess(con):
@@ -545,6 +550,7 @@ def test_site_chat_endpoint_answers_and_lists_the_thread(con, tmp_path):
         body = r.json()
         assert body["answer"].startswith("Tomorrow's high is about 70.3 F")
         assert body["grounded"] is True and body["tool_calls"][0]["tool"] == "get_outlook"
+        assert "rejected" not in body  # refused drafts never leave the server
         thread = web.get("/api/agent/thread", params={"thread_id": body["thread_id"]}).json()
         assert [m["role"] for m in thread["messages"]] == ["user", "assistant"]
         assert web.post("/api/agent/ask", json={"question": "  "}).status_code == 422

@@ -48,3 +48,5 @@ addopts = "-q"
 "scripts/mutation_check.py" = ["E501"]
 "scripts/make_arch_src.py" = ["E501"]
 "scripts/make_agent_arch_src.py" = ["E501"]
+"scripts/inject_faults.py" = ["E501"]
+"scripts/make_ops_arch_src.py" = ["E501"]

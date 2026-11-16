@@ -1,0 +1,89 @@
+# fault injection, 2026-11-15T23:18:34Z, database weatherwise_test
+[split] train < 2024-12-31 <= test
+[eval tmax] lead1 published MAE 1.5 -> 0.3 (linear); lead30 decay 0.85 vs clim 0.85; long-range validation MAE decay 0.781
+[eval tmin] lead1 published MAE 1.5 -> 0.3 (linear); lead30 decay 0.85 vs clim 0.85; long-range validation MAE decay 0.781
+[load] log_forecast rows=6506
+
+== 0. baseline: first run chooses the methods ==
+  app_run_log: t-2025-12-31  status=ok  step=done  mode=reselect  attempts=1
+  PASS  first run ends ok and chooses methods
+
+== 1. API outage ==
+  app_run_log: t-2026-01-01  status=failed  step=fetch  mode=None  attempts=1
+               error: IngestError: HTTP 503 from archive-api.open-meteo.com after 4 tries
+  PASS  run is failed at the fetch step, with the reason
+  PASS  no data changed and no forecast was issued
+  app_run_log: t-2026-01-01  status=ok  step=done  mode=forecast  attempts=2
+  PASS  rerun after the outage ends ok on attempt 2
+
+== 2. late data ==
+  app_run_log: t-2026-01-02  status=ok  step=done  mode=forecast  attempts=1
+               warning: actuals are 1 day behind
+  PASS  one day late: forecast issued, warning recorded
+  app_run_log: t-2026-01-03  status=failed  step=check  mode=None  attempts=1
+               error: StaleData: actuals are 2 days behind (limit 1); no forecast issued
+  PASS  two days late: run failed at the check step, no forecast
+  app_run_log: t-2026-01-03  status=ok  step=done  mode=forecast  attempts=2
+  PASS  when the data arrives the same run ends ok
+
+== 3a. database restart in the middle of a run ==
+  [fault] docker compose restart db
+error connecting in 'pool-7': connection failed: connection to server at "127.0.0.1", port 15480 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+error connecting in 'pool-7': connection failed: connection to server at "127.0.0.1", port 15480 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+error connecting in 'pool-7': connection failed: connection to server at "127.0.0.1", port 15480 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+error connecting in 'pool-7': connection failed: connection to server at "127.0.0.1", port 15480 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+error connecting in 'pool-7': connection failed: connection to server at "127.0.0.1", port 15480 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+error connecting in 'pool-7': connection failed: connection to server at "127.0.0.1", port 15480 failed: FATAL:  the database system is starting up
+error connecting in 'pool-7': connection failed: connection to server at "127.0.0.1", port 15480 failed: FATAL:  the database system is starting up
+error connecting in 'pool-7': connection failed: connection to server at "127.0.0.1", port 15480 failed: FATAL:  the database system is starting up
+error connecting in 'pool-7': connection failed: connection to server at "127.0.0.1", port 15480 failed: FATAL:  the database system is not yet accepting connections
+DETAIL:  Consistent recovery state has not been yet reached.
+  database reachable again after 0 s
+  app_run_log after the restart: [('ok', 'done', 1)]  (exception: None)
+  PASS  the run is never marked ok without its forecast
+  the run finished: the pool waited for the database to come back
+  PASS  the day ends ok with exactly one forecast
+
+== 3b. database down for the whole attempt ==
+  [fault] docker compose stop db
+  starting a run: OperationalError: connection timeout expired
+  [repair] docker compose start db; reachable after 2 s
+  PASS  the run refused to start, said why, and left no half-made run
+  app_run_log: t-2026-01-05  status=ok  step=done  mode=forecast  attempts=1
+  PASS  once the database is back the run ends ok
+
+== 4. drift: recent forecasts 3 C worse than when the methods were chosen ==
+  app_run_log: t-2026-01-06  status=waiting_approval  step=gate  mode=None  attempts=1
+  drifted (variable, lead, recent miss, stored miss): [('tmax', 1, 2.733, 0.302), ('tmax', 2, 2.867, 0.484), ('tmin', 1, 2.733, 0.302), ('tmin', 2, 2.867, 0.484)]
+  PASS  run waits at the gate; nothing retrained, nothing forecast
+[split] train < 2025-01-06 <= test
+[eval tmax] lead1 published MAE 1.5 -> 0.31 (linear); lead30 decay 0.86 vs clim 0.86; long-range validation MAE decay 0.787
+[eval tmin] lead1 published MAE 1.5 -> 0.31 (linear); lead30 decay 0.86 vs clim 0.86; long-range validation MAE decay 0.787
+[load] log_forecast rows=6602
+  app_run_log: t-2026-01-06  status=ok  step=done  mode=reselect  attempts=1
+  PASS  after approval the methods are chosen again and drift is gone
+
+== summary ==
+PASS  baseline first run ends ok and chooses methods
+PASS  outage   run is failed at the fetch step, with the reason
+PASS  outage   no data changed and no forecast was issued
+PASS  outage   rerun after the outage ends ok on attempt 2
+PASS  late     one day late: forecast issued, warning recorded
+PASS  late     two days late: run failed at the check step, no forecast
+PASS  late     when the data arrives the same run ends ok
+PASS  restart  the run is never marked ok without its forecast
+PASS  restart  the day ends ok with exactly one forecast
+PASS  down     the run refused to start, said why, and left no half-made run
+PASS  down     once the database is back the run ends ok
+PASS  drift    run waits at the gate; nothing retrained, nothing forecast
+PASS  drift    after approval the methods are chosen again and drift is gone

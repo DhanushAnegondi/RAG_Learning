@@ -507,8 +507,8 @@ MUTATIONS = [  # (file, original, mutant, what it simulates); the full suite run
     ),
     (
         GR,
-        'return {"messages": [AIMessage(content=REFUSAL, id=draft.id)], "unsupported": bad}',
-        'return {"unsupported": bad}',
+        '"messages": [AIMessage(content=REFUSAL, id=draft.id)],',
+        '"messages": [],',
         "an unsupported number is shown",
     ),
     (GR, "        if used >= limit:\n", "        if False:\n", "model call cap removed"),
@@ -730,6 +730,263 @@ MUTATIONS = [m for m in MUTATIONS if m[3] not in STALE] + [
 ]
 
 
+# ---- sprint 05: operations. Descriptions start with "s5:" so `mutation_check.py s5:` runs them.
+OP = "src/weatherwise/ops.py"
+EV = "src/weatherwise/agent/evals.py"
+DRIFT = "sql/ops/drift.sql"
+S5 = [
+    (
+        OP,
+        'if row and row["status"] in ("ok", "waiting_approval"):',
+        "if False:",
+        "a finished day is run again",
+    ),
+    (
+        OP,
+        'if not state["drifted"] or state["mode"] == "reselect":',
+        "if True:",
+        "drift never pauses the run",
+    ),
+    (
+        OP,
+        'mode = "reselect" if decision == "approved" else "forecast"',
+        'mode = "reselect"',
+        "declining still retrains",
+    ),
+    (
+        OP,
+        "MAX_LAG = models.MAX_OBS_AGE_DAYS - 1",
+        "MAX_LAG = 99",
+        "stale data is not stopped at the check",
+    ),
+    (
+        OP,
+        '[f"actuals are {lag} day behind"] if lag > 0 else []',
+        "[]",
+        "late data is not mentioned",
+    ),
+    (
+        "sql/ops/run_update.sql",
+        "where run_id = %(run_id)s and status <> 'ok';",
+        "where run_id = %(run_id)s;",
+        "a finished run is flipped to failed",
+    ),
+    (
+        OP,
+        '                if state["mode"] == "reselect":\n',
+        "                if True:\n",
+        "every daily run re-chooses the methods",
+    ),
+    (
+        OP,
+        "if lead <= pipeline.SHORT_LEADS:",
+        "if lead <= 0:",
+        "stored short-range methods are ignored",
+    ),
+    (
+        OP,
+        "first_run = pinned(con, city) is None",
+        "first_run = False",
+        "a first run has no methods and does not choose any",
+    ),
+    (
+        OP,
+        'if row["status"] != "waiting_approval":',
+        "if False:",
+        "a decision is accepted for a run that is not waiting",
+    ),
+    (
+        OP,
+        '"drifted": [r for r in rows if r["drifted"]],',
+        '"drifted": rows,',
+        "every lead is reported as drifted",
+    ),
+    (OP, "raise Busy(", "print(", "two daily runs at once"),
+    (
+        OP,
+        "if newest is not None and newest >= today:",
+        "if False:",
+        "a run for a past day is accepted",
+    ),
+    (
+        OP,
+        "            if decided:  # the answer given before this run failed still stands\n",
+        "            if False:\n",
+        "an approval is lost when the run fails",
+    ),
+    (
+        OP,
+        "                if last:  # asked and answered",
+        "                if False:  # asked and answered",
+        "the gate asks again the day after a decision",
+    ),
+    (
+        OP,
+        "if recent < pipeline.WINDOW:",
+        "if False:",
+        "a hole in the newest actuals is found too late",
+    ),
+    (
+        OP,
+        "if lead in used.index and used[lead] != method:",
+        "if False:",
+        "a swapped method is not reported",
+    ),
+    (
+        OP,
+        "return out if complete else None",
+        "return out or None",
+        "a half-finished selection is forecast from",
+    ),
+    (M, "if pin and pin.get(lead) in maes:", "if False:", "a pinned method is not used"),
+    (
+        P,
+        'corr = models.LeadCorrector().fit(pairs, pin=pin.get("short"))',
+        "corr = models.LeadCorrector().fit(pairs)",
+        "the outlook ignores the pinned methods",
+    ),
+    (
+        P,
+        "chosen = pin if pin in val else choose_long(val_mae)",
+        "chosen = choose_long(val_mae)",
+        "the long-range pin is ignored",
+    ),
+    (
+        DRIFT,
+        "order by case when logged.kind = 'live' then 0 else 1 end, logged.issued_on",
+        "order by case when logged.kind = 'live' then 1 else 0 end, logged.issued_on",
+        "drift prefers the replay to what was issued",
+    ),
+    (DRIFT, "where age <= %(days)s", "where age <= 9999", "drift window unbounded"),
+    (DRIFT, "recent.n_days >= %(min_days)s", "recent.n_days >= 0", "drift flagged on too few days"),
+    (
+        DRIFT,
+        "and recent.recent_mae_c > %(ratio)s * chosen.test_mae_c",
+        "and recent.recent_mae_c >= %(ratio)s * chosen.test_mae_c",
+        "drift ratio boundary moved",
+    ),
+    (
+        DRIFT,
+        "and recent.recent_mae_c - chosen.test_mae_c > %(gap)s",
+        "and recent.recent_mae_c - chosen.test_mae_c >= %(gap)s",
+        "drift gap boundary moved",
+    ),
+    (DRIFT, "and logged.lead_days <= %(max_lead)s", "", "drift measured on uncorrected leads"),
+    (
+        "sql/ops/data_lag.sql",
+        "(cast(%(today)s as date) - 1) - newest.last_day",
+        "cast(%(today)s as date) - newest.last_day",
+        "data lag off by one day",
+    ),
+    (
+        "sql/ops/run_start.sql",
+        "attempts = app_run_log.attempts + 1",
+        "attempts = app_run_log.attempts",
+        "attempts are not counted",
+    ),
+    (
+        "sql/ops/run_start.sql",
+        "else cast('{}' as jsonb)",
+        "else app_run_log.detail",
+        "a rerun keeps the failed attempt's record",
+    ),
+    (
+        "sql/ops/run_start.sql",
+        "then jsonb_build_object('decision', app_run_log.detail -> 'decision')",
+        "then cast('{}' as jsonb)",
+        "a rerun forgets the decision",
+    ),
+    (
+        "sql/ops/run_supersede.sql",
+        "and today < %(today)s",
+        "and today < date '1900-01-01'",
+        "an unanswered run stays open",
+    ),
+    (
+        "sql/ops/last_decision.sql",
+        "and today >= cast(%(today)s as date) - %(days)s",
+        "",
+        "one decision silences the gate forever",
+    ),
+    (
+        "sql/ops/stamp_run.sql",
+        "    today = %(today)s,",
+        "    today = today,",
+        "the run stamp does not move",
+    ),
+    (
+        EV,
+        "v = _round(_round(v, places) * 1.8, 1)",
+        "v = _round(_round(v, places) * 1.8 + 32, 1)",
+        "eval key converts a gap as a temperature",
+    ),
+    (
+        EV,
+        "v = _round(_round(v, places) * 1.8 + 32, 1)",
+        "v = _round(float(v) * 1.8 + 32, 1)",
+        "eval key converts before rounding",
+    ),
+    (EV, "rounding=ROUND_HALF_UP", "rounding=ROUND_HALF_EVEN", "eval key rounds half to even"),
+    (
+        EV,
+        '            return {"passed": False, "why": "the answer was refused by the number check"}',
+        "            pass",
+        "a refused answer can pass the eval",
+    ),
+    (
+        EV,
+        "        if float(value) not in _stated(answer):\n",
+        "        if False:\n",
+        "eval passes without the expected numbers",
+    ),
+    (
+        EV,
+        "        if label and not any(\n",
+        "        if False and not any(\n",
+        "eval passes numbers stated the wrong way round",
+    ),
+    (
+        EV,
+        "            if value.lower() not in answer.lower():\n",
+        "            if False:\n",
+        "eval passes without the expected day",
+    ),
+    (
+        EV,
+        'if case.get("declines") and not DECLINES.search(answer):',
+        "if False:",
+        "eval passes a guess where a decline is required",
+    ),
+    (
+        EV,
+        "stated = [n for n in figures(answer) if n not in asked]",
+        "stated = []",
+        "eval ignores figures in a no-figure answer",
+    ),
+    (EV, 'if case["tool"] not in used:', "if False:", "eval does not check which tool was used"),
+    (
+        EV,
+        r'(?!\d|\.\d)", answer):',
+        r'(?![\d.]\d)", answer):',
+        "eval bans a different number that starts the same",
+    ),
+    (GR, "    if len(asked) <= keep:\n", "    if True:\n", "long conversations are sent whole"),
+    (
+        GR,
+        'messages, dropped = recent(state["messages"], KEEP_QUESTIONS)\n        draft',
+        'messages, dropped = state["messages"], 0\n        draft',
+        "the number check sees turns the model no longer does",
+    ),
+    (
+        GR,
+        'turned_down = [*state.get("rejected", []), {"draft": text_of(draft), "unsupported": bad}]',
+        "turned_down = []",
+        "rejected drafts are not kept for audit",
+    ),
+    (S, 'out.pop("rejected")', 'out.get("rejected")', "refused drafts are sent to the browser"),
+]
+MUTATIONS += [(f, old, new, f"s5: {what}") for f, old, new, what in S5]
+
 MODEL_TESTS = ["test_sprint2_models.py", "test_models.py", "test_sprint3_review.py"]
 
 
@@ -741,7 +998,12 @@ def test_order(rel: str) -> list[str]:
     first = [n for n in names if (n in MODEL_TESTS) == model_code]
     if "agent" in rel or rel.endswith("config.py"):
         first = ["test_sprint4_agent.py"]
+    if "ops" in rel or rel.endswith(("evals.py", "models.py", "pipeline.py", "graph.py")):
+        first = ["test_sprint5_ops.py", *first]
     return [f"tests/{n}" for n in first + [n for n in names if n not in first]]
+
+
+LIMIT_S = 1500  # one mutant: the whole suite takes about 750 s on a slow day
 
 
 def drop_test_schema() -> None:
@@ -761,8 +1023,21 @@ def drop_test_schema() -> None:
 
 def main() -> int:
     print(f"# mutation run {datetime.now(UTC):%FT%TZ}; KILLED = a test failed (exit 1)")
-    # optional arguments: run only the mutants of files whose path contains one of the words
-    todo = [m for m in MUTATIONS if not sys.argv[1:] or any(w in m[0] for w in sys.argv[1:])]
+    # optional arguments: run only the mutants whose file path or description contains a word
+    # MUTATION_SLICE=i/n takes every n-th of them from the i-th (parallel workers, each with
+    # its own copy of the tree and its own test database); MUTATION_SKIP names an earlier
+    # output file whose KILLED mutants are not run again
+    todo = [
+        m
+        for m in MUTATIONS
+        if not sys.argv[1:] or any(w in m[0] or w in m[3] for w in sys.argv[1:])
+    ]
+    if os.environ.get("MUTATION_SKIP"):
+        done = Path(os.environ["MUTATION_SKIP"]).read_text(encoding="utf-8")
+        todo = [m for m in todo if f"KILLED   {m[3]}" not in done]
+    if os.environ.get("MUTATION_SLICE"):
+        i, n = (int(x) for x in os.environ["MUTATION_SLICE"].split("/"))
+        todo = todo[i::n]
     bad = 0
     for rel, old, new, what in todo:
         path = ROOT / rel
@@ -781,7 +1056,10 @@ def main() -> int:
                 cwd=ROOT,
                 capture_output=True,
                 text=True,
+                timeout=LIMIT_S,
             )
+        except subprocess.TimeoutExpired:
+            r = subprocess.CompletedProcess([], 2, f"no result in {LIMIT_S} s", "")
         finally:
             path.write_text(src, encoding="utf-8")
             if migration:

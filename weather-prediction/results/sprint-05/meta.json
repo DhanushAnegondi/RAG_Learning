@@ -1,0 +1,75 @@
+{
+ "title": "sprint-05: operations (daily run, drift gate with approval, faults, scored questions)",
+ "goal": "Run the forecast every day without re-choosing methods, notice when the methods have stopped working and stop for a person before retraining, end every failure in a stated state that a rerun recovers from, and score the assistant against the database.",
+ "pattern": "LangGraph run graph (fetch, check, gate, forecast, finish) with a Postgres checkpoint per step, an interrupt at the gate and a run log",
+ "findings": [
+  "Tests: 221 passed in 587.31s (0:09:47).",
+  "Mutation check: 49/49 mutations killed (the sprint-05 mutants).",
+  "Real daily run torrance-2026-11-15: ended ok (reselect). The drift check flagged 1 of 14 lead/variable pairs (tmin 1 day ahead: recent miss 1.866 C against 0.697 C when the method was chosen), so the run stopped at the gate before any retraining. Decision recorded: approved.",
+  "Fault injection: 13 of 13 checks passed (API outage, late data, database restart mid-run, database down, planted drift).",
+  "Question set against the live model: 42/42 attempts passed; 14/14 cases passed every attempt."
+ ],
+ "commands": [
+  "make test",
+  "make check",
+  "make mutate",
+  "make daily",
+  ".venv/Scripts/python scripts/run_daily.py --approve RUN_ID   (or --decline)",
+  "make faults",
+  "make eval"
+ ],
+ "scripts": [
+  "evals/questions.json",
+  "scripts/inject_faults.py",
+  "scripts/run_daily.py",
+  "scripts/run_eval.py",
+  "scripts/write_ops_results.py",
+  "sql/migrations/003_ops.sql",
+  "sql/ops/chosen_methods.sql",
+  "sql/ops/data_lag.sql",
+  "sql/ops/drift.sql",
+  "sql/ops/last_decision.sql",
+  "sql/ops/miss_by_month.sql",
+  "sql/ops/newest_actual.sql",
+  "sql/ops/run_get.sql",
+  "sql/ops/run_start.sql",
+  "sql/ops/run_supersede.sql",
+  "sql/ops/run_update.sql",
+  "sql/ops/stamp_run.sql",
+  "src/weatherwise/agent/evals.py",
+  "src/weatherwise/ops.py",
+  "tests/test_sprint5_ops.py"
+ ],
+ "table_order": [
+  "app_run_log"
+ ],
+ "captions": {
+  "01_eval.csv": {
+   "title": "Question set, live model, each case asked three times",
+   "note": "passed = attempts that met every check of the case. Expected values are read from the database when the evaluation runs. refused_by_number_check counts attempts whose answer was withheld."
+  },
+  "02_drift_check.csv": {
+   "title": "Drift check of the real daily run (torrance-2026-11-15)",
+   "note": "recent_mae_c = this project's average miss over the last 30 scored days; baseline_mae_c = its miss on the held-out year when the method was chosen. n_live = days scored on a forecast issued live (the rest are replays). drifted = at least 14 days, over 1.5 times the baseline and over 0.5 C worse."
+  },
+  "03_run_log.csv": {
+   "title": "Run log (app_run_log) for Torrance",
+   "note": "One row per day. waiting_approval = stopped at the gate."
+  },
+  "04_drift_evidence_1_tmin_lead1.csv": {
+   "title": "Evidence behind the drift flag: 1 tmin lead1",
+   "note": "Average miss and bias per month from the replayed forecasts. bias below 0 = forecast too cold."
+  }
+ },
+ "limits": [
+  "Drift is measured almost entirely on replayed forecasts so far: the live log started on 2026-11-14. The replay's models were fitted a year before, so part of what the check sees is that age, which a daily refit already removes.",
+  "For that reason the flag did not clear after the approved re-selection on 2026-11-15: the same methods were chosen again, the refitted model now adds about 1.9 C to the published low for tomorrow, and the check still reads 1.93 C against 0.70 C because it scores the year-old replay, not the model that runs. The run does not ask again for 7 days. Scoring only live forecasts needs at least 14 live days.",
+  "The drift rule (30 days, 1.5 times, 0.5 C) is a judgement, not tuned on data.",
+  "The mutation run for this sprint hung once (a test process idle for 4.5 hours, no time limit in the script). It was stopped, a time limit added, and the rest run as three workers, each on its own copy of the tree and its own test database.",
+  "The question set is 14 cases written by the author of the assistant; three attempts each show run-to-run variation, not a confidence interval.",
+  "The 'declines' rule of the grader is a phrase match. It shows the answer said no, not that everything else in it is right.",
+  "Fault injection runs on a small synthetic city in the test database with a stand-in for the weather APIs; the database restart and stop are real.",
+  "The 79 + 52 mutants of sprints 01-04 were not rerun this sprint.",
+  "No scheduler is installed: `make daily` is run by hand or by a scheduled task the user sets up."
+ ]
+}

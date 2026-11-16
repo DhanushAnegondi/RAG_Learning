@@ -193,7 +193,10 @@ class LeadCorrector:
         self._oof_dates = pd.DatetimeIndex(np.concatenate(dates))
         return {n: (actual, np.concatenate(p)) for n, p in preds.items()}
 
-    def fit(self, df: pd.DataFrame) -> "LeadCorrector":
+    def fit(self, df: pd.DataFrame, pin: dict[int, str] | None = None) -> "LeadCorrector":
+        """Choose a method per lead by cross-validation. `pin` (lead -> method) keeps a
+        choice made earlier instead; a pinned method that cannot be fitted on this data
+        falls back to the cross-validated one."""
         self.method: dict[int, str] = {}
         self.val_mae: dict[int, dict[str, float]] = {}
         self.band: dict[int, tuple[float, float]] = {}
@@ -207,9 +210,11 @@ class LeadCorrector:
             best = min(maes, key=maes.get)
             if maes[best] > maes["raw"] * (1 - self.min_gain):
                 best = "raw"
+            lead = int(lead)
+            if pin and pin.get(lead) in maes:
+                best = pin[lead]
             actual, pred = oof[best]
             lo, hi = np.quantile(actual - pred, self.quantiles)
-            lead = int(lead)
             self.oof_resid[lead] = pd.Series(actual - pred, index=self._oof_dates)
             self.method[lead], self.val_mae[lead] = best, maes
             self.band[lead] = (min(float(lo), 0.0), max(float(hi), 0.0))
@@ -323,8 +328,11 @@ def residual_quantiles(
     return out
 
 
+MAX_OBS_AGE_DAYS = 2  # a forecast needs an observation from yesterday or the day before
+
+
 def recent_anomaly(
-    anom: pd.Series, today: pd.Timestamp, window: int = 3, max_age_days: int = 2
+    anom: pd.Series, today: pd.Timestamp, window: int = 3, max_age_days: int = MAX_OBS_AGE_DAYS
 ) -> float:
     """Mean anomaly over the last `window` observed days, which must be contiguous and recent.
 

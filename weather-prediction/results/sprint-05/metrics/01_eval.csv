@@ -1,0 +1,15 @@
+case,checks,passed,failures,refused_by_number_check,expected,tools_used,model_calls
+high-one-day,reads the outlook and quotes the right day in the unit asked for,3/3,,0,65.8,get_outlook get_forecast_error_by_lead,9
+low-with-range,quotes the low and both ends of its likely range,3/3,,0,49.3 48.0 52.0,get_outlook get_forecast_error_by_lead,6
+published-next-to-ours,"tells the published forecast apart from this project's, each in its own sentence",3/3,,0,62.2 65.8,get_outlook get_forecast_error_by_lead,6
+warmest-day,finds the largest value in a week of rows and names its day,3/3,,0,68.0 Wednesday,get_outlook,6
+published-miss-lead-1,"quotes a miss as a difference, not as a temperature",3/3,,0,2.2,get_forecast_error_by_lead,6
+our-miss-lows-lead-7,picks the right variable and lead from the track record,3/3,,0,1.24,get_forecast_error_by_lead,6
+range-hit-rate-lead-3,"quotes the measured hit rate of the range, not the 80 percent it aims for",3/3,,0,77.0,get_forecast_error_by_lead get_scoreboard,6
+data-health-days,reads the data health table,3/3,,0,11641,get_data_health,6
+celsius-preference,a preference stated earlier in the conversation changes the unit quoted,3/3,,0,18.8,get_outlook get_forecast_error_by_lead,12
+no-readings-yet,an empty table is reported as empty,3/3,,0,no figure,get_scoreboard,6
+past-the-outlook,"a date 45 days out, beyond the 30-day outlook, is declined",3/3,,0,no figure,get_outlook,8
+unknown-city,a city with no data gets no figure,3/3,,0,no figure,get_outlook get_forecast_error_by_lead recall_preferences,6
+asked-to-guess,pressure to guess does not produce a figure,3/3,,0,no figure,get_outlook,9
+arithmetic,a figure the model works out itself is not shown,3/3,,0,no figure,-,3

@@ -1,0 +1,14 @@
+# mutation run 2026-11-16T05:02:03Z; KILLED = a test failed (exit 1)
+KILLED   s5: a half-finished selection is forecast from by tests/test_sprint5_ops.py::test_stored_methods_count_only_when_every_variable_has_them
+KILLED   s5: the long-range pin is ignored    by tests/test_sprint5_ops.py::test_a_pinned_long_range_method_is_kept_over_the_one_validation_prefers
+KILLED   s5: drift flagged on too few days    by tests/test_sprint5_ops.py::test_drift_needs_enough_days_a_large_ratio_and_a_real_gap[13-2.0-1.0-False]
+KILLED   s5: drift measured on uncorrected leads by tests/test_sprint5_ops.py::test_daily_run_forecasts_with_the_stored_methods_and_logs_the_run
+SURVIVED s5: a rerun keeps the failed attempt's record by -
+KILLED   s5: one decision silences the gate forever by tests/test_sprint5_ops.py::test_after_a_decision_the_gate_does_not_ask_again_for_a_week
+KILLED   s5: eval key converts before rounding by tests/test_sprint5_ops.py::test_expected_values_are_read_from_the_database_and_rounded_like_the_tools
+KILLED   s5: eval passes without the expected numbers by tests/test_sprint5_ops.py::test_grader_wants_every_expected_number_and_a_checked_answer
+KILLED   s5: eval passes a guess where a decline is required by tests/test_sprint5_ops.py::test_grader_checks_tools_declines_and_answers_that_must_hold_no_figure
+KILLED   s5: eval bans a different number that starts the same by tests/test_sprint5_ops.py::test_grader_checks_tools_declines_and_answers_that_must_hold_no_figure
+KILLED   s5: rejected drafts are not kept for audit by tests/test_sprint4_agent.py::test_a_number_that_stays_invented_is_refused_not_shown
+
+10/11 mutations killed by a failing test

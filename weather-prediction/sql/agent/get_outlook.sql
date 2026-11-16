@@ -2,7 +2,6 @@
 -- one row per day with high and low side by side.
 select
     date,
-    to_char(date, 'FMDay') as weekday,
     lead_days,
     issued_on,
     cast(
@@ -36,7 +35,8 @@ select
     cast(
         round(cast(max(published_c) filter (where variable = 'tmin') as numeric), 1)
         as double precision
-    ) as published_low_c
+    ) as published_low_c,
+    to_char(date, 'FMDay') as weekday
 from log_forecast
 where
     city = %(city)s

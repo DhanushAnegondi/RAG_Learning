@@ -19,12 +19,13 @@ Default city: **Torrance, California** (shown in °F; other cities are one confi
 2. [How the site works](#how-the-site-works)
 3. [How the forecast is made](#how-the-forecast-is-made)
 4. [The planning assistant](#the-planning-assistant)
-5. [Run it](#run-it)
-6. [Daily use](#daily-use)
-7. [How it is tested](#how-it-is-tested)
-8. [Honest limits](#honest-limits)
-9. [Repo layout](#repo-layout)
-10. [Sprints](#sprints)
+5. [Running it every day](#running-it-every-day)
+6. [Run it](#run-it)
+7. [Daily use](#daily-use)
+8. [How it is tested](#how-it-is-tested)
+9. [Honest limits](#honest-limits)
+10. [Repo layout](#repo-layout)
+11. [Sprints](#sprints)
 
 ---
 
@@ -272,6 +273,101 @@ answers against the database is the next sprint.
 
 ---
 
+## Running it every day
+
+`make daily` is the run meant for every morning. It is deliberately not the same as the first
+run.
+
+```
+fetch -> check -> gate -> forecast -> finish
+```
+
+| Step | What it does | If it goes wrong |
+|---|---|---|
+| fetch | new actuals, archived forecasts, today's live forecast | the run is marked `failed` at `fetch` with the reason; nothing is half-loaded |
+| check | rebuilds the SQL tables, measures how late the data is, measures drift | actuals one day late: a warning on the run. Two or more: the run stops here, no forecast is issued |
+| gate | only if drift was found: stops and waits for you | the run stays `waiting_approval` until you answer, even across restarts |
+| forecast | today's forecast with the methods already in use | |
+| finish | backs up your entries and the live forecast log, marks the run `ok` | |
+
+**It does not re-choose its methods every day.** Which correction is used for each number of
+days ahead was chosen once, on data the models had not seen. The daily run refits those same
+methods on the newest data and forecasts. Choosing again every day would let the method list
+chase noise, and nobody would notice when it changed.
+
+**Drift, and why a person decides.** Each morning the run compares this project's average miss
+over the last 30 scored days with its miss when the method was chosen. If the recent miss is
+more than 1.5 times that, and more than 0.5 °C worse, on at least 14 days, the run stops:
+
+```bash
+make daily
+#   run torrance-2026-11-15: waiting_approval at step gate
+#   waiting for you: --approve torrance-2026-11-15  or  --decline torrance-2026-11-15
+```
+
+`--approve` chooses the methods again on today's data (a few minutes). `--decline` forecasts
+with the current ones. Either way the decision is recorded on the run.
+
+**This happened on the first real run.** The first real run for Torrance (`torrance-2026-11-15`) stopped at the gate. Of 14 checks (high and low, 1 to 7 days ahead), 1 was flagged: the daily low 1 day ahead, where the average miss over the last 30 scored days was 1.866 °C against 0.697 °C when the method was chosen. Month by month the change is plain (bias below 0 = too cold):
+
+| Month | weatherwise miss | weatherwise bias | published bias |
+|---|---|---|---|
+| 2026-07 | 0.48 °C | -0.19 °C | -1.36 °C |
+| 2026-08 | 0.5 °C | -0.39 °C | -2.05 °C |
+| 2026-09 | 0.36 °C | -0.26 °C | -1.82 °C |
+| 2026-10 | 1.71 °C | -1.56 °C | -1.68 °C |
+| 2026-11 | 2.0 °C | -2.0 °C | -2.23 °C |
+
+The published forecast for that lead turned colder, and a correction learned on the older bias no longer fits. Decision recorded on the run: approved. Source: `results/sprint-05/metrics/04_drift_evidence_1_tmin_lead1.csv`.
+
+**The flag did not clear after the approval, and that is a limit of the check.** The
+re-selection chose the same methods (the blend is still best on the held-out year). The
+refitted model did adapt: it now adds about 1.9 °C to the published low for the next day.
+But the check still reads 1.93 °C against 0.70 °C, because it scores replayed forecasts made
+by models fitted a year earlier, not the model that runs today. Until there are at least 14
+live days (the live log started on 2026-11-14) it measures the age of the replay more than
+the health of the forecast. After a decision the run does not ask again for 7 days and says
+on each run that the flag is still set.
+
+**Every run leaves one row** in `app_run_log`: `running`, `waiting_approval`, `ok` or `failed`,
+with the step, the reason, the drift table and your decision. Running `make daily` again
+after a failure makes a new attempt from the first step; every step is safe to repeat. A day
+that already ended `ok` is not run twice.
+
+**What was broken on purpose** (`make faults`, output in `results/sprint-05/run/faults.out`):
+
+| Fault | Where the run ends | Recovery |
+|---|---|---|
+| Weather API down | `failed` at `fetch`, reason kept, no data changed | run again: `ok` on attempt 2 |
+| Actuals one day late | `ok`, with a warning | none needed |
+| Actuals two days late | `failed` at `check`, no forecast issued | run again when the data arrives |
+| Database restarted mid-run | never `ok` without its forecast | the run waits for the database, or a rerun finishes it |
+| Database down | the run refuses to start and says why | start the database, run again |
+| Forecasts drifted | `waiting_approval`, nothing retrained | approve or decline |
+
+All 13 checks pass. The first version of that script found a real defect: a run that had
+finished and was marked `ok` was flipped to `failed` because the database restarted while the
+last checkpoint was being saved. A finished run now stays finished.
+
+### Scoring the assistant
+
+`make eval` puts a fixed set of 14 questions to the live model, three times each, and
+grades the answers against the database. The answer key is not typed in: each case carries
+SQL that reads the expected values when the evaluation runs.
+
+| Kind of question | What must be true to pass |
+|---|---|
+| A value that is stored (a high, a range, an average miss, a hit rate) | the exact figures are in the answer, the right tool was used, and the answer passed the number check |
+| Something not stored (a city with no data, readings you have not entered) | no figure at all |
+| A day past the 30-day outlook, or a demand to guess | the answer says the data cannot answer it |
+| Arithmetic the model would have to do itself | the result is not shown |
+
+**Result:** 42 of 42 attempts passed; 14 of 14 cases passed every attempt (model `claude-sonnet-5-5`, effort medium; `results/sprint-05/run/eval.out`).
+
+**How it got there, and why that matters.** The first measured run was 37 of 42 attempts. Every failure was a correct answer withheld: the model added a rounded figure in plain language ("the low 70s"), and the number check treats a rounded figure as invented. 20 drafts were turned down in that run; one rewrite rescued most. The instructions now tell the model to describe in words, not rounded digits. On the same questions afterwards: 42 of 42, with 2 drafts turned down. The final run with the stricter grader also passed every attempt, with 8 drafts turned down and rewritten, so the rounding habit is reduced, not gone. Two things to hold against that number: the instructions were tuned on the same 14 questions they are scored on, and the grading rules were changed twice after results were seen (both changes are written into `evals/questions.json` and `results/sprint-05/review.md`, with the earlier outputs kept). The answer key reads the same stored tables the assistant reads, so this scores whether stored figures are quoted correctly and guesses refused. It does not score whether the stored figures are right, or whether the advice is good.
+
+---
+
 ## Run it
 
 Needs: Docker Desktop, [uv](https://docs.astral.sh/uv/), `make` (Git Bash on Windows).
@@ -293,10 +389,13 @@ make agent Q="Is Saturday warm enough for the beach, and how sure is that?"
 Other commands:
 
 ```bash
-make test       # 184 tests against a real Postgres test database
+make test       # 221 tests against a real Postgres test database
 make check      # ruff + sqlfluff
 make mutate     # break the code on purpose; every break must fail a test
 make prove-resume  # kill the assistant mid-run, resume it, check nothing ran twice
+make daily      # the every-morning run: fetch, check for drift, forecast
+make faults     # break the daily run six ways and check where each one ends
+make eval       # score the assistant against the database (needs the API key)
 make results    # rebuild results/index.html (every sprint, every table, every output)
 make down       # stop Postgres (data is kept in a Docker volume)
 ```
@@ -309,7 +408,8 @@ Settings live in `.env` (copy `.env.example`). Nothing secret is in the repo.
 
 ## Daily use
 
-1. Open the site. If the forecast date is not today, press **Update forecast**.
+1. Run `make daily` (or schedule it). If it stops for drift, approve or decline. The
+   site's **Update forecast** button does a full first-run-style update instead.
 2. In the evening, or the next day, open **Check a day** and type what you saw.
 3. After a couple of weeks the **Scoreboard** tells you, on your own readings, whether
    weatherwise or the published forecast has been closer.
@@ -322,15 +422,18 @@ happens, and nothing can change it afterwards.
 ## How it is tested
 
 - **Tests first.** Each test was seen failing before its code existed
-  (`results/<sprint>/run/red*.out`), then passing. 184 tests, listed with the bug each one
+  (`results/<sprint>/run/red*.out`), then passing. 221 tests, listed with the bug each one
   catches in [`tests/CATALOG.md`](tests/CATALOG.md).
 - **Real database.** Tests run against Postgres, not a mock.
-- **Mutation check.** A script breaks the code in 131 specific ways (flip a sign, drop a
-  key column, let the model peek at the future). Each break must make a named test fail. This sprint the 52 breaks of the assistant's files were run (52 caught); the 79 older ones were last run in sprint 03.
+- **Mutation check.** A script breaks the code in 180 specific ways (flip a sign, drop a
+  key column, let the model peek at the future). Each break must make a named test fail. This sprint the 49 breaks of the daily run, the drift check and the graders were run (49 caught); the 79 and 52 older ones were last run in sprints 03 and 04.
 - **The assistant is tested offline.** A scripted stand-in replaces the model, so tests
   need no API key and give the same result every time. They cover the read-only role, the
   tool log and replay, timeouts and retries, the number check, the call limit, preferences
   across conversations and resume after a crash.
+- **The daily run is tested on a small synthetic city** with a stand-in for the weather
+  APIs: the stored methods are used, drift pauses the run before anything is retrained,
+  an outage or late data ends in a stated state, a rerun recovers.
 - **No peeking.** The last 12 months are never used to fit, choose or tune anything. Tests
   inject a +10 °C jump into that window and assert nothing learned from it.
 - **Two independent reviews per sprint**, one of the code and one of the tests. Findings and
@@ -360,6 +463,13 @@ happens, and nothing can change it afterwards.
   does not check that a correct number is attached to the right day, and it refuses a sum
   or difference the model works out itself, even a correct one.
 - **One local user.** Conversations are not access-controlled.
+- **Drift is measured mostly on replayed forecasts so far.** The live log started on
+  2026-11-14. The drift thresholds are a judgement, not tuned.
+- **The question set is small and written by the same hands as the assistant.** It shows
+  whether stored figures are quoted correctly and guesses are refused; it does not show the
+  advice is good.
+- **Nothing schedules the daily run.** `make daily` is run by hand, or by a scheduled task
+  you set up.
 
 ---
 
@@ -372,8 +482,11 @@ sql/raw/                 loaders (insert ... on conflict)
 sql/staging/, sql/marts/ cleaning rules, forecast-vs-actual tables, verification views
 sql/site/, sql/checks/   the site's queries, checksum and test reset
 sql/agent/               the assistant's tool queries and its read-only grants
+sql/ops/                 the daily run: drift, data lag, run log
 src/weatherwise/         ingest, warehouse, models, deep (LSTM), pipeline, observations, site, report
-src/weatherwise/agent/   tools, grounding (the number check), graph, scripted (offline model)
+src/weatherwise/agent/   tools, grounding (the number check), graph, scripted (offline model), evals
+src/weatherwise/ops.py   the daily run graph and the drift gate
+evals/                   the scored question set
 web/                     the site's page, script and styles
 scripts/                 one entry point per make target
 tests/                   tests and CATALOG.md
@@ -391,7 +504,7 @@ data/                    CSV backups of your entries and the live forecast log
 | 01 | Forecast-error audit and first 7/30-day outlook (Bengaluru, DuckDB) | done |
 | 02 | Torrance, four weather models, blend and recent-bias correction, LSTM, forecast log, site | built on DuckDB, frozen, carried into 03 |
 | 03 | Port to Postgres in Docker: migrations, safe reloads, same numbers | done |
-| 04 | LangGraph planning assistant: typed read-only SQL tools, checkpoints, memory, logged tool calls, number check | this sprint |
-| 05 | Operations: daily run, drift detection with approval, scored question set, fault injection | planned |
+| 04 | LangGraph planning assistant: typed read-only SQL tools, checkpoints, memory, logged tool calls, number check | done |
+| 05 | Operations: daily run, drift detection with approval, scored question set, fault injection | this sprint |
 
 Plan and acceptance criteria: [`docs/spec-postgres-agent.md`](docs/spec-postgres-agent.md).

@@ -241,7 +241,9 @@ def create_app(
     def ask(q: Question) -> dict:
         """One question to the assistant. Send the returned thread_id back to continue
         the same conversation."""
-        return agent().ask(q.question, q.thread_id)
+        out = agent().ask(q.question, q.thread_id)
+        out.pop("rejected")  # drafts the number check turned down stay on the server
+        return out
 
     @app.get("/api/agent/thread")
     def thread(thread_id: str = Query(max_length=64)) -> dict:

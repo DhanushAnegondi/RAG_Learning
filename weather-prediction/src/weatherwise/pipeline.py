@@ -105,6 +105,18 @@ def q(con, sql: str, params: list | None = None) -> pd.DataFrame:
     return warehouse.frame(con, sql, params)
 
 
+def model_pairs(con, city: str) -> pd.DataFrame:
+    """Every archived forecast next to what happened, all weather models side by side."""
+    pairs = q(
+        con,
+        "select date, lead_days, variable, forecast_c, fc_gfs, fc_ecmwf, fc_gem, actual_c "
+        "from mart_model_pairs where city = %s",
+        [city],
+    )
+    pairs["date"] = pd.to_datetime(pairs["date"])
+    return pairs
+
+
 def daily_series(con, city: str, var: str) -> pd.Series:
     if var not in VARIABLES:  # formatted into SQL below
         raise ValueError(f"unknown variable {var!r}")
@@ -270,13 +282,14 @@ def mae_by_lead(bt: pd.DataFrame, col: str = "pred_c") -> pd.Series:
     return (bt[col] - bt["actual_c"]).abs().groupby(bt["lead_days"]).mean()
 
 
-def select_long(series: pd.Series, use_lstm: bool) -> tuple:
+def select_long(series: pd.Series, use_lstm: bool, pin: str | None = None) -> tuple:
     """Choose the long-range method on the last year of `series`, with models fit only on the
-    days before that year. Returns (chosen, that year's misses by lead, val_mae, by_lead)."""
+    days before that year. Returns (chosen, that year's misses by lead, val_mae, by_lead).
+    `pin` keeps a method chosen earlier, when it is one of the methods run here."""
     val, _ = long_backtests(series.iloc[:-365], series, series.index[-365:-HORIZON], use_lstm)
     by_lead = {m: mae_by_lead(bt) for m, bt in val.items()}
     val_mae = {m: float(s.loc[SHORT_LEADS + 1 :].mean()) for m, s in by_lead.items()}
-    chosen = choose_long(val_mae)
+    chosen = pin if pin in val else choose_long(val_mae)
     resid = {
         int(lead): (g["actual_c"] - g["pred_c"]).set_axis(pd.DatetimeIndex(g["date"]))
         for lead, g in val[chosen].groupby("lead_days")
@@ -370,16 +383,20 @@ def build_outlook(
     pairs: pd.DataFrame,
     today: pd.Timestamp,
     use_lstm: bool = False,
+    pin: dict | None = None,
 ) -> pd.DataFrame:
-    """Production fit on all data (the evaluation above used the holdout)."""
+    """Production fit on all data (the evaluation above used the holdout). `pin` =
+    {"short": {lead: method}, "long": method} keeps the methods of an earlier selection
+    (the daily run); without it the methods are chosen again."""
+    pin = pin or {}
     obs = actual.dropna()
     clim = models.Climatology().fit(obs.index, obs.to_numpy())
     anom = actual - clim.predict(actual.index)
     coef = models.fit_anomaly_decay(anom, HORIZON, WINDOW)
-    corr = models.LeadCorrector().fit(pairs)
+    corr = models.LeadCorrector().fit(pairs, pin=pin.get("short"))
     live = live_frame(con, city, var, today, pairs)
     recent = models.recent_anomaly(anom, today, WINDOW)
-    chosen, resid, _, _ = select_long(actual, use_lstm)
+    chosen, resid, _, _ = select_long(actual, use_lstm, pin.get("long"))
     long_pred, source = None, "climatology + anomaly"
     if chosen != "decay":
         from weatherwise import deep
@@ -488,13 +505,7 @@ def run_city(con, city, today: date, test_months: int = 12, use_lstm: bool = Tru
     (forecast log, leaderboard, run stamp). Needs build_models to have run on fresh data."""
     test_start = pd.Timestamp(today) - pd.DateOffset(months=test_months)
     log(f"[split] train < {test_start.date()} <= test")
-    pairs_all = q(
-        con,
-        "select date, lead_days, variable, forecast_c, fc_gfs, fc_ecmwf, fc_gem, actual_c "
-        "from mart_model_pairs where city = %s",
-        [city.name],
-    )
-    pairs_all["date"] = pd.to_datetime(pairs_all["date"])
+    pairs_all = model_pairs(con, city.name)
     now = pd.Timestamp(datetime.now(UTC).replace(tzinfo=None, microsecond=0))
     summary, outlook, short_tests, boards, logs = {}, {}, {}, [], []
     for var in VARIABLES:
