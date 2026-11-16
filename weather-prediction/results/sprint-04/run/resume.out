@@ -1,0 +1,28 @@
+# kill-and-resume proof, thread proof-20261115T195415, 2026-11-15T19:54:15Z
+question: How warm is tomorrow, and how far off is a day-ahead forecast usually?
+
+== step 1: run, killed inside the second tool ==
+[child] killed inside get_forecast_error_by_lead (os._exit 137)
+child exit code: 137
+agent.tool_call after the kill:
+  proof-20261115T195415:call_1           get_outlook                  ok       attempts=1 rows=1 finished=2026-11-15 19:54:19.808160
+  proof-20261115T195415:call_2           get_forecast_error_by_lead   running  attempts=1 rows=None finished=None
+checkpoint: next node = ('tools',), messages saved = 2
+
+== step 2: a new process resumes the same thread ==
+[child] answer: The forecast high for 2026-11-15 is 72.1 F. Day-ahead published forecasts have missed by 2.2 F on average.
+[child] model calls 2, numbers checked: True
+child exit code: 0
+agent.tool_call after the resume:
+  proof-20261115T195415:call_1           get_outlook                  ok       attempts=1 rows=1 finished=2026-11-15 19:54:19.808160
+  proof-20261115T195415:call_2           get_forecast_error_by_lead   ok       attempts=2 rows=7 finished=2026-11-15 19:54:24.700834
+
+== checks ==
+PASS  first run was killed (exit 137)
+PASS  checkpoint was waiting at the tools step
+PASS  first tool finished before the kill
+PASS  second tool was cut off
+PASS  resume finished (exit 0)
+PASS  first tool ran once
+PASS  first tool was not rerun (same finish time)
+PASS  second tool ran again and finished

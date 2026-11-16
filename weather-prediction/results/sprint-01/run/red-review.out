@@ -1,0 +1,40 @@
+# RED for review-driven tests, against the code as reviewed. 2026-11-15T01:55:51Z
+$ .venv/Scripts/python -m pytest -q -rfE --tb=line tests/test_review_fixes.py
+F..F.........FFF......FF...                                              [100%]
+================================== FAILURES ===================================
+E   requests.exceptions.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+D:\Projects\AI_projects\weatherwise\tests\test_review_fixes.py:25: requests.exceptions.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+E   TypeError: fetch_all() got an unexpected keyword argument 'session'
+D:\Projects\AI_projects\weatherwise\tests\test_review_fixes.py:96: TypeError: fetch_all() got an unexpected keyword argument 'session'
+E   Failed: DID NOT RAISE ValueError
+D:\Projects\AI_projects\weatherwise\tests\test_review_fixes.py:238: Failed: DID NOT RAISE ValueError
+E   Failed: DID NOT RAISE ValueError
+D:\Projects\AI_projects\weatherwise\tests\test_review_fixes.py:238: Failed: DID NOT RAISE ValueError
+E   AttributeError: module 'weatherwise.models' has no attribute 'recent_anomaly'
+D:\Projects\AI_projects\weatherwise\tests\test_review_fixes.py:246: AttributeError: module 'weatherwise.models' has no attribute 'recent_anomaly'
+E   AttributeError: module 'weatherwise.pipeline' has no attribute 'calibrate_bands'
+D:\Projects\AI_projects\weatherwise\tests\test_review_fixes.py:350: AttributeError: module 'weatherwise.pipeline' has no attribute 'calibrate_bands'
+E   AttributeError: module 'weatherwise.pipeline' has no attribute 'short_range_finding'
+D:\Projects\AI_projects\weatherwise\tests\test_review_fixes.py:369: AttributeError: module 'weatherwise.pipeline' has no attribute 'short_range_finding'
+=========================== short test summary info ===========================
+FAILED tests/test_review_fixes.py::test_fetch_json_retries_gateway_error_with_html_body
+FAILED tests/test_review_fixes.py::test_fetch_all_on_new_years_day_never_requests_an_inverted_range
+FAILED tests/test_review_fixes.py::test_outlook_refuses_missing_published_forecast[0]
+FAILED tests/test_review_fixes.py::test_outlook_refuses_missing_published_forecast[2]
+FAILED tests/test_review_fixes.py::test_recent_anomaly_uses_contiguous_window_and_checks_age
+FAILED tests/test_review_fixes.py::test_long_range_bands_are_out_of_sample - ...
+FAILED tests/test_review_fixes.py::test_short_range_findings_report_kept_raw_and_worst_lead
+exit=1
+
+# RED rerun after fixing the sprint-order test marker ('ten' matched 'content='). 2026-11-15T01:56:23Z
+F                                                                        [100%]
+================================== FAILURES ===================================
+E   assert 2709 < 2486
+     +  where 2709 = <built-in method index of str object at 0x000002A66F021690>('zq-ten-zq')
+     +    where <built-in method index of str object at 0x000002A66F021690> = "<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-...='sub'>g</p>\n<h3>What the run found</h3><ul class='findings'><li>zq-ten-zq</li></ul>\n</section></main></body></html>".index
+     +  and   2486 = <built-in method index of str object at 0x000002A66F021690>('zq-nine-zq')
+     +    where <built-in method index of str object at 0x000002A66F021690> = "<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-...='sub'>g</p>\n<h3>What the run found</h3><ul class='findings'><li>zq-ten-zq</li></ul>\n</section></main></body></html>".index
+D:\Projects\AI_projects\weatherwise\tests\test_review_fixes.py:390: assert 2709 < 2486
+=========================== short test summary info ===========================
+FAILED tests/test_review_fixes.py::test_report_orders_sprint_10_above_sprint_9
+exit=1

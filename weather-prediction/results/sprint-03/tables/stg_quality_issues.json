@@ -1,0 +1,23 @@
+{
+ "table": "stg_quality_issues",
+ "row_count": 0,
+ "columns": [
+  [
+   "city",
+   "text"
+  ],
+  [
+   "source",
+   "text"
+  ],
+  [
+   "seen_at",
+   "timestamp without time zone"
+  ],
+  [
+   "reason",
+   "text"
+  ]
+ ],
+ "sample": []
+}

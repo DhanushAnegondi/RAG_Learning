@@ -1,0 +1,98 @@
+{
+ "table": "agent.tool_call",
+ "row_count": 21,
+ "columns": [
+  [
+   "call_id",
+   "text"
+  ],
+  [
+   "thread_id",
+   "text"
+  ],
+  [
+   "tool",
+   "text"
+  ],
+  [
+   "args",
+   "jsonb"
+  ],
+  [
+   "status",
+   "text"
+  ],
+  [
+   "attempts",
+   "integer"
+  ],
+  [
+   "row_count",
+   "integer"
+  ],
+  [
+   "ms",
+   "integer"
+  ],
+  [
+   "error",
+   "text"
+  ],
+  [
+   "result",
+   "jsonb"
+  ],
+  [
+   "started_at",
+   "timestamp without time zone"
+  ],
+  [
+   "finished_at",
+   "timestamp without time zone"
+  ]
+ ],
+ "sample": [
+  [
+   "proof-20261115T170939:call_1",
+   "proof-20261115T170939",
+   "get_outlook",
+   "{'city': 'torrance', 'days': 1}",
+   "ok",
+   1,
+   1,
+   467,
+   null,
+   "{'rows': [{'date': '2026-11-15', 'low_c': 14.2, 'low_f': 57.6, 'high_c': 22.3, 'high_f': 72.1, 'issued_on': '2...",
+   "2026-11-15 17:09:49.669595",
+   "2026-11-15 17:09:50.242948"
+  ],
+  [
+   "proof-20261115T171057:call_2",
+   "proof-20261115T171057",
+   "get_forecast_error_by_lead",
+   "{'city': 'torrance', 'variable': 'tmax'}",
+   "ok",
+   2,
+   7,
+   125,
+   null,
+   "{'rows': [{'n_days': 1756, 'lead_days': 1, 'published_bias_c': -0.63, 'published_bias_f': -1.1, 'weatherwise_m...",
+   "2026-11-15 17:11:02.043384",
+   "2026-11-15 17:11:05.843116"
+  ],
+  [
+   "proof-20261115T170939:call_2",
+   "proof-20261115T170939",
+   "get_forecast_error_by_lead",
+   "{'city': 'torrance', 'variable': 'tmax'}",
+   "error",
+   2,
+   null,
+   308,
+   "InsufficientPrivilege: permission denied for table mart_error_by_lead",
+   null,
+   "2026-11-15 17:09:50.372448",
+   "2026-11-15 17:09:55.420528"
+  ]
+ ]
+}

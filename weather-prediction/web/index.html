@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>weatherwise</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <h1>weatherwise</h1>
+    <p>What the forecast says, how far off it usually is, and whether it matched what you saw.</p>
+  </div>
+  <div class="controls">
+    <label>City <select id="city"></select></label>
+    <div class="seg" role="group" aria-label="Temperature unit">
+      <button type="button" data-unit="F">&deg;F</button>
+      <button type="button" data-unit="C">&deg;C</button>
+    </div>
+    <button type="button" id="refresh" class="ghost" title="Fetch new data and re-forecast (a few minutes)">Update forecast</button>
+  </div>
+</header>
+<p id="status" class="status" role="status"></p>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" data-tab="forecast" aria-selected="true">Forecast</button>
+  <button role="tab" data-tab="check">Check a day</button>
+  <button role="tab" data-tab="score">Scoreboard</button>
+  <button role="tab" data-tab="record">Track record</button>
+  <button role="tab" data-tab="data">Data</button>
+  <button role="tab" data-tab="ask">Ask</button>
+</nav>
+
+<main>
+<section id="tab-forecast" class="tab">
+  <h2>Next 7 days</h2>
+  <p class="hint" id="issued"></p>
+  <div id="week" class="cards"></div>
+  <h2>Next 30 days</h2>
+  <p class="hint">Line = the forecast. Shaded band = where the real value landed 8 times out of 10 in the past for a forecast this far ahead. Days 8 to 30 are a seasonal expectation, not a day-level forecast.</p>
+  <div class="grid2">
+    <figure><figcaption>Daily high</figcaption><div id="chart-tmax" class="chart"></div></figure>
+    <figure><figcaption>Daily low</figcaption><div id="chart-tmin" class="chart"></div></figure>
+  </div>
+  <details><summary>All 30 days as a table</summary><div id="outlook-table" class="scroll"></div></details>
+</section>
+
+<section id="tab-check" class="tab" hidden>
+  <h2>Check a day</h2>
+  <p class="hint">Type the high and/or low you saw (your thermometer, your car, a weather app's "observed" value). The site shows what was forecast for that day, from 1 day before up to 30 days before, and whether it matched.</p>
+  <form id="entry" class="entry">
+    <label>Day <input type="date" name="date" required></label>
+    <label>High <input type="number" name="tmax" step="0.1" inputmode="decimal" placeholder="e.g. 72"></label>
+    <label>Low <input type="number" name="tmin" step="0.1" inputmode="decimal" placeholder="e.g. 58"></label>
+    <label>Unit <select name="unit"><option>F</option><option>C</option></select></label>
+    <label class="wide">Note (optional) <input type="text" name="note" maxlength="120" placeholder="where you read it"></label>
+    <button type="submit">Save and compare</button>
+  </form>
+  <p id="entry-error" class="error" role="alert"></p>
+  <div id="check-result"></div>
+  <h3>Your entries</h3>
+  <div id="entries" class="scroll"></div>
+</section>
+
+<section id="tab-score" class="tab" hidden>
+  <h2>Scoreboard</h2>
+  <p class="hint">Built only from the days you entered: weatherwise against the published forecast, judged by your own readings.</p>
+  <div id="score-tiles" class="tiles"></div>
+  <div id="score-table" class="scroll"></div>
+  <p class="hint" id="score-note"></p>
+</section>
+
+<section id="tab-record" class="tab" hidden>
+  <h2>Track record</h2>
+  <p class="hint" id="record-hint"></p>
+  <h3>Average miss by how far ahead the forecast was made</h3>
+  <div class="grid2">
+    <figure><figcaption>Daily high</figcaption><div id="mae-tmax" class="chart"></div></figure>
+    <figure><figcaption>Daily low</figcaption><div id="mae-tmin" class="chart"></div></figure>
+  </div>
+  <h3>Day-before forecast against what happened (last 120 days of the held-out year)</h3>
+  <div id="hist-tmax" class="chart tall"></div>
+  <h3>Every method, every lead</h3>
+  <p class="hint">Average miss on the held-out year. The highlighted cell is the method the forecast uses; it was picked on earlier data, before the held-out year was looked at, so it is not always the lowest number in the row.</p>
+  <div id="board" class="scroll"></div>
+  <h3>How wrong the published forecast has been since 2022</h3>
+  <div id="by-lead" class="scroll"></div>
+</section>
+
+<section id="tab-data" class="tab" hidden>
+  <h2>Data</h2>
+  <h3>Health check</h3>
+  <p class="hint">What arrived from the sources, what survived cleaning, what is missing.</p>
+  <div id="quality" class="scroll"></div>
+  <h3>Rows rejected by the cleaning rules</h3>
+  <div id="issues" class="scroll"></div>
+  <h3>Tables</h3>
+  <p class="hint">Every table in the warehouse, raw to final, with its columns, row count and first rows.</p>
+  <div id="tables"></div>
+</section>
+<section id="tab-ask" class="tab" hidden>
+  <h2>Ask</h2>
+  <p class="hint">A planning assistant that reads the same tables as the other tabs. It may only state numbers that are stored in the database; if it cannot support a figure, it says so. It does not make forecasts.</p>
+  <div id="chat" class="chat" aria-live="polite"></div>
+  <form id="ask" class="ask">
+    <input type="text" name="question" maxlength="2000" required autocomplete="off" placeholder="e.g. Is Saturday warm enough for the beach, and how sure is that?">
+    <button type="submit">Ask</button>
+    <button type="button" id="new-chat" class="ghost">New conversation</button>
+  </form>
+  <p id="ask-error" class="error" role="alert"></p>
+</section>
+</main>
+<div id="tip" class="tip" hidden></div>
+<script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+{
+ "table": "raw_user_observation",
+ "row_count": 0,
+ "columns": [
+  [
+   "city",
+   "text"
+  ],
+  [
+   "date",
+   "date"
+  ],
+  [
+   "tmax_c",
+   "double precision"
+  ],
+  [
+   "tmin_c",
+   "double precision"
+  ],
+  [
+   "note",
+   "text"
+  ],
+  [
+   "entered_at",
+   "timestamp without time zone"
+  ]
+ ],
+ "sample": []
+}

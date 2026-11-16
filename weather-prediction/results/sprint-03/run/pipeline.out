@@ -1,0 +1,32 @@
+[start] city=torrance today=2026-11-14 (city clock) db=weatherwise utc=2026-11-15T05:51:07Z
+[fetch] actuals (ERA5 archive) 1995-01-01..2026-11-13
+[load] raw_actual_daily rows=11640
+[fetch] published forecasts 2022-01-01..2022-12-31 hourly values=122640 table rows=931453
+[fetch] published forecasts 2023-01-01..2023-12-31 hourly values=121856 table rows=931453
+[fetch] published forecasts 2024-01-01..2024-12-31 hourly values=229124 table rows=931453
+[fetch] published forecasts 2025-01-01..2025-12-31 hourly values=245280 table rows=931453
+[fetch] published forecasts 2026-01-01..2026-11-13 hourly values=212553 table rows=931453
+[load] raw_live_forecast rows=64 (issued_on=2026-11-14)
+[checksum] raw_actual_daily rows=11640 digest=787424844578237319244
+[checksum] raw_live_forecast rows=64 digest=-97087622810963481845
+[checksum] raw_published_hourly rows=931453 digest=-3033062765516420294168
+[split] train < 2025-11-14 <= test
+[eval tmax] lead1 published MAE 1.29 -> 1.14 (blend); lead30 lstm 2.91 vs clim 2.86; long-range validation MAE decay 2.134, lstm 2.032, mix 2.065
+[eval tmin] lead1 published MAE 1.53 -> 0.7 (blend); lead30 decay 2.1 vs clim 2.3; long-range validation MAE decay 1.150, lstm 1.215, mix 1.174
+[load] log_forecast rows=20416
+[table] raw_actual_daily: 11640 rows
+[table] raw_published_hourly: 931453 rows
+[table] raw_live_forecast: 64 rows
+[table] raw_user_observation: 0 rows
+[table] stg_actual_daily: 11640 rows
+[table] stg_published_daily: 38778 rows
+[table] stg_quality_issues: 0 rows
+[table] mart_forecast_error: 24542 rows
+[table] mart_error_by_lead: 14 rows
+[table] mart_model_pairs: 24542 rows
+[table] mart_data_quality: 5 rows
+[table] log_forecast: 20416 rows
+[table] app_model_eval: 222 rows
+[table] mart_verification: 0 rows
+[table] mart_scoreboard: 0 rows
+[done] wrote results\sprint-03

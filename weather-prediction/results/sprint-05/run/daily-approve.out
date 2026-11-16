@@ -1,0 +1,23 @@
+[split] train < 2025-11-15 <= test
+[eval tmax] lead1 published MAE 1.29 -> 1.12 (blend); lead30 lstm 2.91 vs clim 2.85; long-range validation MAE decay 2.134, lstm 2.030, mix 2.063
+[eval tmin] lead1 published MAE 1.53 -> 0.7 (blend); lead30 decay 2.1 vs clim 2.3; long-range validation MAE decay 1.151, lstm 1.196, mix 1.166
+[load] log_forecast rows=20476
+run torrance-2026-11-15: ok at step done, attempt 1
+  mode: reselect
+  decision at the gate: approved
+  drift check (recent average miss against the miss when the method was chosen):
+    variable lead method     days live  recent  stored  drifted
+    tmax        1 blend        30    0   1.394   1.141  no
+    tmax        2 blend        30    0   1.099   1.115  no
+    tmax        3 blend        30    0   1.210   1.083  no
+    tmax        4 blend        30    0   1.400   1.214  no
+    tmax        5 blend        30    0   1.513   1.389  no
+    tmax        6 blend        30    0   1.976   1.580  no
+    tmax        7 ens_mean     30    0   2.277   1.772  no
+    tmin        1 blend        30    0   1.866   0.697  YES
+    tmin        2 blend        30    0   1.119   0.764  no
+    tmin        3 blend        30    0   1.145   0.841  no
+    tmin        4 blend        30    0   1.165   0.867  no
+    tmin        5 blend        30    0   1.304   1.003  no
+    tmin        6 blend        30    0   1.584   1.154  no
+    tmin        7 blend        30    0   1.589   1.278  no

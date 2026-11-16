@@ -1,0 +1,23 @@
+{
+ "table": "stg_quality_issues",
+ "row_count": 0,
+ "columns": [
+  [
+   "city",
+   "VARCHAR"
+  ],
+  [
+   "source",
+   "VARCHAR"
+  ],
+  [
+   "seen_at",
+   "TIMESTAMP"
+  ],
+  [
+   "reason",
+   "VARCHAR"
+  ]
+ ],
+ "sample": []
+}

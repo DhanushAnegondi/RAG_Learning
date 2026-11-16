@@ -1,0 +1,73 @@
+# live run against Claude, 2026-11-15T19:41:24Z. Real Torrance database.
+
+== 1. a planning question ==
+$ run_agent.py "How warm will tomorrow be in Torrance, and how far off is a day-ahead forecast usually?"
+[tool] get_outlook {'city': 'torrance', 'days': 2} -> ok, 2 rows, 676 ms
+[tool] get_forecast_error_by_lead {'city': 'torrance', 'variable': 'tmax'} -> ok, 7 rows, 342 ms
+**Tomorrow (Monday 2026-11-16) in Torrance should reach a high of 70.9 ?F.** The likely range is 66.4 to 71.6 ?F. The unadjusted published forecast says 67.5 ?F. I'd plan on a mild day, and the low end of the range is the main risk if you need it to be warm.
+
+The forecast for tomorrow was issued on 2026-11-14, so it's a 2-day-ahead forecast. Over the last 12 months, 2-day-ahead published forecasts missed the daily high by 2.2 ?F on average. They ran about 1.2 ?F too cool (a bias of -1.2). This project's own forecast missed by 2.0 ?F on average, and the actual high fell inside the stated range on 76.7% of days.
+
+For a true day-ahead forecast, the published average miss is 2.2 ?F. This project's average miss is 2.1 ?F, and the high fell inside the range on 73.7% of days. About 7.9% of days were off by 5.4 ?F or more.
+[thread ae156a204acd481a9ad920a1a857fcbf] model calls 2, numbers checked: ok
+exit 0
+
+== 2. same conversation: a preference ==
+$ run_agent.py --thread ae156a204acd481a9ad920a1a857fcbf From now on use Fahrenheit, my home city is Torrance, and warn me about any day above 75 F.
+[tool] remember_preference {'key': 'units', 'value': 'F'} -> ok, 1 rows, 92 ms
+[tool] remember_preference {'key': 'home_city', 'value': 'torrance'} -> ok, 1 rows, 68 ms
+[tool] remember_preference {'key': 'hot_day_threshold', 'value': '75 F'} -> ok, 1 rows, 114 ms
+I saved all three preferences:
+- **Units:** Fahrenheit.
+- **Home city:** Torrance.
+- **Hot-day warning:** any day above 75 F.
+
+I'll flag any forecast day above 75 F when I check the outlook for you.
+[thread ae156a204acd481a9ad920a1a857fcbf] model calls 4, numbers checked: ok
+exit 0
+
+== 3. a new conversation: are the preferences known? ==
+$ run_agent.py Any days in the next week I should worry about?
+[tool] get_outlook {'city': 'torrance', 'days': 7} -> ok, 7 rows, 49 ms
+[tool] get_forecast_error_by_lead {'city': 'torrance', 'variable': 'tmax'} -> ok, 7 rows, 92 ms
+No day in the next week looks like a problem. Every forecast high stays below your hot-day threshold, and the top of every high range is also below it. The most noticeable change is that it cools off toward the weekend.
+
+- **Today, Sunday:** The high is 72.1 F, likely between 70.2 and 74.5 F. This is the warmest day, and the top of its range is the closest to your threshold.
+- **Monday and Tuesday:** Highs are 70.9 F and 68.0 F.
+- **Wednesday through Saturday:** Highs are 68.2, 65.7, 66.2 and 65.5 F.
+- **Cooler nights:** The low drops to 47.7 F on Friday, likely between 46.2 and 51.1 F. Saturday's low is 48.4 F, likely between 45.9 and 53.1 F. You have no cold-night threshold saved, so tell me one if you want those nights flagged.
+- **Saturday's range:** The high range runs from 61.7 to 72.7 F, which is wider than on other days. That makes Saturday the least certain day.
+
+**Accuracy:** At 1 day ahead, this project's high forecasts have missed by an average of 2.1 F over the last 12 months. At 7 days ahead the average miss is 3.2 F. The range has held the real high on 72.9% of days at 7 days ahead. The published forecast's worst miss at that distance is 21.8 F, so the later days are less certain.
+
+I'd plan normally. Check again midweek for the weekend.
+[thread 61c0d8117d5747eda43bf30cc36ece89] model calls 3, numbers checked: ok
+exit 0
+
+== 4. a question the data cannot answer ==
+$ run_agent.py What will the high be in Torrance on Christmas Day, December 25?
+[tool] get_outlook {'city': 'torrance', 'days': 30} -> ok, 30 rows, 296 ms
+I cannot give that answer: it contained figures that are not in the forecast data I can read. Ask me for the outlook, the forecast's track record, a day you entered, your scoreboard or the data health, and I will quote what is stored.
+[thread 1debd693891f4eaa85977c348fec280d] model calls 3, numbers checked: refused ['60']
+exit 0
+
+== 5. track record again, after the tool notes were made explicit ==
+$ run_agent.py For Torrance highs, how good is a 3-day-ahead forecast? Compare the published forecast with weatherwise and say which period each figure covers.
+[tool] get_forecast_error_by_lead {'city': 'torrance', 'variable': 'tmax'} -> ok, 7 rows, 111 ms
+At 3 days ahead, Torrance highs are forecast fairly well. Weatherwise is a little more accurate than the published forecast, but the two figures cover different periods, so the comparison isn't exact.
+
+**Published forecast** (whole stored history, 1754 days at this lead):
+- It misses by 2.4 F on average.
+- Its bias is -1.1 F, meaning it runs slightly cool.
+- It is off by 5.4 F or more on 8.3% of days.
+- Its worst miss was 14.8 F.
+
+**Weatherwise** (last 12 months only, a year its models never saw):
+- It misses by 1.9 F on average.
+- The actual high fell inside its likely range on 77.3% of days.
+
+The published forecast's average includes many years, while weatherwise's covers one year. The 0.5 F gap is therefore suggestive, not a strict like-for-like result.
+
+For planning, expect a 3-day-ahead high to be within about 2 F of the forecast. Allow for the roughly 1 in 4 days when the high falls outside the stated range.
+[thread 54c4b34d7a314317b4278428b7d79fbd] model calls 2, numbers checked: ok
+exit 0

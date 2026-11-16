@@ -1,0 +1,43 @@
+{
+ "table": "mart_scoreboard",
+ "row_count": 0,
+ "columns": [
+  [
+   "city",
+   "VARCHAR"
+  ],
+  [
+   "variable",
+   "VARCHAR"
+  ],
+  [
+   "lead_days",
+   "INTEGER"
+  ],
+  [
+   "n_checks",
+   "BIGINT"
+  ],
+  [
+   "our_mae_c",
+   "DOUBLE"
+  ],
+  [
+   "published_mae_c",
+   "DOUBLE"
+  ],
+  [
+   "our_mae_same_days_c",
+   "DOUBLE"
+  ],
+  [
+   "share_inside_range",
+   "DOUBLE"
+  ],
+  [
+   "your_reading_minus_era5_c",
+   "DOUBLE"
+  ]
+ ],
+ "sample": []
+}

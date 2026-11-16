@@ -1,0 +1,14 @@
+# mutation run 2026-11-16T05:02:03Z; KILLED = a test failed (exit 1)
+KILLED   s5: a swapped method is not reported by tests/test_sprint5_ops.py::test_a_stored_method_that_cannot_be_used_is_reported_not_swapped_silently
+KILLED   s5: the outlook ignores the pinned methods by tests/test_sprint5_ops.py::test_the_stored_method_is_used_even_where_selection_would_pick_another
+KILLED   s5: drift window unbounded           by tests/test_sprint5_ops.py::test_drift_uses_the_last_30_days_and_prefers_what_was_issued_live
+KILLED   s5: drift gap boundary moved         by tests/test_sprint5_ops.py::test_drift_needs_enough_days_a_large_ratio_and_a_real_gap[14-0.75-0.25-False]
+KILLED   s5: attempts are not counted         by tests/test_sprint5_ops.py::test_an_api_outage_fails_the_run_at_fetch_and_a_rerun_recovers
+KILLED   s5: an unanswered run stays open     by tests/test_sprint5_ops.py::test_an_unanswered_run_is_closed_when_the_next_day_starts
+KILLED   s5: eval key converts a gap as a temperature by tests/test_sprint5_ops.py::test_expected_values_are_read_from_the_database_and_rounded_like_the_tools
+KILLED   s5: a refused answer can pass the eval by tests/test_sprint5_ops.py::test_grader_wants_every_expected_number_and_a_checked_answer
+KILLED   s5: eval passes without the expected day by tests/test_sprint5_ops.py::test_grader_checks_which_number_is_which_and_which_day
+KILLED   s5: eval does not check which tool was used by tests/test_sprint5_ops.py::test_grader_checks_tools_declines_and_answers_that_must_hold_no_figure
+KILLED   s5: the number check sees turns the model no longer does by tests/test_sprint5_ops.py::test_a_figure_from_a_turn_that_was_trimmed_away_is_no_longer_a_source
+
+11/11 mutations killed by a failing test

@@ -1,0 +1,110 @@
+{
+ "table": "mart_model_pairs",
+ "row_count": 24542,
+ "columns": [
+  [
+   "city",
+   "text"
+  ],
+  [
+   "date",
+   "date"
+  ],
+  [
+   "lead_days",
+   "integer"
+  ],
+  [
+   "variable",
+   "text"
+  ],
+  [
+   "forecast_c",
+   "double precision"
+  ],
+  [
+   "fc_gfs",
+   "double precision"
+  ],
+  [
+   "fc_ecmwf",
+   "double precision"
+  ],
+  [
+   "fc_gem",
+   "double precision"
+  ],
+  [
+   "actual_c",
+   "double precision"
+  ]
+ ],
+ "sample": [
+  [
+   "torrance",
+   "2022-01-01",
+   1,
+   "tmax",
+   15.2,
+   15.2,
+   null,
+   null,
+   15.1
+  ],
+  [
+   "torrance",
+   "2022-01-01",
+   1,
+   "tmin",
+   10.5,
+   10.5,
+   null,
+   null,
+   6.5
+  ],
+  [
+   "torrance",
+   "2022-01-01",
+   2,
+   "tmax",
+   15.6,
+   15.6,
+   null,
+   null,
+   15.1
+  ],
+  [
+   "torrance",
+   "2022-01-01",
+   2,
+   "tmin",
+   10.7,
+   10.7,
+   null,
+   null,
+   6.5
+  ],
+  [
+   "torrance",
+   "2022-01-01",
+   3,
+   "tmax",
+   15.7,
+   15.7,
+   null,
+   null,
+   15.1
+  ],
+  [
+   "torrance",
+   "2022-01-01",
+   3,
+   "tmin",
+   10.7,
+   10.7,
+   null,
+   null,
+   6.5
+  ]
+ ]
+}

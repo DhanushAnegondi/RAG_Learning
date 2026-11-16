@@ -1,0 +1,9 @@
+.................F                                                       [100%]
+E       AssertionError: assert [{'d': '2026-...5, 'n': None}] == [{'d': '2026-...5, 'n': None}]
+E         
+E         At index 0 diff: {'d': '2026-11-13', 't': '2026-11-13', 'x': 1.5, 'n': None} != {'d': '2026-11-13', 't': '2026-11-13T00:00:30', 'x': 1.5, 'n': None}
+E         Use -v to get more diff
+51.63s call     tests/test_sprint3_review.py::test_run_city_logs_live_and_replayed_forecasts_and_replaces_the_leaderboard
+1.77s setup    tests/test_sprint3_review.py::test_unknown_city_is_a_404_on_every_page[scoreboard]
+1.37s setup    tests/test_sprint3_review.py::test_history_pairs_the_replayed_forecast_with_what_happened
+FAILED tests/test_sprint3_review.py::test_records_keeps_midnight_timestamps_as_timestamps

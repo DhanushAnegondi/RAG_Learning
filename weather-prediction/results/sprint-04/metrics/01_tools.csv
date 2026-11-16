@@ -1,0 +1,8 @@
+tool,arguments,reads,what it returns
+get_outlook,"city: string, days: integer",sql/agent/get_outlook.sql,"The newest forecast this project issued for a city: one row per day with the forecast high and low, the likely range for each (low end, high end) and the published forecast where one exists (days 1-7). Days 8-30 are a seasonal expectation, not a day-by-day forecast."
+get_forecast_error_by_lead,"city: string, variable: string",sql/agent/get_forecast_error_by_lead.sql,"Track record by days ahead (1-7) for the daily high or low: how far off the published forecast has been over the stored history (average miss, bias, share of days with a large miss, worst miss), and this project's average miss and range hit rate on the held-out year its models never saw."
+check_day,"city: string, day: string",sql/agent/check_day.sql,For a day the user typed a reading for: every forecast made for that day (1 to 30 days before) against the reading. error = forecast minus reading.
+get_scoreboard,city: string,sql/agent/get_scoreboard.sql,"Score on the user's own readings by days ahead: number of readings, this project's average miss, the published forecast's average miss, how often the reading fell inside the likely range, and reading minus grid data."
+get_data_health,city: string,sql/agent/get_data_health.sql,"What data arrived per source, how many days survived cleaning, how many were rejected or are missing, and the day the forecast was last run."
+remember_preference,"key: string, value: string",preference store,"Save a lasting preference the user states: units, home city, or a temperature threshold they care about. Use only when the user asks for it or states it."
+recall_preferences,none,preference store,List the preferences saved for this user.

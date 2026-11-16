@@ -1,0 +1,32 @@
+DIFF 01_outlook_next_30_days.csv
+  row 0 max_c: 22.2 -> 22.3
+  row 2 max_c: 20.1 -> 20.0
+  row 3 max_c: 19.7 -> 20.1
+  row 4 max_c: 18.8 -> 18.7
+  row 5 max_c: 18.4 -> 19.0
+  row 6 max_c: 18.9 -> 18.6
+  row 0 max_range_c: 21.2 - 23.5 -> 21.2 - 23.6
+  row 2 max_range_c: 18.6 - 21.8 -> 18.5 - 21.7
+  row 3 max_range_c: 18.1 - 21.8 -> 18.5 - 22.2
+  row 4 max_range_c: 16.8 - 21.4 -> 16.7 - 21.3
+  row 5 max_range_c: 16.1 - 20.8 -> 16.7 - 21.4
+  row 6 max_range_c: 16.8 - 22.9 -> 16.5 - 22.6
+SAME 02_published_error_by_lead.csv
+SAME 03_worst_day_ahead_misses.csv
+SAME 04_short_range_eval_tmax.csv
+SAME 04_short_range_eval_tmin.csv
+SAME 05_long_range_eval_tmax.csv
+SAME 05_long_range_eval_tmin.csv
+SAME 06_leaderboard_test_mae_tmax.csv
+SAME 06_leaderboard_test_mae_tmin.csv
+SAME 07_data_quality.csv
+SAME 08_cleaning_rejections.csv
+
+1 file(s) differ beyond 0.011
+
+Explained difference: 01_outlook_next_30_days.csv is the live outlook. The DuckDB run fetched
+the live forecast at 04:00 UTC, the Postgres runs later the same evening; in between, Open-Meteo
+published a new GFS run (best_match and gfs_seamless changed by up to 1.0 C for 15-21 Nov, ecmwf
+and gem did not; compared row by row from both stored raw_live_forecast tables). Every table
+computed from history (error by lead, both evaluations, leaderboards, data quality) is identical.
+The column band_p10_p90_c was renamed start_band_c after the review; values are unchanged.

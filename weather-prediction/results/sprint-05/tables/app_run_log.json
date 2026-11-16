@@ -1,0 +1,70 @@
+{
+ "table": "app_run_log",
+ "row_count": 1,
+ "columns": [
+  [
+   "run_id",
+   "text"
+  ],
+  [
+   "city",
+   "text"
+  ],
+  [
+   "today",
+   "date"
+  ],
+  [
+   "status",
+   "text"
+  ],
+  [
+   "step",
+   "text"
+  ],
+  [
+   "mode",
+   "text"
+  ],
+  [
+   "detail",
+   "jsonb"
+  ],
+  [
+   "error",
+   "text"
+  ],
+  [
+   "attempts",
+   "integer"
+  ],
+  [
+   "started_at",
+   "timestamp without time zone"
+  ],
+  [
+   "updated_at",
+   "timestamp without time zone"
+  ],
+  [
+   "finished_at",
+   "timestamp without time zone"
+  ]
+ ],
+ "sample": [
+  [
+   "torrance-2026-11-15",
+   "torrance",
+   "2026-11-15",
+   "ok",
+   "done",
+   "reselect",
+   "{'mode': 'forecast', 'drift': [{'method': 'blend', 'n_days': 30, 'n_live': 0, 'drifted': False, 'last_day': '2026-11-13', 'variable': 'tmax', 'first_day': '2026-10-15', 'lead_days': 1, 'recent_mae_c': 1.394, 'baseline_mae_c': 1.141}, {'method': 'blend', 'n_days': 30, 'n_live': 0, 'drifted': False, 'last_day': '2026-11-13', 'variable': 'tmax', 'first_day': '2026-10-15', 'lead_days': 2, 'recent_mae_c': 1.099, 'baseline_mae_c': 1.115}, {'method': 'blend', 'n_days': 30, 'n_live': 0, 'drifted': False, 'last_day': '2026-11-13', 'variable': 'tmax', 'first_day': '2026-10-15', 'lead_days': 3, 'recent_mae_c': 1.21, 'baseline_mae_c': 1.083}, {'method': 'blend', 'n_days': 30, 'n_live': 0, 'drifted': False, 'last_day': '2026-11-13', 'variable': 'tmax', 'first_day': '2026-10-15', 'lead_days': 4, 'recent_mae_c': 1.4, 'baseline_mae_c': 1.214}, {'method': 'blend', 'n_days': 30, 'n_live': 0, 'drifted': False, 'last_day': '2026-11-13', 'variable': 'tmax', 'first_day': '2026-10-15', 'lead_days': 5, 'recent_mae_c': 1.513, 'baseline_mae_c': 1.389}, {'method': 'blend', 'n_days': 30, 'n_live': 0, 'drifted': False, 'last_day': '2026-11-13', 'variable': 'tmax', 'first_day': '2026-10-15', 'lead_days': 6, 'recent_mae_c': 1.976, 'baseline_mae_c': 1.58}, {'method': 'ens_mean', 'n_days': 30, 'n_live': 0, 'drifted': False, 'last_day': '2026-11-13', 'variable': 'tmax', 'first_day': '2026-10-15', 'lead_days': 7, 'recent_mae_c': 2.277, 'baseline_mae_c': 1.772}, {'method': 'blend', 'n_days': 30, 'n_live': 0, 'drifted': True, 'last_day': '2026-11-13', 'variable': 'tmin', 'first_day': '2026-10-15', 'lead_days': 1, 'recent_mae_c': 1.866, 'baseline_mae_c': 0.697}, {'method': 'blend', 'n_days': 30, 'n_live': 0, 'drifted': False, 'last_day': '2026-11-13', 'variable': 'tmin', 'first_day': '2026-10-15', 'lead_days': 2, 'recent_mae_c': 1.119, 'baseline_mae_c': 0.764}, {'method': 'blend', 'n_days': 30, 'n_live': 0, 'drifted': False, 'last_day': '2026-11-13', 'variable': 'tmin', 'first_day': '2026-10-15', 'lead_days': 3, 'recent_mae_c': 1.145, 'baseline_mae_c': 0.841}, {'method': 'blend', 'n_days': 30, 'n_live': 0, 'drifted': False, 'last_day': '2026-11-13', 'variable': 'tmin', 'first_day': '2026-10-15', 'lead_days': 4, 'recent_mae_c': 1.165, 'baseline_mae_c': 0.867}, {'method': 'blend', 'n_days': 30, 'n_live': 0, 'drifted': False, 'last_day': '2026-11-13', 'variable': 'tmin', 'first_day': '2026-10-15', 'lead_days': 5, 'recent_mae_c': 1.304, 'baseline_mae_c': 1.003}, {'method': 'blend', 'n_days': 30, 'n_live': 0, 'drifted': False, 'last_day': '2026-11-13', 'variable': 'tmin', 'first_day': '2026-10-15', 'lead_days': 6, 'recent_mae_c': 1.584, 'baseline_mae_c': 1.154}, {'method': 'blend', 'n_days': 30, 'n_live': 0, 'drifted': False, 'last_day': '2026-11-13', 'variable': 'tmin', 'first_day': '2026-10-15', 'lead_days': 7, 'recent_mae_c': 1.589, 'baseline_mae_c': 1.278}], 'drifted': [{'method': 'blend', 'n_days': 30, 'n_live': 0, 'drifted': True, 'last_day': '2026-11-13', 'variable': 'tmin', 'first_day': '2026-10-15', 'lead_days': 1, 'recent_mae_c': 1.866, 'baseline_mae_c': 0.697}], 'decision': 'approved', 'lag_days': 0, 'warnings': []}",
+   null,
+   1,
+   "2026-11-15 22:13:10.442584",
+   "2026-11-15 23:03:47.862848",
+   "2026-11-15 23:03:47.862848"
+  ]
+ ]
+}

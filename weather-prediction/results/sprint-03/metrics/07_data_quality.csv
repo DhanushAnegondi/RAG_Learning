@@ -1,0 +1,6 @@
+source,raw_rows,usable_days,first_date,last_date,rejected_days,missing_days
+actuals (ERA5 daily),11640,11640,1995-01-01,2026-11-13,0,0
+forecast 1 day ahead: best_match,42180,1756,2022-01-01,2026-11-13,2,22
+forecast 1 day ahead: ecmwf_ifs025,24344,1014,2024-02-04,2026-11-13,1,0
+forecast 1 day ahead: gem_seamless,24626,1024,2024-01-20,2026-11-13,3,5
+forecast 1 day ahead: gfs_seamless,42180,1756,2022-01-01,2026-11-13,2,22

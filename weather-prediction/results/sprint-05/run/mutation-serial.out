@@ -1,0 +1,17 @@
+# mutation run 2026-11-15T23:29:01Z; KILLED = a test failed (exit 1)
+KILLED   s5: a finished day is run again      by tests/test_sprint5_ops.py::test_running_again_the_same_day_does_no_work
+KILLED   s5: drift never pauses the run       by tests/test_sprint5_ops.py::test_drift_pauses_the_run_and_declining_keeps_the_methods
+KILLED   s5: declining still retrains         by tests/test_sprint5_ops.py::test_drift_pauses_the_run_and_declining_keeps_the_methods
+KILLED   s5: stale data is not stopped at the check by tests/test_sprint5_ops.py::test_late_actuals_are_a_warning_then_a_stop
+KILLED   s5: late data is not mentioned       by tests/test_sprint5_ops.py::test_late_actuals_are_a_warning_then_a_stop
+SURVIVED s5: a finished run is flipped to failed by -
+KILLED   s5: every daily run re-chooses the methods by tests/test_sprint5_ops.py::test_daily_run_forecasts_with_the_stored_methods_and_logs_the_run
+KILLED   s5: stored short-range methods are ignored by tests/test_sprint5_ops.py::test_daily_run_forecasts_with_the_stored_methods_and_logs_the_run
+KILLED   s5: a first run has no methods and does not choose any by tests/test_sprint5_ops.py::test_first_run_with_no_stored_methods_selects_them_without_asking
+KILLED   s5: a decision is accepted for a run that is not waiting by tests/test_sprint5_ops.py::test_approving_drift_reselects_the_methods
+KILLED   s5: every lead is reported as drifted by tests/test_sprint5_ops.py::test_daily_run_forecasts_with_the_stored_methods_and_logs_the_run
+KILLED   s5: two daily runs at once           by tests/test_sprint5_ops.py::test_only_one_daily_run_at_a_time
+KILLED   s5: a run for a past day is accepted by tests/test_sprint5_ops.py::test_a_day_the_data_has_already_reached_is_refused
+KILLED   s5: an approval is lost when the run fails by tests/test_sprint5_ops.py::test_an_approval_survives_a_failure_after_the_gate
+KILLED   s5: the gate asks again the day after a decision by tests/test_sprint5_ops.py::test_after_a_decision_the_gate_does_not_ask_again_for_a_week
+KILLED   s5: a hole in the newest actuals is found too late by tests/test_sprint5_ops.py::test_a_hole_in_the_last_three_days_stops_the_run_at_the_check

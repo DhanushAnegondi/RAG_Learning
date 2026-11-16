@@ -1,0 +1,6 @@
+All checks passed!
+39 files already formatted
+== [sql\agent\get_outlook.sql] FAIL
+L:   3 | P:   1 | ST06 | Select wildcards then simple targets before calculations
+                       | and aggregates. [structure.column_order]
+All Finished!

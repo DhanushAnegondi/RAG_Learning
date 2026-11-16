@@ -1,0 +1,143 @@
+{
+ "title": "sprint-02: forecast error audit and 7/30-day outlook (torrance)",
+ "goal": "Measure how far published forecasts drift from what happened, then forecast the next week (published forecast, corrected only where CV shows it helps) and next month (climatology + decaying anomaly), each with a measured p10-p90 range.",
+ "pattern": "batch ELT: raw -> staging -> marts (DuckDB) + per-lead MOS",
+ "findings": [
+  "Published day-ahead max-temp forecasts for torrance (2022-01-01 to 2026-11-13, 1756 days) missed by 1.243 C on average; 20% of days were off by 2 C or more and 8% by 3 C or more (worst 7.4 C).",
+  "Forecasts issued 7 days ahead missed by 1.748 C on average; 16% of days were off by 3 C or more.",
+  "Bias: published max temps run -0.62 C at lead 1 over the whole period (positive = forecast too warm); it drifts by year as the upstream model changes.",
+  "Test window (2025-11-14 onward), max temp: kept the published forecast at lead none (no correction beat it in CV); correction lowered error at lead 1, 2, 3, 4, 5, 6, 7; no lead got worse. The p10-p90 range held the actual value on 72.9% to 78.4% of days (target 80%).",
+  "min temp: kept the published forecast at lead none (no correction beat it in CV); correction lowered error at lead 1, 2, 3, 4, 5, 6, 7; no lead got worse. The p10-p90 range held the actual value on 72.9% to 79.7% of days (target 80%).",
+  "Beyond a week: max temp lead 30: model 2.91 C vs climatology 2.86 C vs persistence 4.09 C; min temp lead 30: model 2.1 C vs climatology 2.3 C vs persistence 2.45 C."
+ ],
+ "commands": [
+  "make test",
+  "make run",
+  "make results"
+ ],
+ "scripts": [
+  "scripts/build_results.py",
+  "scripts/mutation_check.py",
+  "scripts/run_pipeline.py",
+  "scripts/run_site.py",
+  "sql/marts/01_mart_forecast_error.sql",
+  "sql/marts/02_mart_error_by_lead.sql",
+  "sql/marts/03_mart_model_pairs.sql",
+  "sql/marts/04_mart_data_quality.sql",
+  "sql/marts/05_mart_verification.sql",
+  "sql/marts/06_mart_scoreboard.sql",
+  "sql/raw/00_create_raw.sql",
+  "sql/raw/delete_user_observation.sql",
+  "sql/raw/load_actual_daily.sql",
+  "sql/raw/load_forecast_log.sql",
+  "sql/raw/load_live_forecast.sql",
+  "sql/raw/load_model_eval.sql",
+  "sql/raw/load_published_hourly.sql",
+  "sql/raw/load_run.sql",
+  "sql/raw/load_user_observation.sql",
+  "sql/site/check.sql",
+  "sql/site/error_by_lead.sql",
+  "sql/site/forecast_cities.sql",
+  "sql/site/history.sql",
+  "sql/site/issues.sql",
+  "sql/site/leaderboard.sql",
+  "sql/site/observations.sql",
+  "sql/site/outlook.sql",
+  "sql/site/quality.sql",
+  "sql/site/runs.sql",
+  "sql/site/scoreboard.sql",
+  "sql/staging/stg_actual_daily.sql",
+  "sql/staging/stg_published_daily.sql",
+  "sql/staging/stg_quality_issues.sql",
+  "src/weatherwise/__init__.py",
+  "src/weatherwise/config.py",
+  "src/weatherwise/deep.py",
+  "src/weatherwise/ingest.py",
+  "src/weatherwise/models.py",
+  "src/weatherwise/observations.py",
+  "src/weatherwise/pipeline.py",
+  "src/weatherwise/report.py",
+  "src/weatherwise/site.py",
+  "src/weatherwise/warehouse.py"
+ ],
+ "table_order": [
+  "raw_actual_daily",
+  "raw_published_hourly",
+  "raw_live_forecast",
+  "raw_user_observation",
+  "stg_actual_daily",
+  "stg_published_daily",
+  "stg_quality_issues",
+  "mart_forecast_error",
+  "mart_error_by_lead",
+  "mart_model_pairs",
+  "mart_data_quality",
+  "log_forecast",
+  "app_model_eval",
+  "mart_verification",
+  "mart_scoreboard"
+ ],
+ "captions": {
+  "01_outlook_next_30_days.csv": {
+   "title": "Outlook from 2026-11-14: next 30 days",
+   "note": "Range = p10-p90, aiming for 8 in 10 days inside. Measured on the test window it held: tmax short 73-78%; tmax long 66-74%; tmin short 73-80%; tmin long 70-74%. Days 1-7 use the published forecast, corrected where CV showed it helps. Days 8-30 are climatology plus a decaying anomaly, because no archived forecasts past 7 days exist to check the published 8-16 day values (shown as published_* for reference)."
+  },
+  "02_published_error_by_lead.csv": {
+   "title": "How wrong published forecasts were, by lead",
+   "note": "error = forecast - actual. share_off_2c = fraction of days off by 2 C or more."
+  },
+  "03_worst_day_ahead_misses.csv": {
+   "title": "Worst day-ahead misses",
+   "note": "Lead 1, largest absolute errors."
+  },
+  "04_short_range_eval_tmax.csv": {
+   "title": "Next-week model vs baselines on the test window: max temp",
+   "note": "Same days for every method. chosen_method is picked by 4-fold rolling-origin CV over the last training year and must beat raw by 2%, else the published forecast is kept. last_365d_only_mae_c = ablation trained on the final year only."
+  },
+  "04_short_range_eval_tmin.csv": {
+   "title": "Next-week model vs baselines: min temp",
+   "note": ""
+  },
+  "05_long_range_eval_tmax.csv": {
+   "title": "Next-month model vs baselines on the test window: max temp",
+   "note": "anomaly_kept = share of today's anomaly carried to that lead."
+  },
+  "05_long_range_eval_tmin.csv": {
+   "title": "Next-month model vs baselines: min temp",
+   "note": ""
+  }
+ },
+ "limits": [
+  "Actuals are ERA5 reanalysis for the grid cell, not a weather station; the last few days of the archive are preliminary.",
+  "Published forecasts are Open-Meteo's best-match model (previous_dayN hourly values aggregated to daily max/min), not a specific app's forecast.",
+  "Leads 8-30 have no day-level skill in any public model; the 30-day line is a seasonal expectation with a measured range, not a weather forecast.",
+  "One test window of 12 months; MAE differences under about 0.1 C are within noise.",
+  "Training rows are cut on target date, not issue date: up to 6 days of actuals just before the test window were not yet known when a lead-7 forecast was issued (about 0.1% of rows).",
+  "Temperature only. Rain is fetched but not modelled this sprint."
+ ],
+ "provenance": {
+  "run_utc": "2026-11-15T04:10:32Z",
+  "city": {
+   "name": "torrance",
+   "latitude": 33.8358,
+   "longitude": -118.3406,
+   "timezone": "America/Los_Angeles",
+   "unit": "F"
+  },
+  "test_start": "2025-11-14",
+  "args": {
+   "city": "torrance",
+   "db": "D:\\Projects\\AI_projects\\RAG_Learning\\weather-prediction\\data\\warehouse.duckdb",
+   "sprint": "sprint-02",
+   "actuals_start": "1995-01-01",
+   "published_start": "2022-01-01",
+   "test_months": 12,
+   "skip_fetch": true,
+   "no_lstm": false
+  },
+  "python": "3.11.3",
+  "duckdb": "2.0.0",
+  "pandas": "3.1.1",
+  "sklearn": "1.9.1"
+ }
+}

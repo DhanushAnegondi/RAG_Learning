@@ -1,0 +1,16 @@
+
+=================================== ERRORS ====================================
+_________________ ERROR collecting tests/test_sprint5_ops.py __________________
+ImportError while importing test module 'D:\Projects\AI_projects\RAG_Learning\weather-prediction\tests\test_sprint5_ops.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\Dhanush\AppData\Local\Programs\Python\Python311\Lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_sprint5_ops.py:17: in <module>
+    from weatherwise import ingest, ops, pipeline, warehouse
+E   ImportError: cannot import name 'ops' from 'weatherwise' (D:\Projects\AI_projects\RAG_Learning\weather-prediction\src\weatherwise\__init__.py)
+=========================== short test summary info ===========================
+ERROR tests/test_sprint5_ops.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 141.00s (0:02:20)

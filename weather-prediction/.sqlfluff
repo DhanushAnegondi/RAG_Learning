@@ -1,0 +1,32 @@
+[sqlfluff]
+dialect = postgres
+templater = placeholder
+max_line_length = 100
+# RF04: `date` mirrors the Open-Meteo field name across SQL and Python; renaming it buys nothing.
+exclude_rules = RF04
+
+[sqlfluff:templater:placeholder]
+param_style = pyformat
+city = 'torrance'
+day = '2026-01-01'
+days = 7
+variable = 'tmax'
+today = '2026-01-01'
+min_days = 14
+max_lead = 7
+window = 3
+lead_days = 1
+ratio = 1.5
+gap = 0.5
+run_id = 'x'
+run_utc = '2026-01-01'
+status = 'ok'
+step = 'x'
+mode = 'x'
+detail = '{}'
+error = 'x'
+
+[sqlfluff:rules:capitalisation.keywords]
+capitalisation_policy = lower
+[sqlfluff:rules:capitalisation.functions]
+extended_capitalisation_policy = lower

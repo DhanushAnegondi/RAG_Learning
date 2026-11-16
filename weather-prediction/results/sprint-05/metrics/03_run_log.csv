@@ -1,0 +1,2 @@
+run_id,today,status,step,mode,attempts,error,warnings,decision,started_at,finished_at
+torrance-2026-11-15,2026-11-15,ok,done,reselect,1,,[],approved,2026-11-15 22:13:10.442584,2026-11-15 23:03:47.862848

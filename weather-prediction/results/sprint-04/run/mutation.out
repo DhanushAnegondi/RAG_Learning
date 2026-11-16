@@ -1,0 +1,55 @@
+# mutation run 2026-11-15T19:54:26Z; KILLED = a test failed (exit 1)
+KILLED   tools run with full privileges       by tests/test_sprint4_agent.py::test_tools_read_as_a_role_that_cannot_write_or_see_raw_tables
+KILLED   tool queries have no timeout         by tests/test_sprint4_agent.py::test_a_slow_query_times_out_is_retried_twice_then_reported_unavailable
+KILLED   a finished tool call runs again      by tests/test_sprint4_agent.py::test_a_finished_call_is_replayed_from_the_log_not_run_again
+KILLED   threads share tool call ids          by tests/test_sprint4_agent.py::test_a_finished_call_is_replayed_from_the_log_not_run_again
+KILLED   a miss converted as a temperature    by tests/test_sprint4_agent.py::test_error_tool_converts_misses_as_differences_not_temperatures
+KILLED   tool failures are not retried        by tests/test_sprint4_agent.py::test_a_slow_query_times_out_is_retried_twice_then_reported_unavailable
+KILLED   retries do not back off              by tests/test_sprint4_agent.py::test_a_slow_query_times_out_is_retried_twice_then_reported_unavailable
+KILLED   unknown tool arguments accepted      by tests/test_sprint4_agent.py::test_bad_tool_arguments_are_refused_and_logged_without_running[get_outlook-args5-sql:
+KILLED   outlook days unbounded               by tests/test_sprint4_agent.py::test_bad_tool_arguments_are_refused_and_logged_without_running[get_outlook-args0-days]
+KILLED   preferences leak between users       by tests/test_sprint4_agent.py::test_a_preference_saved_in_one_thread_is_known_in_another
+KILLED   a permission error is retried        by tests/test_sprint4_agent.py::test_a_query_the_role_may_not_run_fails_once_without_retries
+KILLED   any unit accepted as a preference    by tests/test_sprint4_agent.py::test_bad_tool_arguments_are_refused_and_logged_without_running[remember_preference-args7-units
+KILLED   no rewrite offered                   by tests/test_sprint4_agent.py::test_an_invented_number_gets_one_rewrite_and_then_passes
+KILLED   an unsupported number is shown       by tests/test_sprint4_agent.py::test_a_number_that_stays_invented_is_refused_not_shown
+KILLED   model call cap removed               by tests/test_sprint4_agent.py::test_model_calls_are_capped_per_thread
+KILLED   saved preferences never reach the model by tests/test_sprint4_agent.py::test_a_preference_saved_in_one_thread_is_known_in_another
+KILLED   the correction note counts as a source by tests/test_sprint4_agent.py::test_a_number_that_stays_invented_is_refused_not_shown
+KILLED   missing key not reported             by tests/test_sprint4_agent.py::test_site_chat_without_a_key_says_so
+KILLED   internal notes shown in the history  by tests/test_sprint4_agent.py::test_an_invented_number_gets_one_rewrite_and_then_passes
+KILLED   assistant reads an old outlook       by tests/test_sprint4_agent.py::test_outlook_tool_returns_the_newest_live_forecast_in_both_units
+KILLED   outlook ignores the days asked for   by tests/test_sprint4_agent.py::test_outlook_tool_returns_the_newest_live_forecast_in_both_units
+KILLED   check_day ignores the day            by tests/test_sprint4_agent.py::test_check_day_scoreboard_and_health_tools_read_their_marts
+KILLED   share reported as a fraction, labelled percent by tests/test_sprint4_agent.py::test_error_tool_converts_misses_as_differences_not_temperatures
+KILLED   reader role can read raw tables      by tests/test_sprint4_agent.py::test_tools_read_as_a_role_that_cannot_write_or_see_raw_tables
+KILLED   marts unreadable after a rebuild     by tests/test_sprint4_agent.py::test_marts_stay_readable_after_a_rebuild
+KILLED   number check accepts near misses     by tests/test_sprint4_agent.py::test_numbers_in_an_answer_must_come_from_the_sources
+KILLED   a whole number matches any value that rounds to it by tests/test_sprint4_agent.py::test_numbers_in_an_answer_must_come_from_the_sources
+KILLED   day of month counts as any number    by tests/test_sprint4_agent.py::test_numbers_in_an_answer_must_come_from_the_sources
+KILLED   a number after may is read as a date by tests/test_sprint4_agent.py::test_numbers_in_an_answer_must_come_from_the_sources
+KILLED   list numbering flagged as invented   by tests/test_sprint4_agent.py::test_numbers_in_an_answer_must_come_from_the_sources
+KILLED   invented dates pass the number check by tests/test_sprint4_agent.py::test_numbers_in_an_answer_must_come_from_the_sources
+KILLED   an invented written date passes      by tests/test_sprint4_agent.py::test_numbers_in_an_answer_must_come_from_the_sources
+KILLED   tool transaction is not read-only    by tests/test_sprint4_agent.py::test_tools_read_as_a_role_that_cannot_write_or_see_raw_tables
+KILLED   a reused call id is answered from the log by tests/test_sprint4_agent.py::test_a_call_id_reused_for_a_different_call_is_refused_not_answered_from_the_log
+KILLED   a missing value crashes the conversion by tests/test_sprint4_agent.py::test_a_day_with_no_published_forecast_has_no_invented_fahrenheit
+KILLED   the user's threshold number is rewritten by -
+KILLED   preferences saved under the wrong user by -
+KILLED   a huge result is sent whole          by -
+KILLED   a bug in a tool strands the conversation by -
+KILLED   a new question lands on an unfinished run by -
+KILLED   resuming an unknown thread crashes   by -
+KILLED   a refusal or cut-off reply is shown as the answer by -
+KILLED   a bad key looks like an outage       by -
+KILLED   an old error sticks to the conversation by -
+KILLED   earlier questions' tool calls reported again by -
+KILLED   tool arguments are not a source      by -
+KILLED   saved preferences are not a source   by -
+KILLED   a replayed forecast leaks into the outlook by -
+KILLED   assistant cannot start before the first run by -
+KILLED   a BOM hides the first key            by -
+KILLED   .env replaces a variable that is already set by -
+KILLED   export lines in .env are ignored     by -
+
+52/52 mutations killed by a failing test

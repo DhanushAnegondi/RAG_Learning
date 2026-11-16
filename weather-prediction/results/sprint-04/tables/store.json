@@ -1,0 +1,63 @@
+{
+ "table": "agent.store",
+ "row_count": 3,
+ "columns": [
+  [
+   "prefix",
+   "text"
+  ],
+  [
+   "key",
+   "text"
+  ],
+  [
+   "value",
+   "jsonb"
+  ],
+  [
+   "created_at",
+   "timestamp with time zone"
+  ],
+  [
+   "updated_at",
+   "timestamp with time zone"
+  ],
+  [
+   "expires_at",
+   "timestamp with time zone"
+  ],
+  [
+   "ttl_minutes",
+   "integer"
+  ]
+ ],
+ "sample": [
+  [
+   "prefs.local",
+   "units",
+   "{'value': 'F'}",
+   "2026-11-15 19:42:57.676611+00:00",
+   "2026-11-15 19:42:57.676611+00:00",
+   null,
+   null
+  ],
+  [
+   "prefs.local",
+   "home_city",
+   "{'value': 'torrance'}",
+   "2026-11-15 19:42:57.846026+00:00",
+   "2026-11-15 19:42:57.846026+00:00",
+   null,
+   null
+  ],
+  [
+   "prefs.local",
+   "hot_day_threshold",
+   "{'value': '75 F (23.9 C)'}",
+   "2026-11-15 19:42:58.087201+00:00",
+   "2026-11-15 19:42:58.087201+00:00",
+   null,
+   null
+  ]
+ ]
+}

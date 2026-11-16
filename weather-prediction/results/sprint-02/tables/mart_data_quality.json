@@ -1,0 +1,90 @@
+{
+ "table": "mart_data_quality",
+ "row_count": 5,
+ "columns": [
+  [
+   "city",
+   "VARCHAR"
+  ],
+  [
+   "source",
+   "VARCHAR"
+  ],
+  [
+   "raw_rows",
+   "BIGINT"
+  ],
+  [
+   "usable_days",
+   "BIGINT"
+  ],
+  [
+   "first_date",
+   "DATE"
+  ],
+  [
+   "last_date",
+   "DATE"
+  ],
+  [
+   "rejected_days",
+   "BIGINT"
+  ],
+  [
+   "missing_days",
+   "BIGINT"
+  ]
+ ],
+ "sample": [
+  [
+   "torrance",
+   "actuals (ERA5 daily)",
+   11640,
+   11640,
+   "1995-01-01",
+   "2026-11-13",
+   0,
+   0
+  ],
+  [
+   "torrance",
+   "forecast 1 day ahead: best_match",
+   42180,
+   1756,
+   "2022-01-01",
+   "2026-11-13",
+   2,
+   22
+  ],
+  [
+   "torrance",
+   "forecast 1 day ahead: ecmwf_ifs025",
+   24344,
+   1014,
+   "2024-02-04",
+   "2026-11-13",
+   1,
+   0
+  ],
+  [
+   "torrance",
+   "forecast 1 day ahead: gem_seamless",
+   24626,
+   1024,
+   "2024-01-20",
+   "2026-11-13",
+   3,
+   5
+  ],
+  [
+   "torrance",
+   "forecast 1 day ahead: gfs_seamless",
+   42180,
+   1756,
+   "2022-01-01",
+   "2026-11-13",
+   2,
+   22
+  ]
+ ]
+}

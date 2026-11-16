@@ -1,0 +1,68 @@
+...........................................................              [100%]
+=================================== PASSES ====================================
+______ test_fetch_all_on_new_years_day_never_requests_an_inverted_range _______
+---------------------------- Captured stdout call -----------------------------
+[fetch] actuals (ERA5 archive) 2020-01-01..2026-12-31
+[load] raw_actual_daily rows=0
+[fetch] published forecasts 2026-06-01..2026-12-31 hourly values=0 table rows=0
+[load] raw_live_forecast rows=0 (issued_on=2027-01-01)
+=========================== short test summary info ===========================
+PASSED tests/test_ingest.py::test_parse_daily_keeps_rows_and_nulls_as_nan
+PASSED tests/test_ingest.py::test_parse_previous_runs_goes_wide_to_long_by_lead_and_drops_nulls
+PASSED tests/test_ingest.py::test_parse_previous_runs_missing_lead_column_raises
+PASSED tests/test_ingest.py::test_parse_daily_without_daily_block_raises
+PASSED tests/test_ingest.py::test_fetch_json_retries_transient_then_succeeds
+PASSED tests/test_ingest.py::test_fetch_json_does_not_retry_client_error
+PASSED tests/test_ingest.py::test_fetch_json_gives_up_after_retries
+PASSED tests/test_ingest.py::test_fetch_json_error_body_with_200_raises
+PASSED tests/test_models.py::test_seasonal_features_shape_and_quarter_turn
+PASSED tests/test_models.py::test_climatology_recovers_season_and_trend
+PASSED tests/test_models.py::test_anomaly_decay_learns_geometric_ratio
+PASSED tests/test_models.py::test_split_by_date_is_strict
+PASSED tests/test_models.py::test_interval_coverage_inclusive_bounds
+PASSED tests/test_models.py::test_corrector_removes_constant_warm_bias
+PASSED tests/test_models.py::test_corrector_keeps_raw_when_forecast_is_unbiased
+PASSED tests/test_models.py::test_corrector_intervals_cover_about_80_percent
+PASSED tests/test_models.py::test_corrector_rejects_unseen_lead
+PASSED tests/test_models.py::test_outlook_blends_short_and_long_range
+PASSED tests/test_models.py::test_long_range_backtest_hand_computed
+PASSED tests/test_models.py::test_corrector_band_reflects_most_recent_year
+PASSED tests/test_report.py::test_page_lists_sprints_newest_first
+PASSED tests/test_report.py::test_page_shows_terminal_output_verbatim_and_escaped
+PASSED tests/test_report.py::test_page_shows_table_schema_count_and_sample
+PASSED tests/test_review_fixes.py::test_fetch_json_retries_gateway_error_with_html_body
+PASSED tests/test_review_fixes.py::test_fetch_json_retries_429_with_exponential_backoff
+PASSED tests/test_review_fixes.py::test_fetchers_send_location_timezone_and_variables
+PASSED tests/test_review_fixes.py::test_fetch_all_on_new_years_day_never_requests_an_inverted_range
+PASSED tests/test_review_fixes.py::test_sql_keeps_cities_and_leads_apart
+PASSED tests/test_review_fixes.py::test_error_by_lead_rmse_and_quantiles_hand_computed
+PASSED tests/test_review_fixes.py::test_actual_with_null_max_is_dropped_end_to_end
+PASSED tests/test_review_fixes.py::test_every_loader_is_idempotent_and_rejects_duplicate_batches[actual_daily]
+PASSED tests/test_review_fixes.py::test_every_loader_is_idempotent_and_rejects_duplicate_batches[published_hourly]
+PASSED tests/test_review_fixes.py::test_every_loader_is_idempotent_and_rejects_duplicate_batches[live_forecast]
+PASSED tests/test_review_fixes.py::test_live_forecasts_from_different_issue_days_both_survive
+PASSED tests/test_review_fixes.py::test_snapshot_rejects_unknown_table
+PASSED tests/test_review_fixes.py::test_outlook_seam_between_day_7_and_day_8
+PASSED tests/test_review_fixes.py::test_outlook_refuses_missing_published_forecast[0]
+PASSED tests/test_review_fixes.py::test_outlook_refuses_missing_published_forecast[2]
+PASSED tests/test_review_fixes.py::test_recent_anomaly_uses_contiguous_window_and_checks_age
+PASSED tests/test_review_fixes.py::test_corrector_with_too_little_history_fails_loudly
+PASSED tests/test_review_fixes.py::test_corrector_band_always_contains_prediction
+PASSED tests/test_review_fixes.py::test_anomaly_decay_with_three_day_window_hand_computed
+PASSED tests/test_review_fixes.py::test_residual_quantiles_on_ten_residuals
+PASSED tests/test_review_fixes.py::test_evaluate_long_never_learns_from_the_test_window
+PASSED tests/test_review_fixes.py::test_evaluate_short_never_learns_from_the_test_window
+PASSED tests/test_review_fixes.py::test_long_range_bands_are_out_of_sample
+PASSED tests/test_review_fixes.py::test_short_range_findings_report_kept_raw_and_worst_lead
+PASSED tests/test_review_fixes.py::test_report_orders_sprint_10_above_sprint_9
+PASSED tests/test_review_fixes.py::test_report_escapes_findings_and_csv_cells_and_embeds_charts
+PASSED tests/test_review_fixes.py::test_seasonal_features_hand_values
+PASSED tests/test_review_fixes.py::test_share_off_counts_an_error_of_exactly_3c
+PASSED tests/test_sql.py::test_load_is_idempotent_and_replaces_changed_rows
+PASSED tests/test_sql.py::test_load_duplicate_key_in_one_batch_fails_loudly
+PASSED tests/test_sql.py::test_load_rejects_unknown_table
+PASSED tests/test_sql.py::test_published_daily_uses_full_days_only
+PASSED tests/test_sql.py::test_forecast_error_sign_is_forecast_minus_actual
+PASSED tests/test_sql.py::test_forecast_error_excludes_days_without_actuals
+PASSED tests/test_sql.py::test_error_by_lead_metrics_hand_computed
+PASSED tests/test_sql.py::test_snapshot_reports_schema_count_and_sample
