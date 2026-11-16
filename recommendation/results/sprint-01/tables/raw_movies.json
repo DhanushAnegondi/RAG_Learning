@@ -1,0 +1,180 @@
+{
+ "table": "raw_movies",
+ "row_count": 237350,
+ "columns": [
+  [
+   "id",
+   "BIGINT"
+  ],
+  [
+   "title",
+   "VARCHAR"
+  ],
+  [
+   "original_title",
+   "VARCHAR"
+  ],
+  [
+   "original_language",
+   "VARCHAR"
+  ],
+  [
+   "status",
+   "VARCHAR"
+  ],
+  [
+   "release_date",
+   "VARCHAR"
+  ],
+  [
+   "runtime",
+   "BIGINT"
+  ],
+  [
+   "adult",
+   "BOOLEAN"
+  ],
+  [
+   "tconst",
+   "VARCHAR"
+  ],
+  [
+   "overview",
+   "VARCHAR"
+  ],
+  [
+   "tagline",
+   "VARCHAR"
+  ],
+  [
+   "genres",
+   "VARCHAR"
+  ],
+  [
+   "keywords",
+   "VARCHAR"
+  ],
+  [
+   "directors",
+   "VARCHAR"
+  ],
+  [
+   "cast_names",
+   "VARCHAR"
+  ],
+  [
+   "imdb_rating",
+   "DOUBLE"
+  ],
+  [
+   "imdb_votes",
+   "BIGINT"
+  ],
+  [
+   "popularity",
+   "DOUBLE"
+  ]
+ ],
+ "sample": [
+  [
+   5,
+   "Four Rooms",
+   "Four Rooms",
+   "en",
+   "Released",
+   "1995-12-09",
+   98,
+   false,
+   "tt0113101",
+   "It's Ted the Bellhop's first night on the job...and the hotel's very unusual guests are about to place him in some outrageous predicaments. It seems that this evening's room service is serving up one unbelievable happening after another.",
+   "Twelve outrageous guests. Four scandalous requests. And one lone bellhop, in his first day on the job, who's in for the wildest New year's Eve of his life.",
+   "Comedy",
+   "hotel, new year's eve, witch, bet, sperm, hotel room, anthology, los angeles, california, hoodlum, multiple storylines, woman director",
+   "Allison Anders, Alexandre Rockwell, Robert Rodriguez, Quentin Tarantino, Chuck Jones",
+   "Tim Roth, Jennifer Beals, Antonio Banderas, Valeria Golino, David Proval, Sammi Davis, Amanda de Cadenet, Madonna, Ione Skye, Lili Taylor",
+   6.7,
+   115992,
+   15.295
+  ],
+  [
+   6,
+   "Judgment Night",
+   "Judgment Night",
+   "en",
+   "Released",
+   "1993-10-15",
+   109,
+   false,
+   "tt0107286",
+   "While racing to a boxing match, Frank, Mike, John and Rey get more than they bargained for. A wrong turn lands them directly in the path of Fallon, a vicious, wise-cracking drug lord. After accidentally witnessing Fallon murder a disloyal henchman, the four become his unwilling prey in a savage game of cat and mouse as they are mercilessly stalked through the urban jungle in this taut suspense drama.",
+   "Don't move. Don't whisper. Don't even breathe.",
+   "Action, Crime, Thriller",
+   "drug dealer, chicago, illinois, escape, one night, boxing",
+   "Stephen Hopkins",
+   "Emilio Estevez, Cuba Gooding Jr., Denis Leary, Stephen Dorff, Jeremy Piven, Peter Greene, Michael DeLorenzo, Everlast, Michael Wiseman, Relioues Webb",
+   6.6,
+   20688,
+   13.564
+  ],
+  [
+   8,
+   "Life in Loops (A Megacities RMX)",
+   "Life in Loops (A Megacities RMX)",
+   "en",
+   "Released",
+   "2006-01-01",
+   80,
+   false,
+   "tt0825671",
+   "Timo Novotny labels his new project an experimental music documentary film, in a remix of the celebrated film Megacities (1997), a visually refined essay on the hidden faces of several world \"megacities\" by leading Austrian documentarist Michael Glawogger. Novotny complements 30 % of material taken straight from the film (and re-edited) with 70 % as yet unseen footage in which he blends original shots unused by Glawogger with his own sequences (shot by Megacities cameraman Wolfgang Thaler) from Tokyo. Alongside the Japanese metropolis, Life in Loops takes us right into the atmosphere of Mexico City, New York, Moscow and Bombay. This electrifying combination of fascinating film images and an equally compelling soundtrack from Sofa Surfers sets us off on a stunning audiovisual adventure across the continents. The film also makes an original contribution to the discussion on new trends in documentary filmmaking. Written by KARLOVY VARY IFF 2006",
+   "A Megacities remix.",
+   "Documentary",
+   "megacities",
+   "Timo Novotny",
+   null,
+   8.1,
+   285,
+   1.587
+  ],
+  [
+   11,
+   "Star Wars",
+   "Star Wars",
+   "en",
+   "Released",
+   "1977-05-25",
+   121,
+   false,
+   "tt0076759",
+   "Princess Leia is captured and held hostage by the evil Imperial forces in their effort to take over the galactic Empire. Venturesome Luke Skywalker and dashing captain Han Solo team together with the loveable robot duo R2-D2 and C-3PO to rescue the beautiful princess and restore peace and justice in the Empire.",
+   "A long time ago in a galaxy far, far away...",
+   "Adventure, Action, Science Fiction",
+   "empire, galaxy, rebellion, android, hermit, smuggling (contraband), freedom, rebel, rescue mission, space, planet, desert, super power, oppression, space opera, wizard, totalitarianism",
+   "George Lucas",
+   "Mark Hamill, Harrison Ford, Carrie Fisher, Peter Cushing, Alec Guinness, Anthony Daniels, Kenny Baker, Peter Mayhew, David Prowse, James Earl Jones",
+   8.6,
+   1550447,
+   88.559
+  ],
+  [
+   12,
+   "Finding Nemo",
+   "Finding Nemo",
+   "en",
+   "Released",
+   "2003-05-30",
+   100,
+   false,
+   "tt0266543",
+   "Nemo, an adventurous young clownfish, is unexpectedly taken from his Great Barrier Reef home to a dentist's office aquarium. It's up to his worrisome father Marlin and a friendly but forgetful fish Dory to bring Nemo home -- meeting vegetarian sharks, surfer dude turtles, hypnotic jellyfish, hungry seagulls, and more along the way.",
+   "There are 3.7 trillion fish in the ocean. They're looking for one.",
+   "Animation, Family",
+   "sydney, australia, parent child relationship, anthropomorphism, harbor, underwater, shark, pelican, fish tank, great barrier reef, sea turtle, missing child, aftercreditsstinger, duringcreditsstinger, short term memory loss, clownfish, father son reunion, protective father",
+   "Andrew Stanton, Lee Unkrich",
+   "Albert Brooks, Ellen DeGeneres, Alexander Gould, Willem Dafoe, Geoffrey Rush, Brad Garrett, Allison Janney, Austin Pendleton, Stephen Root, Vicki Lewis",
+   8.2,
+   1191150,
+   55.456
+  ]
+ ]
+}

@@ -1,0 +1,13 @@
+slice,method,users,recall_at_10,ndcg_at_10,hit_rate
+all films,most popular (baseline),5373,0.0353,0.0647,0.2719
+all films,content: films like your likes,5373,0.0107,0.0166,0.1033
+all films,item-item: liked by the same people,5373,0.0569,0.1014,0.3773
+all films,hybrid: blend weighted on validation,5373,0.0597,0.1057,0.3916
+Telugu films only,most popular (baseline),143,0.9571,0.6375,0.979
+Telugu films only,content: films like your likes,143,0.0182,0.0126,0.035
+Telugu films only,item-item: liked by the same people,143,0.4316,0.4055,0.4476
+Telugu films only,hybrid: blend weighted on validation,143,0.7671,0.4892,0.7972
+"Telugu films, users with no Telugu film in their history",most popular (baseline),130,0.9813,0.6294,0.9923
+"Telugu films, users with no Telugu film in their history",content: films like your likes,130,0.0195,0.0132,0.0308
+"Telugu films, users with no Telugu film in their history",item-item: liked by the same people,130,0.4577,0.4343,0.4615
+"Telugu films, users with no Telugu film in their history",hybrid: blend weighted on validation,130,0.8028,0.5023,0.8154

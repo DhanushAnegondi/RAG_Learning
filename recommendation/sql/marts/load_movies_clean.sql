@@ -1,0 +1,35 @@
+-- Full refresh of the cleaned film table from the frame clean.py returns (registered as
+-- `incoming`). warehouse.write_clean checks the frame has exactly the staged ids first.
+create or replace table mart_movies_clean as
+select
+    incoming.movie_id,
+    incoming.imdb_id,
+    incoming.title,
+    incoming.original_title,
+    incoming.language,
+    incoming.status,
+    incoming.release_date,
+    incoming.release_year,
+    incoming.runtime_min,
+    incoming.overview,
+    incoming.tagline,
+    incoming.genres,
+    incoming.keywords,
+    incoming.directors,
+    incoming.cast_names,
+    incoming.imdb_rating,
+    incoming.imdb_votes,
+    incoming.popularity,
+    incoming.score,
+    incoming.genres_fill_method,
+    incoming.title_filled,
+    incoming.release_year_filled,
+    incoming.runtime_min_filled,
+    incoming.genres_filled,
+    incoming.overview_filled,
+    incoming.keywords_filled,
+    incoming.directors_filled,
+    incoming.cast_names_filled,
+    incoming.imdb_rating_filled,
+    incoming.imdb_votes_filled
+from incoming;

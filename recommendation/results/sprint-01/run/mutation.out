@@ -1,0 +1,199 @@
+# mutation run 2026-11-16T20:26:05Z; KILLED = a test failed (exit 1)
+KILLED   other languages landed                       by tests/test_sql.py::test_load_movies_keeps_only_english_and_telugu
+KILLED   Telugu films cut by the English vote floor   by tests/test_sql.py::test_staging_keeps_telugu_below_the_english_vote_floor
+KILLED   adult titles kept                            by tests/test_sql.py::test_staging_excludes_adult_titles_and_treats_null_adult_as_not_adult
+KILLED   vote floor reads the kept copy only          by tests/test_sql.py::test_vote_floor_looks_at_the_highest_vote_count_among_the_copies_of_an_id
+KILLED   vote floor reads the lowest copy             by tests/test_sql.py::test_vote_floor_looks_at_the_highest_vote_count_among_the_copies_of_an_id
+KILLED   scope audit counts the vote floor on the kept copy by tests/test_sql.py::test_vote_floor_looks_at_the_highest_vote_count_among_the_copies_of_an_id
+KILLED   scope audit counts Telugu films under the floor by tests/test_sql.py::test_scope_audit_counts_add_up
+KILLED   duplicates not counted                       by tests/test_sql.py::test_vote_floor_looks_at_the_highest_vote_count_among_the_copies_of_an_id
+KILLED   dedup keeps the emptiest copy                by tests/test_sql.py::test_staging_dedup_keeps_the_most_complete_row
+KILLED   dedup keeps the least-voted copy             by tests/test_sql.py::test_dedup_equal_completeness_goes_to_more_votes_then_to_title
+KILLED   dedup title tie-break reversed               by tests/test_sql.py::test_dedup_equal_completeness_goes_to_more_votes_then_to_title
+KILLED   dedup tie-break on imdb_id dropped           by tests/test_sql.py::test_dedup_tie_never_depends_on_the_order_rows_were_loaded[tconst-imdb_id-tt1-tt2]
+KILLED   dedup tie-break on genres dropped            by tests/test_sql.py::test_dedup_tie_never_depends_on_the_order_rows_were_loaded[genres-genres-Action-Drama]
+KILLED   dedup tie-break on popularity dropped        by tests/test_sql.py::test_dedup_tie_never_depends_on_the_order_rows_were_loaded[popularity-popularity-1.0-9.0]
+KILLED   dedup tie-break on the adult flag dropped    by tests/test_sql.py::test_dedup_tie_between_an_adult_and_a_non_adult_copy_keeps_the_non_adult_one
+KILLED   zero runtime treated as real                 by tests/test_sql.py::test_staging_turns_blanks_zero_runtime_and_bad_dates_into_null_but_keeps_the_row
+KILLED   blank overview treated as real               by tests/test_sql.py::test_staging_turns_blanks_zero_runtime_and_bad_dates_into_null_but_keeps_the_row
+KILLED   blank title treated as real                  by tests/test_sql.py::test_every_blank_text_field_becomes_null
+KILLED   blank original title treated as real         by tests/test_sql.py::test_every_blank_text_field_becomes_null
+KILLED   blank IMDb id treated as real                by tests/test_sql.py::test_every_blank_text_field_becomes_null
+KILLED   blank tagline treated as real                by tests/test_sql.py::test_every_blank_text_field_becomes_null
+KILLED   blank status treated as real                 by tests/test_sql.py::test_every_blank_text_field_becomes_null
+KILLED   null adult flag drops the film               by tests/test_sql.py::test_staging_excludes_adult_titles_and_treats_null_adult_as_not_adult
+KILLED   latest rating kept, not the earliest         by tests/test_sql.py::test_two_movielens_ids_for_one_film_keep_the_earliest_rating_and_its_time[later
+KILLED   same-second tie goes to the higher MovieLens id by tests/test_sql.py::test_two_movielens_ids_rated_at_the_same_second_keep_the_lower_movielens_id
+KILLED   out-of-scope ratings kept                    by tests/test_sql.py::test_ratings_map_to_tmdb_ids_and_drop_out_of_scope_movies
+KILLED   link table not refreshed                     by tests/test_sql.py::test_ratings_rerun_gives_same_rows
+KILLED   test cutoff uses the wrong window            by tests/test_sql.py::test_split_cutoffs_count_back_whole_months_from_the_last_rating_day
+KILLED   validation boundary rating lost              by tests/test_sql.py::test_model_ratings_boundary_rating_exactly_at_validation_start_counts_as_late
+KILLED   sampled users dropped                        by tests/test_sql.py::test_model_ratings_keep_sampled_users_and_users_active_after_validation_start
+KILLED   audit counts the wrong flag                  by tests/test_sql.py::test_missing_audit_reports_every_column_with_its_own_counts_and_a_gap_left_after
+KILLED   audit reads the wrong column before cleaning by tests/test_sql.py::test_missing_audit_reports_every_column_with_its_own_counts_and_a_gap_left_after
+KILLED   audit never sees a year left missing         by tests/test_sql.py::test_missing_audit_reports_every_column_with_its_own_counts_and_a_gap_left_after
+KILLED   audit never sees genres left missing         by tests/test_sql.py::test_missing_audit_reports_every_column_with_its_own_counts_and_a_gap_left_after
+KILLED   audit votes flag reads the rating flag       by tests/test_sql.py::test_missing_audit_reports_every_column_with_its_own_counts_and_a_gap_left_after
+KILLED   coverage ignores the like rating setting     by tests/test_sql.py::test_rating_coverage_uses_the_like_rating_it_is_given
+KILLED   coverage median not computed                 by tests/test_sql.py::test_rating_coverage_counts_films_ratings_likes_and_the_median_by_language
+KILLED   like counts ignore the like rating setting   by tests/test_sql.py::test_like_counts_cut_at_validation_start_and_test_start_for_every_user
+KILLED   like count at the validation cutoff included by tests/test_sql.py::test_like_counts_cut_at_validation_start_and_test_start_for_every_user
+KILLED   like count at the test cutoff included       by tests/test_sql.py::test_like_counts_cut_at_validation_start_and_test_start_for_every_user
+KILLED   validation like count uses the test cutoff   by tests/test_sql.py::test_like_counts_cut_at_validation_start_and_test_start_for_every_user
+KILLED   row-count guard off                          by tests/test_sql.py::test_write_clean_refuses_a_frame_that_lost_or_gained_rows
+KILLED   id guard off                                 by tests/test_sql.py::test_write_clean_refuses_a_frame_with_different_ids
+KILLED   memory cap not set                           by tests/test_sql.py::test_a_file_warehouse_gets_a_memory_cap_a_spill_folder_and_unordered_inserts
+KILLED   spill folder not set                         by tests/test_sql.py::test_a_file_warehouse_gets_a_memory_cap_a_spill_folder_and_unordered_inserts
+KILLED   insertion order preserved (memory)           by tests/test_sql.py::test_a_file_warehouse_gets_a_memory_cap_a_spill_folder_and_unordered_inserts
+KILLED   snapshot sample in insertion order           by tests/test_sql.py::test_snapshot_sample_is_the_lowest_rows_not_insertion_order
+KILLED   like rating never passed to the marts        by tests/test_sql.py::test_rating_coverage_counts_films_ratings_likes_and_the_median_by_language
+KILLED   existing file refetched                      by tests/test_ingest.py::test_download_skips_existing_file_without_a_request
+KILLED   429 not retried                              by tests/test_ingest.py::test_download_retries_server_error_then_succeeds
+KILLED   short download kept                          by tests/test_ingest.py::test_download_truncated_body_is_not_kept
+KILLED   download without a length header never succeeds by tests/test_ingest.py::test_download_without_a_content_length_header_keeps_the_file
+KILLED   length checked on an encoded body            by tests/test_ingest.py::test_download_of_an_encoded_body_skips_the_length_check
+KILLED   connection error not retried                 by tests/test_ingest.py::test_download_retries_connection_error
+KILLED   loose zip member match                       by tests/test_ingest.py::test_extract_movielens_takes_only_ratings_and_links
+KILLED   no growing wait between retries              by tests/test_ingest.py::test_download_retries_server_error_then_succeeds
+KILLED   wait after the last attempt                  by tests/test_ingest.py::test_download_gives_up_after_the_last_attempt_without_a_final_wait
+KILLED   partial file left behind                     by tests/test_ingest.py::test_download_truncated_body_is_not_kept
+KILLED   a repeated zip member overwrites the first   by tests/test_ingest.py::test_extract_movielens_keeps_the_first_of_a_repeated_member
+KILLED   year filled with mean                        by tests/test_clean.py::test_year_is_the_language_median_of_observed_years
+KILLED   year ignores language                        by tests/test_clean.py::test_year_is_the_language_median_of_observed_years
+KILLED   runtime from a too-small group               by tests/test_clean.py::test_runtime_uses_language_and_first_genre_when_the_group_is_big_enough
+KILLED   runtime ignores genre                        by tests/test_clean.py::test_runtime_uses_language_and_first_genre_when_the_group_is_big_enough
+KILLED   runtime thin group uses the all-film median, not the language's by tests/test_clean.py::test_runtime_thin_group_falls_back_to_the_language_median_not_the_global_one
+KILLED   people left missing                          by tests/test_clean.py::test_no_row_is_dropped_and_order_is_kept
+KILLED   weak genre votes kept                        by tests/test_clean.py::test_genres_come_from_the_most_similar_films
+KILLED   genre votes counted, not weighted by similarity by tests/test_clean.py::test_genre_votes_are_weighted_by_similarity
+KILLED   all neighbours vote, not the k nearest       by tests/test_clean.py::test_only_the_k_nearest_films_vote_for_genres
+KILLED   genre cap off                                by tests/test_clean.py::test_a_film_gets_at_most_three_genres_and_ties_go_alphabetically
+KILLED   language favourite tie goes to the last genre by tests/test_clean.py::test_language_favourite_tie_goes_to_the_alphabetically_first_genre
+KILLED   cast left out of built overview              by tests/test_clean.py::test_overview_is_built_from_the_film_s_own_fields
+KILLED   built overview lists the whole cast          by tests/test_clean.py::test_overview_is_built_from_the_film_s_own_fields
+KILLED   tagline left out of built overview           by tests/test_clean.py::test_overview_is_built_from_the_film_s_own_fields
+KILLED   keywords drawn from a built overview         by tests/test_clean.py::test_keywords_for_a_filled_overview_come_from_genres
+KILLED   keyword count not capped                     by tests/test_clean.py::test_keywords_keep_only_the_top_n_words
+KILLED   score not shrunk                             by tests/test_clean.py::test_score_shrinks_low_vote_films_toward_the_language_mean
+KILLED   rating mean ignores language                 by tests/test_clean.py::test_score_uses_each_language_s_own_mean
+KILLED   vote weight ignores language                 by tests/test_clean.py::test_score_weight_is_the_median_votes_of_the_film_s_own_language
+KILLED   title ignores the original title             by tests/test_clean.py::test_title_falls_back_to_original_title_then_to_a_label
+KILLED   filled number truncated, not rounded         by tests/test_clean.py::test_a_filled_number_is_rounded_not_truncated
+KILLED   dropped-row guard off                        by tests/test_clean.py::test_clean_refuses_to_return_fewer_rows
+KILLED   leftover-gap guard off                       by tests/test_clean.py::test_clean_refuses_to_return_a_gap
+KILLED   unrelated films count as neighbours          by tests/test_clean.py::test_year_is_the_language_median_of_observed_years
+KILLED   year ignores similar films                   by tests/test_clean.py::test_year_comes_from_films_sharing_cast_before_the_language_median
+KILLED   similar films' year averaged, not the median by tests/test_clean.py::test_year_comes_from_films_sharing_cast_before_the_language_median
+KILLED   year uses every similar film, not the k nearest by tests/test_clean.py::test_year_uses_only_the_k_nearest_films
+KILLED   mask size wrong                              by tests/test_clean.py::test_masked_check_scores_fills_and_a_fair_naive_fill
+KILLED   masked check ignores its seed                by tests/test_clean.py::test_masked_check_is_repeatable_for_a_seed_and_follows_it
+KILLED   earlier fills treated as observed in the masked check by tests/test_clean.py::test_masked_check_fills_see_observed_values_only
+KILLED   naive fill uses one median for all languages by tests/test_clean.py::test_masked_check_scores_fills_and_a_fair_naive_fill
+KILLED   naive genre guess gets one genre, the fill gets three by tests/test_clean.py::test_masked_check_scores_fills_and_a_fair_naive_fill
+KILLED   naive genre guess sees the hidden rows       by tests/test_clean.py::test_masked_check_scores_fills_and_a_fair_naive_fill
+KILLED   fill error doubled                           by tests/test_clean.py::test_masked_check_fills_see_observed_values_only
+KILLED   naive genre guess takes the rarest genres    by tests/test_clean.py::test_masked_check_scores_fills_and_a_fair_naive_fill
+KILLED   Unknown counts as a person                   by tests/test_features.py::test_literal_unknown_person_without_a_flag_is_not_a_similarity_signal
+KILLED   filled text counts as signal                 by tests/test_features.py::test_filled_overview_and_keywords_are_not_a_similarity_signal
+KILLED   filled genres count as signal                by tests/test_features.py::test_filled_genres_are_not_a_similarity_signal
+KILLED   whole cast list used                         by tests/test_features.py::test_only_the_first_five_cast_names_count
+KILLED   every row rescaled to length 1 (gaps rewarded) by tests/test_features.py::test_a_film_with_every_field_is_unit_length_and_a_film_with_gaps_is_shorter
+KILLED   item is its own neighbour                    by tests/test_recommend.py::test_item_neighbors_is_cosine_of_shared_likes
+KILLED   cosine without the square root               by tests/test_pipeline.py::test_collaborative_fit_uses_only_sampled_users_likes_before_the_cutoff
+KILLED   every neighbour kept, not the top n          by tests/test_recommend.py::test_item_neighbors_keeps_only_the_top_n_per_item_and_blocks_agree
+KILLED   neighbour block offset lost                  by tests/test_recommend.py::test_item_neighbors_keeps_only_the_top_n_per_item_and_blocks_agree
+KILLED   item-item score reads neighbours in the wrong direction by tests/test_recommend.py::test_cf_scores_read_row_i_as_the_neighbours_of_liked_item_i
+KILLED   seen items recommended                       by tests/test_evaluate.py::test_evaluate_reports_each_method_on_the_same_users
+KILLED   worst items first                            by tests/test_evaluate.py::test_evaluate_reports_each_method_on_the_same_users
+KILLED   top-k ties not deterministic                 by tests/test_recommend.py::test_top_k_ties_go_to_the_lower_index_on_a_long_list
+KILLED   zero-score slot counts as a recommendation   by tests/test_evaluate.py::test_a_zero_score_pick_is_not_a_hit
+KILLED   taste vector not normalised                  by tests/test_recommend.py::test_content_scores_are_cosine_to_the_mean_liked_vector
+KILLED   seed film returned as its own match          by tests/test_recommend.py::test_similar_items_ties_go_to_the_lower_index_on_a_long_list
+KILLED   bridge ignores the language filter           by tests/test_pipeline.py::test_bridge_table_recommends_only_the_other_language
+KILLED   bridge ties not deterministic                by tests/test_recommend.py::test_similar_items_ties_go_to_the_lower_index_on_a_long_list
+KILLED   blend scaled by a seen film                  by tests/test_evaluate.py::test_the_blend_scale_ignores_a_seen_film_with_the_top_score
+KILLED   blend scaled over all films, not the shelf   by tests/test_evaluate.py::test_the_blend_scale_ignores_a_seen_film_with_the_top_score
+KILLED   blend without scaling                        by tests/test_recommend.py::test_blend_endpoints_and_row_scaling
+KILLED   blend accepts an empty candidate set         by tests/test_recommend.py::test_blend_with_no_candidate_raises
+KILLED   blend looks up a part whose weight is zero   by tests/test_evaluate.py::test_a_zero_weight_part_that_no_method_uses_is_not_scored
+KILLED   cutoff rating leaks into train               by tests/test_evaluate.py::test_split_is_strict_at_the_cutoff
+KILLED   test split is the train split                by tests/test_evaluate.py::test_split_is_strict_at_the_cutoff
+KILLED   window end included                          by tests/test_evaluate.py::test_window_keeps_start_and_leaves_out_end
+KILLED   window start excluded                        by tests/test_evaluate.py::test_window_keeps_start_and_leaves_out_end
+KILLED   like boundary                                by tests/test_evaluate.py::test_user_matrices_need_enough_liked_films_in_the_profile
+KILLED   already-rated film counts as a hit           by tests/test_evaluate.py::test_user_matrices_split_likes_seen_and_later_likes
+KILLED   thin profiles tested                         by tests/test_evaluate.py::test_user_matrices_need_enough_liked_films_in_the_profile
+KILLED   a repeated rating counts twice               by tests/test_evaluate.py::test_a_repeated_user_film_pair_is_still_one_entry
+KILLED   test ratings of films outside the catalogue kept by tests/test_evaluate.py::test_test_ratings_of_films_outside_the_catalogue_are_ignored
+KILLED   pair key collides for large film ids         by tests/test_evaluate.py::test_pair_key_keeps_film_ids_above_two_to_the_twenty_apart
+KILLED   profile built from every rated film          by tests/test_evaluate.py::test_user_matrices_split_likes_seen_and_later_likes
+KILLED   unfilled slot counts as a hit                by tests/test_evaluate.py::test_unfilled_slots_never_count_as_hits
+KILLED   NDCG ideal not capped                        by tests/test_evaluate.py::test_ndcg_ideal_is_capped_by_the_number_of_relevant_items
+KILLED   recall divided by min(relevant, k)           by tests/test_evaluate.py::test_evaluate_reports_each_method_on_the_same_users
+KILLED   hit rate counts hits, not users              by tests/test_evaluate.py::test_recall_and_ndcg_by_hand
+KILLED   slice user filter ignored                    by tests/test_evaluate.py::test_slice_user_mask_and_users_without_a_relevant_item_are_left_out
+KILLED   hits outside the slice count                 by tests/test_evaluate.py::test_slice_user_mask_and_users_without_a_relevant_item_are_left_out
+KILLED   slice candidates ignored                     by tests/test_evaluate.py::test_slice_limits_candidates_and_hits_for_every_method
+KILLED   method weights ignored                       by tests/test_evaluate.py::test_evaluate_blends_parts_with_the_given_weights
+KILLED   evaluate hides liked films, not every rated film by tests/test_evaluate.py::test_evaluate_never_recommends_a_film_the_user_rated_and_disliked
+KILLED   weights tuned hiding liked films, not every rated film by tests/test_evaluate.py::test_evaluate_never_recommends_a_film_the_user_rated_and_disliked
+KILLED   weights scaled by liked films, not every rated film by tests/test_evaluate.py::test_the_blend_scale_ignores_a_seen_film_with_the_top_score
+KILLED   evaluate scores a part with zero weight      by tests/test_evaluate.py::test_a_zero_weight_part_that_no_method_uses_is_not_scored
+KILLED   users counted over everyone                  by tests/test_evaluate.py::test_slice_user_mask_and_users_without_a_relevant_item_are_left_out
+KILLED   weight tie goes to the last grid entry       by tests/test_evaluate.py::test_choose_weights_tie_goes_to_the_first_grid_entry
+KILLED   weights tuned on users outside the shelf     by tests/test_evaluate.py::test_choose_weights_scores_only_users_with_a_relevant_candidate
+KILLED   collaborative fit sees the future            by tests/test_pipeline.py::test_collaborative_fit_uses_only_sampled_users_likes_before_the_cutoff
+KILLED   collaborative fit uses unsampled users       by tests/test_pipeline.py::test_collaborative_fit_uses_only_sampled_users_likes_before_the_cutoff
+KILLED   dislikes counted as likes                    by tests/test_pipeline.py::test_collaborative_fit_uses_only_sampled_users_likes_before_the_cutoff
+KILLED   a repeated like counts twice                 by tests/test_pipeline.py::test_collaborative_fit_counts_a_repeated_like_once
+KILLED   unliked film gets a like                     by tests/test_pipeline.py::test_popularity_vector_is_aligned_to_the_film_order_and_reads_the_asked_column
+KILLED   films with no release date dropped from the candidates by tests/test_pipeline.py::test_released_before_keeps_unknown_dates_and_films_released_inside_the_window
+KILLED   film released on the window end stays a candidate by tests/test_pipeline.py::test_released_before_keeps_unknown_dates_and_films_released_inside_the_window
+KILLED   validation profile includes validation-window likes by tests/test_pipeline.py::test_validation_window_never_sees_a_test_window_rating
+KILLED   validation scored on test-window likes       by tests/test_pipeline.py::test_validation_window_never_sees_a_test_window_rating
+KILLED   test profile misses the validation window    by tests/test_pipeline.py::test_test_window_profile_and_seen_include_the_validation_window_but_not_test_ratings
+KILLED   validation neighbours fitted on the validation window by tests/test_pipeline.py::test_validation_window_never_sees_a_test_window_rating
+KILLED   test neighbours fitted before the validation window only by tests/test_pipeline.py::test_test_window_profile_and_seen_include_the_validation_window_but_not_test_ratings
+KILLED   validation candidates use the test window end by tests/test_pipeline.py::test_candidates_drop_films_released_on_or_after_each_window_end
+KILLED   validation popularity counts likes up to the test cutoff by tests/test_pipeline.py::test_popularity_comes_from_the_like_count_column_of_each_window
+KILLED   test candidates use the validation window end by tests/test_pipeline.py::test_candidates_drop_films_released_on_or_after_each_window_end
+KILLED   blend weights chosen on the test window      by tests/test_pipeline.py::test_blend_weights_are_chosen_on_validation_data_only
+KILLED   shelf with exactly the minimum users falls back by tests/test_pipeline.py::test_blend_weights_are_chosen_on_validation_data_only
+KILLED   thin Telugu shelf keeps its own weights      by tests/test_pipeline.py::test_a_shelf_with_too_few_validation_users_uses_the_all_films_weights
+KILLED   Telugu shelf weights ignore the window mask  by tests/test_pipeline.py::test_weights_ignore_films_that_cannot_be_hits_in_the_validation_window
+KILLED   all-films weights ignore the window mask     by tests/test_pipeline.py::test_weights_ignore_films_that_cannot_be_hits_in_the_validation_window
+KILLED   test candidates ignore the window mask       by tests/test_pipeline.py::test_test_scoring_uses_the_test_candidates_and_each_shelf_s_own_weights
+KILLED   Telugu test candidates ignore the window mask by tests/test_pipeline.py::test_test_scoring_uses_the_test_candidates_and_each_shelf_s_own_weights
+KILLED   Telugu hybrid uses the all-films weights     by tests/test_pipeline.py::test_test_scoring_uses_the_test_candidates_and_each_shelf_s_own_weights
+KILLED   all-films hybrid uses the Telugu weights     by tests/test_pipeline.py::test_test_scoring_uses_the_test_candidates_and_each_shelf_s_own_weights
+KILLED   first-time slice takes the users with Telugu history by tests/test_pipeline.py::test_test_scoring_uses_the_test_candidates_and_each_shelf_s_own_weights
+KILLED   bridge stays in the seed language            by tests/test_pipeline.py::test_bridge_table_recommends_only_the_other_language
+KILLED   bridge lists a repeated title twice          by tests/test_pipeline.py::test_bridge_table_lists_a_repeated_title_once
+KILLED   bridge lists more than k films               by tests/test_pipeline.py::test_bridge_table_lists_at_most_k_films_with_a_hand_derived_similarity
+KILLED   bridge similarity rounded to one decimal     by tests/test_pipeline.py::test_bridge_table_lists_at_most_k_films_with_a_hand_derived_similarity
+KILLED   weight grid no longer content-first          by tests/test_pipeline.py::test_weight_grid_covers_the_simplex_content_first
+KILLED   weight grid no longer item-item-first within a content level by tests/test_pipeline.py::test_weight_grid_covers_the_simplex_content_first
+KILLED   like spread counts films outside the shelf   by tests/test_pipeline.py::test_like_spread_counts_shelf_likes_most_liked_first
+KILLED   fill examples list the fullest films first   by tests/test_pipeline.py::test_fill_examples_lists_the_gappiest_telugu_films_and_marks_filled_values
+KILLED   fill examples do not mark filled genres      by tests/test_pipeline.py::test_fill_examples_lists_the_gappiest_telugu_films_and_marks_filled_values
+KILLED   a best method named with no recall lead      by tests/test_pipeline.py::test_findings_name_a_winner_only_with_the_best_recall_and_ndcg_and_a_clear_lead
+KILLED   a best method named without leading on NDCG  by tests/test_pipeline.py::test_findings_name_a_winner_only_with_the_best_recall_and_ndcg_and_a_clear_lead
+KILLED   winner margin ignores how few users a slice has by tests/test_pipeline.py::test_a_small_slice_needs_a_recall_lead_of_one_over_root_users
+KILLED   a lead of exactly the margin does not count  by tests/test_pipeline.py::test_a_recall_lead_of_exactly_the_margin_counts_even_with_float_noise
+KILLED   winner margin hit by float noise             by tests/test_pipeline.py::test_a_recall_lead_of_exactly_the_margin_counts_even_with_float_noise
+KILLED   dropped rows hard-coded                      by tests/test_pipeline.py::test_findings_compute_dropped_rows_and_report_what_is_still_missing
+KILLED   still-missing count hard-coded               by tests/test_pipeline.py::test_findings_compute_dropped_rows_and_report_what_is_still_missing
+KILLED   excluded counts swapped on the page          by tests/test_pipeline.py::test_findings_say_how_many_films_each_window_left_out_of_the_candidates
+KILLED   validation users not shown next to the weights by tests/test_pipeline.py::test_findings_print_validation_users_next_to_each_shelf_s_weights
+KILLED   fallback not announced                       by tests/test_pipeline.py::test_findings_say_when_the_telugu_shelf_fell_back_to_the_all_films_weights
+KILLED   vote-floor snapshot limit missing            by tests/test_pipeline.py::test_limits_state_the_measured_telugu_counts_and_the_vote_snapshot
+KILLED   Telugu test user count not measured          by tests/test_pipeline.py::test_limits_state_the_measured_telugu_counts_and_the_vote_snapshot
+KILLED   sprints oldest first                         by tests/test_report.py::test_page_lists_sprints_newest_first_with_natural_order
+KILLED   terminal output not escaped                  by tests/test_report.py::test_page_shows_terminal_output_and_csv_cells_escaped
+KILLED   commands not escaped                         by tests/test_report.py::test_page_escapes_review_limits_commands_and_caption_text
+KILLED   limits not escaped                           by tests/test_report.py::test_page_escapes_review_limits_commands_and_caption_text
+KILLED   review notes not escaped                     by tests/test_report.py::test_page_escapes_review_limits_commands_and_caption_text
+KILLED   caption notes not escaped                    by tests/test_report.py::test_page_escapes_review_limits_commands_and_caption_text
+KILLED   sprint-10 sorted below sprint-9              by tests/test_report.py::test_page_lists_sprints_newest_first_with_natural_order
+
+196/196 mutations killed by a failing test

@@ -1,0 +1,82 @@
+# RED run 2026-11-16T17:18:57Z: tests written before src/cinebridge modules exist
+
+=================================== ERRORS ====================================
+____________________ ERROR collecting tests/test_clean.py _____________________
+ImportError while importing test module 'D:\Projects\AI_projects\recommendation_system\tests\test_clean.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\Dhanush\AppData\Local\Programs\Python\Python311\Lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_clean.py:7: in <module>
+    from cinebridge import clean
+E   ImportError: cannot import name 'clean' from 'cinebridge' (D:\Projects\AI_projects\recommendation_system\src\cinebridge\__init__.py)
+___________________ ERROR collecting tests/test_evaluate.py ___________________
+ImportError while importing test module 'D:\Projects\AI_projects\recommendation_system\tests\test_evaluate.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\Dhanush\AppData\Local\Programs\Python\Python311\Lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_evaluate.py:10: in <module>
+    from cinebridge import evaluate as ev
+E   ImportError: cannot import name 'evaluate' from 'cinebridge' (D:\Projects\AI_projects\recommendation_system\src\cinebridge\__init__.py)
+___________________ ERROR collecting tests/test_features.py ___________________
+ImportError while importing test module 'D:\Projects\AI_projects\recommendation_system\tests\test_features.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\Dhanush\AppData\Local\Programs\Python\Python311\Lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_features.py:6: in <module>
+    from cinebridge import clean
+E   ImportError: cannot import name 'clean' from 'cinebridge' (D:\Projects\AI_projects\recommendation_system\src\cinebridge\__init__.py)
+____________________ ERROR collecting tests/test_ingest.py ____________________
+ImportError while importing test module 'D:\Projects\AI_projects\recommendation_system\tests\test_ingest.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\Dhanush\AppData\Local\Programs\Python\Python311\Lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_ingest.py:8: in <module>
+    from cinebridge.ingest import IngestError, download, extract_movielens
+E   ModuleNotFoundError: No module named 'cinebridge.ingest'
+__________________ ERROR collecting tests/test_recommend.py ___________________
+ImportError while importing test module 'D:\Projects\AI_projects\recommendation_system\tests\test_recommend.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\Dhanush\AppData\Local\Programs\Python\Python311\Lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_recommend.py:7: in <module>
+    from cinebridge import recommend as rec
+E   ImportError: cannot import name 'recommend' from 'cinebridge' (D:\Projects\AI_projects\recommendation_system\src\cinebridge\__init__.py)
+____________________ ERROR collecting tests/test_report.py ____________________
+ImportError while importing test module 'D:\Projects\AI_projects\recommendation_system\tests\test_report.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\Dhanush\AppData\Local\Programs\Python\Python311\Lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_report.py:5: in <module>
+    from cinebridge.report import build_page
+E   ModuleNotFoundError: No module named 'cinebridge.report'
+_____________________ ERROR collecting tests/test_sql.py ______________________
+ImportError while importing test module 'D:\Projects\AI_projects\recommendation_system\tests\test_sql.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\Dhanush\AppData\Local\Programs\Python\Python311\Lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_sql.py:6: in <module>
+    from cinebridge import warehouse
+E   ImportError: cannot import name 'warehouse' from 'cinebridge' (D:\Projects\AI_projects\recommendation_system\src\cinebridge\__init__.py)
+=========================== short test summary info ===========================
+ERROR tests/test_clean.py
+ERROR tests/test_evaluate.py
+ERROR tests/test_features.py
+ERROR tests/test_ingest.py
+ERROR tests/test_recommend.py
+ERROR tests/test_report.py
+ERROR tests/test_sql.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 7 errors during collection !!!!!!!!!!!!!!!!!!!

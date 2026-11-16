@@ -1,0 +1,9 @@
+# RED run 2026-11-16T17:25:28Z: split + model-ratings tests before sql/marts/04, 05 and build_marts(**settings) exist
+>       warehouse.build_marts(con, **marts)
+E       TypeError: build_marts() got an unexpected keyword argument 'test_months'
+
+tests\test_sql.py:329: TypeError
+=========================== short test summary info ===========================
+FAILED tests/test_sql.py::test_split_cutoffs_count_back_whole_months_from_the_last_rating_day
+FAILED tests/test_sql.py::test_model_ratings_keep_sampled_users_and_users_active_after_validation_start
+FAILED tests/test_sql.py::test_model_ratings_boundary_rating_exactly_at_validation_start_counts_as_late

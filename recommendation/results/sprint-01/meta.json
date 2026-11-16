@@ -1,0 +1,172 @@
+{
+ "title": "sprint-01: English + Telugu recommender with fill-don't-drop cleaning",
+ "goal": "Recommend films across English and Telugu from one catalogue: fill every missing field instead of dropping the film, then measure popularity, content, item-item and hybrid recommenders on what users liked after a cutoff date, overall and on Telugu films.",
+ "pattern": "batch ELT: raw -> staging -> marts (DuckDB) + imputation + hybrid recommender",
+ "findings": [
+  "Catalogue: 2,126 Telugu and 34,122 English films (237,350 rows landed; 4,405 rows are extra copies of an id (one copy of each id is kept), 10,095 adult titles and 186,602 English films under the vote floor are left out of the project scope and counted in the scope table).",
+  "Cleaning filled 13,123 missing values and dropped 0 rows; 0 values are still missing in the filled columns.",
+  "Telugu gaps before cleaning: keywords 1,747 of 2,126 (82.2%); genres 373 of 2,126 (17.5%); runtime_min 309 of 2,126 (14.5%); overview 102 of 2,126 (4.8%).",
+  "Fill check, Telugu runtime_min (182 real values hidden then refilled): mean abs error, minutes 15.38 vs 16.40 for the naive fill (the language median, or the language's three commonest genres).",
+  "Fill check, Telugu release_year (207 real values hidden then refilled): mean abs error, years 7.57 vs 13.56 for the naive fill (the language median, or the language's three commonest genres).",
+  "Fill check, Telugu genres (175 real values hidden then refilled): share with no correct genre 0.16 vs 0.18 for the naive fill (the language median, or the language's three commonest genres).",
+  "Rating evidence: 259 of 2,126 Telugu films have any MovieLens rating (2,607 ratings) against 28,845 of 34,122 English films (29,843,336 ratings).",
+  "Films released on or after the end of a window cannot be hits, so they are left out of every method's candidates: 1,598 films for validation and 398 for test (films released inside a window, and films with no release date, stay).",
+  "all films (5,373 test users), Recall@10: popularity 0.035, content 0.011, item_item 0.057, hybrid 0.060; NDCG@10: popularity 0.065, content 0.017, item_item 0.101, hybrid 0.106. There is no clear winner (a method must lead on both Recall and NDCG and by at least 0.014 Recall for 5,373 users).",
+  "Telugu films only (143 test users), Recall@10: popularity 0.957, content 0.018, item_item 0.432, hybrid 0.767; NDCG@10: popularity 0.637, content 0.013, item_item 0.406, hybrid 0.489. Best: popularity (best Recall and NDCG; recall lead 0.190 over hybrid).",
+  "Telugu films, users with no Telugu film in their history (130 test users), Recall@10: popularity 0.981, content 0.020, item_item 0.458, hybrid 0.803; NDCG@10: popularity 0.629, content 0.013, item_item 0.434, hybrid 0.502. Best: popularity (best Recall and NDCG; recall lead 0.178 over hybrid).",
+  "Telugu test likes: the most-liked film, RRR, holds 54.7% of them; the top 3 (RRR, Bāhubali: The Beginning, Bāhubali 2: The Conclusion) hold 60.3%; 76 distinct Telugu films were liked in the test window.",
+  "Hybrid blend weights, picked on the validation window only: all films (5,623 validation users): content 0.5, item_item 0.5, popularity 0.0; Telugu shelf (68 validation users): content 0.75, item_item 0.0, popularity 0.25."
+ ],
+ "commands": [
+  "make test",
+  "make check",
+  "make mutate",
+  "make run",
+  "make diagram",
+  "make results"
+ ],
+ "scripts": [
+  "scripts/build_diagram.py",
+  "scripts/build_results.py",
+  "scripts/fetch_data.py",
+  "scripts/mutation_check.py",
+  "scripts/recommend.py",
+  "scripts/run_pipeline.py",
+  "sql/marts/01_mart_scope_audit.sql",
+  "sql/marts/02_mart_missing_audit.sql",
+  "sql/marts/03_mart_rating_coverage.sql",
+  "sql/marts/04_mart_split.sql",
+  "sql/marts/05_mart_model_ratings.sql",
+  "sql/marts/06_mart_like_counts.sql",
+  "sql/marts/load_movies_clean.sql",
+  "sql/raw/00_create_raw.sql",
+  "sql/raw/load_movies.sql",
+  "sql/raw/load_ratings.sql",
+  "sql/staging/01_stg_movies_dedup.sql",
+  "sql/staging/02_stg_movies.sql",
+  "sql/staging/03_stg_ratings.sql",
+  "src/cinebridge/__init__.py",
+  "src/cinebridge/clean.py",
+  "src/cinebridge/config.py",
+  "src/cinebridge/evaluate.py",
+  "src/cinebridge/features.py",
+  "src/cinebridge/ingest.py",
+  "src/cinebridge/pipeline.py",
+  "src/cinebridge/recommend.py",
+  "src/cinebridge/report.py",
+  "src/cinebridge/warehouse.py"
+ ],
+ "table_order": [
+  "raw_movies",
+  "raw_ratings",
+  "raw_links",
+  "stg_movies",
+  "stg_ratings",
+  "mart_movies_clean",
+  "mart_missing_audit",
+  "mart_scope_audit",
+  "mart_rating_coverage",
+  "mart_split",
+  "mart_model_ratings",
+  "mart_like_counts"
+ ],
+ "captions": {
+  "01_eval_by_slice.csv": {
+   "title": "Recommenders vs the popularity baseline (test window from 2022-10-13)",
+   "note": "Same test users and same candidate films for every method. recall_at_10 = share of the films a user went on to like that appear in their top 10. Models saw only ratings before the test window. The Telugu rows allow only Telugu films to be recommended, for the baseline too. Films released on or after the end of the window are left out of every method's candidates."
+  },
+  "02_bridge_examples.csv": {
+   "title": "Cross-language bridge: if you liked this, try these in the other language",
+   "note": "Nearest films in the other language by plot text, people and genres (cosine similarity; 1 = identical). Not rating-based, so it also reaches films nobody has rated."
+  },
+  "03_missing_audit.csv": {
+   "title": "Missing values before and after cleaning",
+   "note": "missing_before from stg_movies, missing_after from mart_movies_clean, filled_rows = rows carrying the fill flag. No row was dropped."
+  },
+  "04_fill_quality.csv": {
+   "title": "Are the fills any good? Hidden-value check",
+   "note": "10% of real values per language were hidden, filled by the pipeline, and compared with the truth. naive = the language median, or the language's three most common genres."
+  },
+  "05_fill_examples_telugu.csv": {
+   "title": "Telugu films with the most gaps, after filling",
+   "note": "(filled) marks a value the pipeline supplied."
+  },
+  "06_scope_audit.csv": {
+   "title": "Scope: where every landed row went",
+   "note": "kept = landed_rows - duplicate_rows - adult_titles - below_vote_floor. Telugu films have no vote floor."
+  },
+  "07_rating_coverage.csv": {
+   "title": "Rating evidence by language",
+   "note": "likes = ratings of 4.0 or more."
+  },
+  "08_weights_validation.csv": {
+   "title": "Blend weights tried on validation (2021-10-13 to 2022-10-13)",
+   "note": "Each row is one split of 1.0 between content, item-item and popularity, scored on validation users only. The best row per shelf is the hybrid; a tie goes to the more content-heavy row."
+  },
+  "09_telugu_test_likes.csv": {
+   "title": "Which Telugu films the test users went on to like",
+   "note": "Likes in the test window by the scored users. cumulative_pct is the running share of all Telugu test likes."
+  },
+  "01_missing_before_after.png": {
+   "title": "Share of films missing each field, before and after"
+  },
+  "02_recall_by_method.png": {
+   "title": "Recall@10 by method and slice"
+  },
+  "03_fill_quality.png": {
+   "title": "Fill error vs naive fill on hidden real values"
+  }
+ },
+ "limits": [
+  "MovieLens users are mostly English-language viewers, not a Telugu audience. The Telugu rows rest on 143 Telugu test users, 68 Telugu validation users, and 259 of 2,126 Telugu films have any rating.",
+  "One test window. Offline Recall@K is a proxy: it rewards predicting what people rated, not what they would have enjoyed if shown.",
+  "Item-item similarity is learned from a 1-in-8 sample of users to keep the run short; popularity counts every user.",
+  "Feature weights (text 1.0, people 0.6, genres 0.6) are fixed by hand, not tuned.",
+  "Filled genres, runtime and year are estimates, flagged per row. Built overviews, derived keywords, filled genres and the Unknown person placeholder are for display and are not used as similarity signals.",
+  "Films released on or after a window's end are left out of that window's candidates for every method; films with no release date stay.",
+  "The English vote floor (1,000 IMDb votes) uses vote counts from a 2024 snapshot of the metadata, applied equally to every method.",
+  "The bridge table is content-only and unrated by users; treat it as examples, not proof.",
+  "Metadata is a TMDB + IMDb snapshot hosted on Hugging Face; ratings end in October 2023."
+ ],
+ "provenance": {
+  "run_utc": "2026-11-16T20:54:54Z",
+  "seconds": 585.8,
+  "settings": {
+   "movies_url": "https://huggingface.co/api/datasets/HenryWaltson/TMDB-IMDB-Movies-Dataset/parquet/default/train/0.parquet",
+   "movielens_url": "https://files.grouplens.org/datasets/movielens/ml-32m.zip",
+   "en_min_votes": 1000,
+   "like_rating": 4.0,
+   "test_months": 12,
+   "val_months": 12,
+   "k": 10,
+   "min_profile_likes": 5,
+   "cf_user_mod": 8,
+   "cf_neighbors": 50,
+   "cf_shrink": 5.0,
+   "genre_neighbors": 10,
+   "weight_step": 0.25,
+   "min_validation_users": 30,
+   "seed": 7
+  },
+  "test_start": "2022-10-13 00:00:00",
+  "val_start": "2021-10-13 00:00:00",
+  "weights": {
+   "all films": {
+    "content": 0.5,
+    "item_item": 0.5,
+    "popularity": 0.0
+   },
+   "Telugu shelf": {
+    "content": 0.75,
+    "item_item": 0.0,
+    "popularity": 0.25
+   }
+  },
+  "movies_file_bytes": 198317607,
+  "python": "3.11.3",
+  "duckdb": "2.0.0",
+  "pandas": "3.1.1",
+  "sklearn": "1.9.1",
+  "scipy": "1.17.1"
+ }
+}

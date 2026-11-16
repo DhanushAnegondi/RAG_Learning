@@ -1,0 +1,72 @@
+{
+ "table": "mart_model_ratings",
+ "row_count": 8048676,
+ "columns": [
+  [
+   "user_id",
+   "BIGINT"
+  ],
+  [
+   "movie_id",
+   "BIGINT"
+  ],
+  [
+   "rating",
+   "DOUBLE"
+  ],
+  [
+   "rated_at",
+   "TIMESTAMP"
+  ],
+  [
+   "is_cf_user",
+   "BOOLEAN"
+  ],
+  [
+   "is_eval_user",
+   "BOOLEAN"
+  ]
+ ],
+ "sample": [
+  [
+   8,
+   11,
+   4.0,
+   "2019-03-28 09:31:17",
+   true,
+   false
+  ],
+  [
+   8,
+   14,
+   3.5,
+   "2019-03-28 09:31:20",
+   true,
+   false
+  ],
+  [
+   8,
+   38,
+   4.5,
+   "2019-03-28 09:32:42",
+   true,
+   false
+  ],
+  [
+   8,
+   63,
+   4.0,
+   "2019-03-28 09:32:29",
+   true,
+   false
+  ],
+  [
+   8,
+   70,
+   4.0,
+   "2019-03-28 09:32:45",
+   true,
+   false
+  ]
+ ]
+}

@@ -1,0 +1,48 @@
+{
+ "table": "mart_scope_audit",
+ "row_count": 2,
+ "columns": [
+  [
+   "language",
+   "VARCHAR"
+  ],
+  [
+   "landed_rows",
+   "BIGINT"
+  ],
+  [
+   "duplicate_rows",
+   "BIGINT"
+  ],
+  [
+   "adult_titles",
+   "BIGINT"
+  ],
+  [
+   "below_vote_floor",
+   "BIGINT"
+  ],
+  [
+   "kept",
+   "BIGINT"
+  ]
+ ],
+ "sample": [
+  [
+   "en",
+   235223,
+   4404,
+   10095,
+   186602,
+   34122
+  ],
+  [
+   "te",
+   2127,
+   1,
+   0,
+   0,
+   2126
+  ]
+ ]
+}

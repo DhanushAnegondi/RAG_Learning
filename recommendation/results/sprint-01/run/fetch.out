@@ -1,0 +1,4 @@
+movies   tmdb_imdb_movies.parquet  198,317,607 bytes
+ratings  ml-32m.zip  238,950,008 bytes
+  links    links.csv  1,950,748 bytes
+  ratings  ratings.csv  877,076,222 bytes

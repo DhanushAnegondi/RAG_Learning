@@ -1,0 +1,25 @@
+{
+ "table": "mart_split",
+ "row_count": 1,
+ "columns": [
+  [
+   "last_rating",
+   "TIMESTAMP"
+  ],
+  [
+   "test_start",
+   "TIMESTAMP"
+  ],
+  [
+   "val_start",
+   "TIMESTAMP"
+  ]
+ ],
+ "sample": [
+  [
+   "2023-10-13 02:29:07",
+   "2022-10-13 00:00:00",
+   "2021-10-13 00:00:00"
+  ]
+ ]
+}

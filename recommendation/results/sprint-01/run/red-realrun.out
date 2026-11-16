@@ -1,0 +1,35 @@
+# RED run 2026-11-16T18:08:38Z: tests for the 4 defects found in the first complete real run, before the fixes
+E   AttributeError: module 'cinebridge.pipeline' has no attribute 'weight_grid'
+D:\Projects\AI_projects\recommendation_system\tests\test_pipeline.py:57: AttributeError: module 'cinebridge.pipeline' has no attribute 'weight_grid'
+E   assert 'all films: item_item 0.75, content 0.25, popularity 0.0' in "Catalogue: 29 Telugu and 40 English films (130 rows landed; 5 repeated ids, 2 adult titles and 54 English films under...em_item': 0.75, 'content': 0.25, 'popularity': 0.0}} (share given to item-item), picked on the validation window only."
+D:\Projects\AI_projects\recommendation_system\tests\test_pipeline.py:168: assert 'all films: item_item 0.75, content 0.25, popularity 0.0' in "Catalogue: 29 Telugu and 40 English films (130 rows landed; 5 repeated ids, 2 adult titles and 54 English films under...em_item': 0.75, 'content': 0.25, 'popularity': 0.0}} (share given to item-item), picked on the validation window only."
+E   ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()
+D:\Projects\AI_projects\recommendation_system\src\cinebridge\recommend.py:71: ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()
+E   ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()
+D:\Projects\AI_projects\recommendation_system\src\cinebridge\recommend.py:71: ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()
+E   AssertionError: Regex pattern did not match.
+      Expected regex: 'weight'
+      Actual message: 'The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()'
+D:\Projects\AI_projects\recommendation_system\tests\test_recommend.py:100: AssertionError: Regex pattern did not match.
+=========================== short test summary info ===========================
+FAILED tests/test_clean.py::test_year_is_the_language_median_of_observed_years
+FAILED tests/test_clean.py::test_year_comes_from_films_sharing_cast_before_the_language_median
+FAILED tests/test_clean.py::test_year_with_no_observed_value_in_the_language_uses_all_films
+FAILED tests/test_clean.py::test_year_with_nothing_observed_raises - TypeErro...
+FAILED tests/test_evaluate.py::test_evaluate_reports_each_method_on_the_same_users
+FAILED tests/test_evaluate.py::test_slice_limits_candidates_and_hits_for_every_method
+FAILED tests/test_evaluate.py::test_slice_user_mask_and_users_without_a_relevant_item_are_left_out
+FAILED tests/test_evaluate.py::test_evaluate_blends_parts_with_the_given_weights
+FAILED tests/test_evaluate.py::test_evaluate_gives_the_same_answer_in_small_batches
+FAILED tests/test_evaluate.py::test_choose_weights_picks_the_best_blend_and_reports_every_candidate
+FAILED tests/test_evaluate.py::test_choose_weights_tie_goes_to_the_first_grid_entry
+FAILED tests/test_evaluate.py::test_choose_weights_scores_only_users_with_a_relevant_candidate
+FAILED tests/test_evaluate.py::test_choose_weights_with_nobody_to_score_returns_the_first_entry
+FAILED tests/test_features.py::test_a_film_with_every_field_is_unit_length_and_a_film_with_gaps_is_shorter
+FAILED tests/test_features.py::test_a_film_with_gaps_does_not_outrank_a_fuller_match
+FAILED tests/test_pipeline.py::test_parts_score_in_film_order - AttributeErro...
+FAILED tests/test_pipeline.py::test_weight_grid_covers_the_simplex_content_first
+FAILED tests/test_pipeline.py::test_findings_are_built_from_the_tables_they_describe
+FAILED tests/test_recommend.py::test_blend_endpoints_and_row_scaling - ValueE...
+FAILED tests/test_recommend.py::test_blend_scales_each_part_inside_the_candidate_set
+FAILED tests/test_recommend.py::test_blend_rejects_bad_weights - AssertionErr...

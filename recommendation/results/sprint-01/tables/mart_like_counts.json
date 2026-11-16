@@ -1,0 +1,45 @@
+{
+ "table": "mart_like_counts",
+ "row_count": 29104,
+ "columns": [
+  [
+   "movie_id",
+   "BIGINT"
+  ],
+  [
+   "likes_before_val",
+   "BIGINT"
+  ],
+  [
+   "likes_before_test",
+   "BIGINT"
+  ]
+ ],
+ "sample": [
+  [
+   5,
+   2605,
+   2645
+  ],
+  [
+   6,
+   283,
+   284
+  ],
+  [
+   11,
+   61499,
+   62618
+  ],
+  [
+   12,
+   26487,
+   27245
+  ],
+  [
+   13,
+   69653,
+   71056
+  ]
+ ]
+}

@@ -1,0 +1,43 @@
+[project]
+name = "cinebridge"
+version = "0.1.0"
+description = "English + Telugu movie recommender: fills missing data instead of dropping it, and bridges tastes across the two languages."
+requires-python = ">=3.11"
+dependencies = [
+    "duckdb>=1.1",
+    "pandas>=2.2",
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "requests>=2.31",
+    "scikit-learn>=1.5",
+    "matplotlib>=3.8",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6", "sqlfluff>=3.2", "playwright>=1.45"]
+
+[project.scripts]
+cinebridge = "cinebridge.pipeline:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cinebridge"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/mutation_check.py" = ["E501"]
+"src/cinebridge/pipeline.py" = ["E501"]  # long caption and finding sentences
+"src/cinebridge/report.py" = ["E501"]  # CSS block
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

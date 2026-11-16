@@ -1,0 +1,51 @@
+if_you_liked,seed_language,rank,try_this,original_title,language,year,similarity,shared_genres,score
+Inception,English,1,iSmart Shankar,ఇస్మార్ట్ శంకర్‌,Telugu,2019,0.183,"Action, Science Fiction",5.47
+Inception,English,2,Aditya 369,Aditya 369,Telugu,1991,0.181,"Adventure, Science Fiction",8.25
+Inception,English,3,Disco Raja,డిస్కో రాజా,Telugu,2020,0.177,"Action, Science Fiction",6.13
+Inception,English,4,Sainikudu,సైనికుడు,Telugu,2006,0.172,"Action, Adventure",5.24
+Inception,English,5,Balakrishnudu,బాలకృష్ణుడు,Telugu,2017,0.17,"Action, Adventure",5.61
+The Dark Knight,English,1,Salaar: Part 1 - Ceasefire,సలార్: Part 1 - Ceasefire,Telugu,2023,0.229,"Action, Crime, Thriller",6.6
+The Dark Knight,English,2,Kotabommali PS,Kotabommali PS,Telugu,2023,0.227,"Action, Crime, Thriller",6.81
+The Dark Knight,English,3,HIT: The 2nd Case,HIT: The 2nd Case,Telugu,2022,0.224,"Action, Crime, Thriller",7.18
+The Dark Knight,English,4,Jawaan,జ‌వాన్,Telugu,2017,0.223,"Action, Crime, Thriller",5.03
+The Dark Knight,English,5,Bhola Shankar,భోళా శంకర్,Telugu,2023,0.222,"Action, Crime, Drama, Thriller",3.61
+Titanic,English,1,Prema Nagar,ప్రేమనగర్,Telugu,1971,0.269,"Drama, Romance",6.61
+Titanic,English,2,Iddari Lokam Okate,ఇద్దరి లోకం ఓకేట్,Telugu,2019,0.258,"Drama, Romance",5.93
+Titanic,English,3,Tej... I Love You,తేజ్... I Love You,Telugu,2018,0.256,"Drama, Romance",5.76
+Titanic,English,4,Chirutha,చిరుత,Telugu,2007,0.255,"Drama, Romance",5.48
+Titanic,English,5,Bommarillu,బొమ్మరిల్లు,Telugu,2006,0.253,"Drama, Romance",8.15
+Gladiator,English,1,Kondaveeti Donga,కొండవీటి దొంగ,Telugu,1990,0.209,"Action, Adventure, Drama",6.9
+Gladiator,English,2,Anji,అంజి,Telugu,2004,0.209,"Action, Adventure, Drama",6.38
+Gladiator,English,3,RRR,రౌద్రం రణం రుధిరం,Telugu,2022,0.2,"Action, Drama",7.8
+Gladiator,English,4,Sainikudu,సైనికుడు,Telugu,2006,0.191,"Action, Adventure",5.24
+Gladiator,English,5,Sahasam,సాహసం,Telugu,2013,0.191,"Action, Adventure",6.82
+The Notebook,English,1,Premam,ప్రేమమ్,Telugu,2016,0.274,"Drama, Romance",6.48
+The Notebook,English,2,Aunty,ఆంటీ,Telugu,1995,0.271,"Drama, Romance",6.32
+The Notebook,English,3,Maro Charitra,మరో చరిత్ర,Telugu,1978,0.267,"Drama, Romance",7.15
+The Notebook,English,4,Prema Nagar,ప్రేమనగర్,Telugu,1971,0.26,"Drama, Romance",6.61
+The Notebook,English,5,Seethakoka Chilaka,సీతాకోకచిలుక,Telugu,1981,0.258,"Drama, Romance",6.61
+Jurassic Park,English,1,Aditya 369,Aditya 369,Telugu,1991,0.209,"Adventure, Science Fiction",8.25
+Jurassic Park,English,2,Sahasam,సాహసం,Telugu,2013,0.129,Adventure,6.82
+Jurassic Park,English,3,Sabari,కాగా,Telugu,2024,0.129,Science Fiction,6.4
+Jurassic Park,English,4,Simhasanam,సింహాసనం,Telugu,1986,0.128,Adventure,6.85
+Jurassic Park,English,5,Idhe Maa Katha,ఇదే మా కథ,Telugu,2021,0.128,Adventure,5.56
+RRR,Telugu,1,Spider-Man: Lotus,Spider-Man: Lotus,English,2023,0.264,"Action, Drama",4.72
+RRR,Telugu,2,The Chaperone,The Chaperone,English,2019,0.253,Drama,6.28
+RRR,Telugu,3,The Convert,The Convert,English,2023,0.246,"Action, Drama",6.29
+RRR,Telugu,4,WWE WrestleMania XXVIII,WWE WrestleMania XXVIII,English,2012,0.245,"Action, Drama",6.67
+RRR,Telugu,5,Boyka: Undisputed IV,Boyka: Undisputed IV,English,2016,0.242,"Action, Drama",6.82
+Bāhubali: The Beginning,Telugu,1,In the Name of the King: A Dungeon Siege Tale,In the Name of the King: A Dungeon Siege Tale,English,2007,0.269,"Action, Adventure, Drama, Fantasy",3.95
+Bāhubali: The Beginning,Telugu,2,In the Name of the King 2: Two Worlds,In the Name of the King 2: Two Worlds,English,2011,0.267,"Action, Adventure, Drama, Fantasy",4.29
+Bāhubali: The Beginning,Telugu,3,Conan the Destroyer,Conan the Destroyer,English,1984,0.263,"Action, Adventure, Fantasy",5.91
+Bāhubali: The Beginning,Telugu,4,David and Goliath,David and Goliath,English,2015,0.26,"Action, Adventure, Drama, Fantasy",5.35
+Bāhubali: The Beginning,Telugu,5,Quest of the Delta Knights,Quest of the Delta Knights,English,1993,0.257,"Action, Adventure, Fantasy",4.76
+Sita Ramam,Telugu,1,Life in a Year,Life in a Year,English,2020,0.305,"Drama, Romance",6.25
+Sita Ramam,Telugu,2,Love Letters,Love Letters,English,1983,0.269,"Drama, Romance",6.02
+Sita Ramam,Telugu,3,The Last Letter from Your Lover,The Last Letter from Your Lover,English,2021,0.268,"Drama, Romance",6.62
+Sita Ramam,Telugu,4,Letter from an Unknown Woman,Letter from an Unknown Woman,English,1948,0.267,"Drama, Romance",7.46
+Sita Ramam,Telugu,5,Diana,Diana,English,2013,0.267,"Drama, Romance",5.67
+Eega,Telugu,1,R.I.P.D.,R.I.P.D.,English,2013,0.232,"Action, Comedy, Fantasy",5.61
+Eega,Telugu,2,The Monster Squad,The Monster Squad,English,1987,0.223,"Action, Comedy, Fantasy",6.83
+Eega,Telugu,3,Batman Returns,Batman Returns,English,1992,0.219,"Action, Fantasy",7.09
+Eega,Telugu,4,Wings of Fame,Wings of Fame,English,1990,0.217,"Comedy, Fantasy",6.26
+Eega,Telugu,5,Beetlejuice 2,Beetlejuice 2,English,2024,0.217,"Comedy, Fantasy",6.59

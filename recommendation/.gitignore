@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+data/warehouse.duckdb*
+data/raw/
+.stack-icons/
+.stack-icons/
+data/warehouse.tmp/
+ledger/

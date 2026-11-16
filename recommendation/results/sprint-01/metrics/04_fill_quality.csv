@@ -1,0 +1,10 @@
+column_name,language,metric,masked_rows,fill_error,naive_error
+runtime_min,all,"mean abs error, minutes",3501,17.362,18.51
+runtime_min,en,"mean abs error, minutes",3319,17.47,18.626
+runtime_min,te,"mean abs error, minutes",182,15.385,16.401
+release_year,all,"mean abs error, years",3519,10.935,17.731
+release_year,en,"mean abs error, years",3312,11.145,17.992
+release_year,te,"mean abs error, years",207,7.575,13.556
+genres,all,share with no correct genre,3496,0.103,0.244
+genres,en,share with no correct genre,3321,0.1,0.248
+genres,te,share with no correct genre,175,0.16,0.177

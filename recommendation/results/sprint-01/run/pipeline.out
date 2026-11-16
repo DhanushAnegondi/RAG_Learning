@@ -1,0 +1,22 @@
+[1/7] landed tmdb_imdb_movies.parquet (198,317,607 bytes), ml-32m.zip
+[2/7] raw_movies 237,350 rows, raw_ratings 32,000,204 rows, stg_movies 36,248 rows
+[3/7] cleaned 36,248 rows (staged 36,248); filled 13,123 values; still missing 0
+[4/7] fill check done (10% of observed runtime, year, genres hidden and refilled)
+[5/7] model ratings 8,048,676; item matrix 36,248 x 56,902; validation from 2021-10-13, test from 2022-10-13
+      windows built (134s)
+[6/7] validation users 5,624 (all films 5,623, Telugu shelf 68); weights all {'content': 0.5, 'item_item': 0.5, 'popularity': 0.0}; telugu {'content': 0.75, 'item_item': 0.0, 'popularity': 0.25} (506s)
+      films left out of the candidates (released after the window ends): {'validation': 1598, 'test': 398}
+[7/7] test users 5,373
+      all                popularity users   5373  recall@10 0.0353  ndcg@10 0.0647
+      all                content    users   5373  recall@10 0.0107  ndcg@10 0.0166
+      all                item_item  users   5373  recall@10 0.0569  ndcg@10 0.1014
+      all                hybrid     users   5373  recall@10 0.0597  ndcg@10 0.1057
+      telugu             popularity users    143  recall@10 0.9571  ndcg@10 0.6375
+      telugu             content    users    143  recall@10 0.0182  ndcg@10 0.0126
+      telugu             item_item  users    143  recall@10 0.4316  ndcg@10 0.4055
+      telugu             hybrid     users    143  recall@10 0.7671  ndcg@10 0.4892
+      telugu_first_time  popularity users    130  recall@10 0.9813  ndcg@10 0.6294
+      telugu_first_time  content    users    130  recall@10 0.0195  ndcg@10 0.0132
+      telugu_first_time  item_item  users    130  recall@10 0.4577  ndcg@10 0.4343
+      telugu_first_time  hybrid     users    130  recall@10 0.8028  ndcg@10 0.5023
+done in 587s -> results/sprint-01/

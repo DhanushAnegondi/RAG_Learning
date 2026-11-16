@@ -1,0 +1,21 @@
+# RED run 2026-11-16T20:20:01Z: tests for review cycle 2 (winner margin scales with users), before the fix
+...F........                                                             [100%]
+================================== FAILURES ===================================
+________ test_a_small_slice_needs_a_recall_lead_of_one_over_root_users ________
+
+    def test_a_small_slice_needs_a_recall_lead_of_one_over_root_users():
+        # 40 users: margin = 1/sqrt(40) = 0.158. A 0.006 lead is one user's single hit, not a winner.
+        small = methods("telugu", [0.050, 0.056], [0.05, 0.06], users=40)
+        text = make_findings(small)
+>       assert "Best:" not in text
+E       AssertionError: assert 'Best:' not in 'Catalogue: ...ularity 0.5.'
+E         
+E         'Best:' is contained here:
+E         ?           ^^^^^^^^
+E           nt 0.060. Best: content (best Recall and NDCG; recall lead 0.006 over popularity). | Telugu test likes: the most-liked film, Hit One, holds 52.6% of them; the top 3 (Hit One, Hit Two, Hit Three) hold 94.7%; 9 distinct Telugu films were liked in the test window. | Hybrid blend weights, picked on the validation window only: all films (900 validation users): item_item 0.75, content 0.25, popularity 0.0; Telugu shelf (14 validation users): item_item 0.0, content 0.5, popularity 0.5.
+E         ?           ^^^^^^^^^^^^^
+
+tests\test_pipeline.py:670: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_pipeline.py::test_a_small_slice_needs_a_recall_lead_of_one_over_root_users
+1 failed, 11 passed, 26 deselected in 3.33s
